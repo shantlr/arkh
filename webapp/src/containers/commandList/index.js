@@ -26,7 +26,7 @@ const CommandItem = ({ command }) => {
 
   return (
     <div
-      className={classNames('container shadow p-3 rounded', {
+      className={classNames('container shadow p-3 rounded transition-all', {
         'bg-green-400 text-white': command.state === 'running',
       })}
     >

@@ -12,14 +12,17 @@ const Item = ({ path, children }) => {
     <Link to={path}>
       <div
         className={classnames(
-          'flex p-2 justify-center align-items-center cursor-pointer border-2 rounded border-b-8 mb-1',
+          'flex justify-center items-center cursor-pointer mb-1 rounded p-0.5 transition-all',
+          'hover:bg-blue-300',
           {
-            'border-blue-300 hover:border-blue-600': !active,
-            'border-yellow-500 hover:border-yellow-700': active,
+            'pb-2 bg-blue-400': active,
+            'hover:pb-1.5 bg-blue-200': !active,
           }
         )}
       >
-        {children}
+        <div className="p-2 bg-white rounded w-full flex justify-center items-center">
+          {children}
+        </div>
       </div>
     </Link>
   );
