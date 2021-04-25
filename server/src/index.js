@@ -122,6 +122,7 @@ app.post('/api/commands/:name/exec', async (req, res) => {
     COMMANDS[name].logs.push(log);
   });
   console.log(`cmd ${name} started`);
+  return res.status(200).send('');
 });
 app.post('/api/commands/:name/stop', async (req, res) => {
   const { name } = req.params;
@@ -176,7 +177,6 @@ app.post('/api/templates/:name/update', async (req, res) => {
   }
 
   const p = path.resolve(config.get('template.directory'), `${name}.yml`);
-  console.log(p);
 
   if (name !== originalName) {
     // Assert that updated name is not already used
@@ -190,6 +190,7 @@ app.post('/api/templates/:name/update', async (req, res) => {
 
   try {
     if (name !== originalName) {
+      console.log(originalName);
       // Delete previous
       await fs.promises.unlink(
         path.resolve(config.get('template.directory'), `${originalName}.yml`)
@@ -204,9 +205,10 @@ app.post('/api/templates/:name/update', async (req, res) => {
         args,
       })
     );
+    return res.status(200).send();
   } catch (err) {
     console.error(err);
-    return res.status(500).send();
+    return res.status(500).send('');
   }
 });
 

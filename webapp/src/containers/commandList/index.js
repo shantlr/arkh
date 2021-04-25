@@ -1,5 +1,6 @@
 import { Button } from '@chakra-ui/button';
 import { Spinner } from '@chakra-ui/spinner';
+import { useToast } from '@chakra-ui/toast';
 import {
   faCog,
   faPause,
@@ -7,15 +8,22 @@ import {
   faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { API } from 'api';
 import classNames from 'classnames';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
-import { useCommands } from 'hooks';
+import {
+  useCommands,
+  useCreateCommand,
+  useExecCommand,
+  useStopCommand,
+} from 'hooks';
 import { map } from 'lodash';
 import { useState } from 'react';
 
 const CommandItem = ({ command }) => {
+  const exec = useExecCommand();
+  const stop = useStopCommand();
+
   return (
     <div
       className={classNames('container shadow p-3 rounded', {
@@ -40,8 +48,7 @@ const CommandItem = ({ command }) => {
               )}
               icon={faPlay}
               onClick={() => {
-                API.command.exec(command.name);
-                //
+                exec.mutate(command.name);
               }}
             />
           )}
@@ -49,12 +56,8 @@ const CommandItem = ({ command }) => {
             <FontAwesomeIcon
               className="text-white mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
-              onClick={async () => {
-                try {
-                  await API.command.stop(command.name);
-                } catch (err) {
-                  //
-                }
+              onClick={() => {
+                stop.mutate(command.name);
               }}
             />
           )}
@@ -73,8 +76,10 @@ const CommandItem = ({ command }) => {
 
 export const CommandList = () => {
   const [showCreate, setShowCreate] = useState(false);
+  const toast = useToast();
 
   const { isLoading, data } = useCommands();
+  const createCommand = useCreateCommand();
 
   return (
     <div>
@@ -95,14 +100,19 @@ export const CommandList = () => {
         <div className="mb-3">
           <CommandForm
             onCancel={() => setShowCreate(false)}
-            onSubmit={async (values) => {
-              console.log('aoeunt');
-              try {
-                await API.command.create(values);
-                setShowCreate(true);
-              } catch (err) {
-                //
-              }
+            onSubmit={(values) => {
+              createCommand.mutate(values, {
+                onSuccess: () => setShowCreate(false),
+                onError: (err) => {
+                  toast({
+                    status: 'error',
+                    position: 'top-right',
+                    title: `Could not create command`,
+                    description: err.message,
+                    isClosable: true,
+                  });
+                },
+              });
             }}
           />
         </div>

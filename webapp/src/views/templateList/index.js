@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
 import { Button, Spinner } from '@chakra-ui/react';
 import { map } from 'lodash';
 
 import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 import { CreateCommandTemplate } from 'containers/createCommandTemplate';
 import { CommandTemplateForm } from 'containers/commandTemplateForm';
-import { API } from 'api';
-import { useTemplates } from 'hooks';
+import { useTemplates, useUpdateTemplate } from 'hooks';
 
 const AddTemplate = () => {
   const [showForm, setShowForm] = useState(false);
@@ -38,6 +36,7 @@ const AddTemplate = () => {
 
 export const TemplateItem = ({ template }) => {
   const [showEdit, setShowEdit] = useState(false);
+  const updateTemplate = useUpdateTemplate();
 
   return (
     <div
@@ -64,11 +63,18 @@ export const TemplateItem = ({ template }) => {
             onCancel={(e) => {
               setShowEdit(false);
             }}
-            onSubmit={async (values) => {
-              try {
-                await API.template.update(template.name, values);
-                setShowEdit(false);
-              } catch (err) {}
+            onSubmit={(values) => {
+              updateTemplate.mutate(
+                {
+                  name: template.name,
+                  template: values,
+                },
+                {
+                  onSuccess: () => {
+                    setShowEdit(false);
+                  },
+                }
+              );
             }}
             submitText="Update"
           />
