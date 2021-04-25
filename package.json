@@ -1,0 +1,14 @@
+{
+  "name": "metro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:shantlr/metro.git",
+  "author": "Patrick <shantry@hotmail.fr>",
+  "license": "MIT",
+  "scripts": {
+    "start": "concurrently -n back,app \"cd server && yarn start\" \"cd webapp && yarn start\""
+  },
+  "dependencies": {
+    "concurrently": "^6.0.2"
+  }
+}
