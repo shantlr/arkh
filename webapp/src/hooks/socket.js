@@ -1,6 +1,8 @@
 import { useSocket } from 'containers/socket';
 import { useEffect, useReducer } from 'react';
 
+const MAX_LOGS = 5000;
+
 const logsReducer = (state = [], action) => {
   if (!action || !action.length) {
     return state;
@@ -12,7 +14,11 @@ const logsReducer = (state = [], action) => {
       return state;
     }
   }
-  return [...state, ...action];
+  const res = [...state, ...action];
+  if (res.length > MAX_LOGS) {
+    res.splice(0, res.length - MAX_LOGS);
+  }
+  return res;
 };
 
 export const useCommandLogs = (commandName) => {
