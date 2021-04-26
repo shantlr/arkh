@@ -2,66 +2,87 @@ import { Button } from '@chakra-ui/button';
 import { Select } from '@chakra-ui/select';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { nanoid } from 'nanoid';
 
 import { FormInput } from 'components/formInput';
 import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 
 import { FieldArray, Form, Formik } from 'formik';
+import { useState } from 'react';
+import classNames from 'classnames';
 
-const ArgForm = ({ className, error, value: arg, onChange, onDelete }) => {
+const ArgForm = ({
+  className = '',
+  error,
+  value: arg,
+  index,
+  onChange,
+  onDelete,
+}) => {
   const { type } = arg;
 
   return (
-    <div className={`flex ${className}`}>
-      <div className="mr-3 min-w-3">
-        <Select
-          value={type}
-          onChange={(e) => {
-            console.log(e.target.value);
-            onChange({
-              ...arg,
-              type: e.target.value,
-            });
-          }}
+    <Draggable key={arg.id} draggableId={arg.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          className={classNames(`flex ${className} bg-white rounded p-1`, {
+            shadow: snapshot.isDragging,
+          })}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
         >
-          <option value="static">Static</option>
-          <option value="variable">Variable</option>
-        </Select>
-      </div>
+          <div className="mr-3 min-w-3">
+            <Select
+              value={type}
+              onChange={(e) => {
+                onChange({
+                  ...arg,
+                  type: e.target.value,
+                });
+              }}
+            >
+              <option value="static">Static</option>
+              <option value="variable">Variable</option>
+            </Select>
+          </div>
 
-      {type === 'variable' && (
-        <FormInput
-          className="mr-3"
-          placeholder="Arg name"
-          error={error && error.name}
-          value={arg.name}
-          onChange={(name) => {
-            onChange({
-              ...arg,
-              name,
-            });
-          }}
-        />
-      )}
+          {type === 'variable' && (
+            <FormInput
+              className="mr-3"
+              placeholder="Arg name"
+              error={error && error.name}
+              value={arg.name}
+              onChange={(name) => {
+                onChange({
+                  ...arg,
+                  name,
+                });
+              }}
+            />
+          )}
 
-      {type === 'static' && (
-        <FormInput
-          value={arg.value}
-          placeholder="Value"
-          className="mr-3"
-          error={error && error.value}
-          onChange={(value) => {
-            onChange({
-              ...arg,
-              value,
-            });
-          }}
-        />
+          {type === 'static' && (
+            <FormInput
+              value={arg.value}
+              placeholder="Value"
+              className="mr-3"
+              error={error && error.value}
+              onChange={(value) => {
+                onChange({
+                  ...arg,
+                  value,
+                });
+              }}
+            />
+          )}
+          <Button colorScheme="red" onClick={onDelete}>
+            <FontAwesomeIcon icon={faTrash} />
+          </Button>
+        </div>
       )}
-      <Button colorScheme="red" onClick={onDelete}>
-        <FontAwesomeIcon icon={faTrash} />
-      </Button>
-    </div>
+    </Draggable>
   );
 };
 
@@ -106,14 +127,23 @@ export const CommandTemplateForm = ({
   onSubmit,
   submitText = 'Create',
 }) => {
+  const [droppableId] = useState(() => nanoid());
+  const [initialV] = useState(() => {
+    return {
+      ...initialValues,
+      args: initialValues.args.map((arg) => ({
+        id: nanoid(),
+        ...arg,
+      })),
+    };
+  });
+
+  // const initialValues = useMemo(() => {})
+
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={onSubmit}
-      validate={validator}
-    >
+    <Formik initialValues={initialV} onSubmit={onSubmit} validate={validator}>
       {({ values, isValid, setFieldValue, errors }) => (
-        <Form>
+        <Form className="cursor-default">
           <div className="mb-3">
             <TemplateFormattedCommand
               className="text-gray-600"
@@ -139,24 +169,51 @@ export const CommandTemplateForm = ({
             render={(arrayHelper) => (
               <div>
                 <div className="mb-3">Arguments:</div>
-                {values.args.map((arg, index) => (
-                  <ArgForm
-                    className="mb-2"
-                    key={index}
-                    value={arg}
-                    error={errors.args ? errors.args[index] : null}
-                    onChange={(nextValue) => {
-                      arrayHelper.replace(index, nextValue);
-                    }}
-                    onDelete={() => arrayHelper.remove(index)}
-                  />
-                ))}
+                <DragDropContext
+                  onDragEnd={(result) => {
+                    if (
+                      result.destination &&
+                      result.source.index !== result.destination.index
+                    ) {
+                      arrayHelper.move(
+                        result.source.index,
+                        result.destination.index
+                      );
+                    }
+                  }}
+                >
+                  <Droppable droppableId="droppable">
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        style={{}}
+                        {...provided.droppableProps}
+                      >
+                        {values.args.map((arg, index) => (
+                          <ArgForm
+                            key={index}
+                            index={index}
+                            value={arg}
+                            error={errors.args ? errors.args[index] : null}
+                            onChange={(nextValue) => {
+                              arrayHelper.replace(index, nextValue);
+                            }}
+                            onDelete={() => arrayHelper.remove(index)}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+
                 <Button
                   size="sm"
                   className="ml-3 focus:outline-none"
                   colorScheme="blue"
                   onClick={() => {
                     arrayHelper.push({
+                      id: nanoid(),
                       type: 'static',
                       value: '',
                     });
