@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
 import {
+  useCommandLogs,
   useCommands,
   useCreateCommand,
   useExecCommand,
@@ -19,6 +20,28 @@ import {
 } from 'hooks';
 import { map } from 'lodash';
 import { useState } from 'react';
+
+const CommandLogs = ({ command }) => {
+  const logs = useCommandLogs(command.name);
+
+  console.log('logs', logs);
+  return (
+    <div
+      className="bg-black text-sm overflow-auto p-1"
+      style={{ maxHeight: 400 }}
+    >
+      {map(logs, (log, idx) => (
+        <div key={idx}>
+          <span className="text-yellow-500" style={{ minWidth: 30 }}>
+            {idx} |
+          </span>
+          <span className="text-gray-400">{log.date}</span>{' '}
+          <span className="">{log.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const CommandItem = ({ command }) => {
   const exec = useExecCommand();
@@ -70,6 +93,7 @@ const CommandItem = ({ command }) => {
           />
         </div>
       </div>
+      {command.state === 'running' && <CommandLogs command={command} />}
     </div>
   );
 };

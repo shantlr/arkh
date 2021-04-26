@@ -20,7 +20,7 @@ const Item = ({ path, children }) => {
           }
         )}
       >
-        <div className="p-2 bg-white rounded w-full flex justify-center items-center">
+        <div className="p-2 bg-white rounded-sm w-full flex justify-center items-center">
           {children}
         </div>
       </div>

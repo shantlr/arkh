@@ -6,10 +6,12 @@ import {
   Switch,
 } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { DragDropContext } from 'react-beautiful-dnd';
 
 import { RootMenu } from '../menu';
 import { TemplateList } from '../templateList';
 import { CommandView } from 'views/commands';
+import { SocketProvider } from 'containers/socket';
 
 export const Content = () => {
   return (
@@ -28,10 +30,14 @@ export const Root = () => {
     <Router>
       <ChakraProvider>
         <QueryClientProvider client={client}>
-          <div className="flex h-full w-full overflow-hidden">
-            <RootMenu />
-            <Content />
-          </div>
+          <SocketProvider>
+            <DragDropContext>
+              <div className="flex h-full w-full overflow-hidden">
+                <RootMenu />
+                <Content />
+              </div>
+            </DragDropContext>
+          </SocketProvider>
         </QueryClientProvider>
       </ChakraProvider>
     </Router>

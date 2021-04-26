@@ -1,6 +1,8 @@
 import { API } from 'api';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
+export * from './socket';
+
 export const useCommands = () => useQuery('commands', () => API.command.list());
 
 export const useTemplates = () =>

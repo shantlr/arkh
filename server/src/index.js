@@ -7,12 +7,18 @@ import path from 'path';
 import YAML from 'yaml';
 import { sortBy } from 'lodash';
 import childProcess from 'child_process';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 import { config } from './config';
 
 const app = express();
 const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  path: '/socket',
+  cors: {
+    origin: '*',
+  },
+});
 
 app.use(cors(), bodyParser.json());
 
@@ -112,14 +118,22 @@ app.post('/api/commands/:name/exec', async (req, res) => {
     logs: [],
   };
   COMMANDS[name].process.stdout.on('data', (data) => {
-    const log = data.toString();
-    console.log(log);
+    const log = {
+      date: new Date(),
+      msg: data.toString(),
+    };
+    console.log(log.date, log.msg);
     COMMANDS[name].logs.push(log);
+    io.in(`commands-logs:${name}`).emit(`command-logs:${name}`, [log]);
   });
   COMMANDS[name].process.stderr.on('data', (data) => {
-    const log = data.toString();
-    console.log(log);
+    const log = {
+      date: new Date(),
+      msg: data.toString(),
+    };
+    console.log(log.date, log.msg);
     COMMANDS[name].logs.push(log);
+    io.in(`commands-logs:${name}`).emit(`command-logs:${name}`, [log]);
   });
   console.log(`cmd ${name} started`);
   return res.status(200).send('');
@@ -259,10 +273,26 @@ app.get('/api/templates', async (req, res) => {
   return res.status(200).send(sortBy(templates, 'name'));
 });
 
-const io = new Server(server, {
-  path: '/ws',
+io.on('connection', (socket) => {
+  socket.on('listen-command-logs', ({ name }) => {
+    console.log(socket.id, 'listen to cmd', name);
+    socket.join(`command-logs:${name}`);
+    socket.emit(
+      `command-logs:${name}`,
+      COMMANDS[name] ? COMMANDS[name].logs : []
+    );
+  });
+  socket.on('stop-listen-command-logs', ({ name }) => {
+    socket.leave(`command-logs:${name}`);
+    console.log(socket.id, 'stop listen to cmd', name);
+  });
+
+  console.log('Connection');
 });
-io.on('connection', (socket) => {});
+
+io.of('/command-logs').on('connection', (socket) => {
+  console.log('join command-logs');
+});
 
 const server = httpServer.listen(config.get('service.port'), () => {
   console.log(`Listening to http://localhost:${config.get('service.port')}/`);
