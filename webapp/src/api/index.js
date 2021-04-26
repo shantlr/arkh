@@ -10,10 +10,20 @@ export const API = {
     exec: (name) =>
       fetch(`${BASE_URL}/commands/${name}/exec`, {
         method: 'POST',
+      }).then(async (r) => {
+        if (r.status === 200) {
+          return true;
+        }
+        throw new Error(`${r.status}: ${await r.text()}`);
       }),
     stop: (name) =>
       fetch(`${BASE_URL}/commands/${name}/stop`, {
         method: 'POST',
+      }).then(async (r) => {
+        if (r.status === 200) {
+          return true;
+        }
+        throw new Error(`${r.status}: ${await r.text()}`);
       }),
     list: () => fetch(`${BASE_URL}/commands`).then((r) => r.json()),
     create: (command) => {

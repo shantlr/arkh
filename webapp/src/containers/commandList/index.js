@@ -24,19 +24,21 @@ import { useState } from 'react';
 const CommandLogs = ({ command }) => {
   const logs = useCommandLogs(command.name);
 
-  console.log('logs', logs);
   return (
     <div
       className="bg-black text-sm overflow-auto p-1"
       style={{ maxHeight: 400 }}
     >
-      {map(logs, (log, idx) => (
-        <div key={idx}>
-          <span className="text-yellow-500" style={{ minWidth: 30 }}>
-            {idx} |
+      {map(logs, (log) => (
+        <div key={log.offset}>
+          <span
+            className="text-gray-400 select-none text-right"
+            style={{ minWidth: 30 }}
+          >
+            {log.offset} |
           </span>
-          <span className="text-gray-400">{log.date}</span>{' '}
-          <span className="">{log.msg}</span>
+          <span className="text-purple-600">{log.date}</span>{' '}
+          <span className="text-gray-300 whitespace-pre-wrap">{log.msg}</span>
         </div>
       ))}
     </div>
@@ -44,14 +46,18 @@ const CommandLogs = ({ command }) => {
 };
 
 const CommandItem = ({ command }) => {
+  const toast = useToast();
   const exec = useExecCommand();
   const stop = useStopCommand();
 
   return (
     <div
-      className={classNames('container shadow p-3 rounded transition-all', {
-        'bg-green-400 text-white': command.state === 'running',
-      })}
+      className={classNames(
+        'mb-3 container shadow p-3 rounded transition-all',
+        {
+          'bg-green-400 text-white': command.state === 'running',
+        }
+      )}
     >
       <div className="flex justify-between">
         <div>
@@ -71,7 +77,17 @@ const CommandItem = ({ command }) => {
               )}
               icon={faPlay}
               onClick={() => {
-                exec.mutate(command.name);
+                exec.mutate(command.name, {
+                  onError: (err) => {
+                    toast({
+                      position: 'top-right',
+                      title: `Could not exec '${command.name}'`,
+                      description: err.message,
+                      status: 'error',
+                      isClosable: true,
+                    });
+                  },
+                });
               }}
             />
           )}
@@ -80,7 +96,17 @@ const CommandItem = ({ command }) => {
               className="text-white mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
               onClick={() => {
-                stop.mutate(command.name);
+                stop.mutate(command.name, {
+                  onError: (err) => {
+                    toast({
+                      position: 'top-right',
+                      title: `Could not stop '${command.name}'`,
+                      description: err.message,
+                      status: 'error',
+                      isClosable: true,
+                    });
+                  },
+                });
               }}
             />
           )}

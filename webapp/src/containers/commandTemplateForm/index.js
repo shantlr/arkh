@@ -127,7 +127,6 @@ export const CommandTemplateForm = ({
   onSubmit,
   submitText = 'Create',
 }) => {
-  const [droppableId] = useState(() => nanoid());
   const [initialV] = useState(() => {
     return {
       ...initialValues,
@@ -138,10 +137,17 @@ export const CommandTemplateForm = ({
     };
   });
 
-  // const initialValues = useMemo(() => {})
-
   return (
-    <Formik initialValues={initialV} onSubmit={onSubmit} validate={validator}>
+    <Formik
+      initialValues={initialV}
+      onSubmit={(values) => {
+        onSubmit({
+          ...values,
+          args: values.args.map(({ id, ...arg }) => arg),
+        });
+      }}
+      validate={validator}
+    >
       {({ values, isValid, setFieldValue, errors }) => (
         <Form className="cursor-default">
           <div className="mb-3">

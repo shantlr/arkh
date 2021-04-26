@@ -116,24 +116,27 @@ app.post('/api/commands/:name/exec', async (req, res) => {
   COMMANDS[name] = {
     process: childProcess.spawn(bin, args, {}),
     logs: [],
+    offset: 0,
   };
   COMMANDS[name].process.stdout.on('data', (data) => {
+    COMMANDS[name].offset += 1;
     const log = {
+      offset: COMMANDS[name].offset,
       date: new Date(),
       msg: data.toString(),
     };
-    console.log(log.date, log.msg);
     COMMANDS[name].logs.push(log);
-    io.in(`commands-logs:${name}`).emit(`command-logs:${name}`, [log]);
+    io.in(`command-logs:${name}`).emit(`command-logs:${name}`, [log]);
   });
   COMMANDS[name].process.stderr.on('data', (data) => {
+    COMMANDS[name].offset += 1;
     const log = {
+      offset: COMMANDS[name].offset,
       date: new Date(),
       msg: data.toString(),
     };
-    console.log(log.date, log.msg);
     COMMANDS[name].logs.push(log);
-    io.in(`commands-logs:${name}`).emit(`command-logs:${name}`, [log]);
+    io.in(`command-logs:${name}`).emit(`command-logs:${name}`, [log]);
   });
   console.log(`cmd ${name} started`);
   return res.status(200).send('');
@@ -146,6 +149,12 @@ app.post('/api/commands/:name/stop', async (req, res) => {
   }
   if (!COMMANDS[name]) {
     return res.status(422).send('Not running');
+  }
+
+  if (COMMANDS[name].process.exitCode !== null) {
+    // already exited
+    delete COMMANDS[name];
+    return res.status(200).send();
   }
 
   const r = COMMANDS[name].process.kill();
@@ -274,8 +283,9 @@ app.get('/api/templates', async (req, res) => {
 });
 
 io.on('connection', (socket) => {
+  console.log(socket.id, 'connected');
   socket.on('listen-command-logs', ({ name }) => {
-    console.log(socket.id, 'listen to cmd', name);
+    console.log(socket.id, `listen to cmd '${name}'`);
     socket.join(`command-logs:${name}`);
     socket.emit(
       `command-logs:${name}`,
@@ -284,14 +294,10 @@ io.on('connection', (socket) => {
   });
   socket.on('stop-listen-command-logs', ({ name }) => {
     socket.leave(`command-logs:${name}`);
-    console.log(socket.id, 'stop listen to cmd', name);
+    console.log(socket.id, `stop listen to cmd '${name}'`);
   });
 
   console.log('Connection');
-});
-
-io.of('/command-logs').on('connection', (socket) => {
-  console.log('join command-logs');
 });
 
 const server = httpServer.listen(config.get('service.port'), () => {
