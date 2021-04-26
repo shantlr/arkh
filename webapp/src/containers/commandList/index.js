@@ -25,23 +25,29 @@ const CommandLogs = ({ command }) => {
   const logs = useCommandLogs(command.name);
 
   return (
-    <div
-      className="bg-black text-sm overflow-auto p-1"
+    <table
+      className="bg-black text-sm overflow-auto p-1 w-full"
       style={{ maxHeight: 400 }}
     >
-      {map(logs, (log) => (
-        <div key={log.offset}>
-          <span
-            className="text-gray-400 select-none text-right"
-            style={{ minWidth: 30 }}
-          >
-            {log.offset} |
-          </span>
-          <span className="text-purple-600">{log.date}</span>{' '}
-          <span className="text-gray-300 whitespace-pre-wrap">{log.msg}</span>
-        </div>
-      ))}
-    </div>
+      <tbody>
+        {map(logs, (log) => (
+          <tr key={log.offset}>
+            <td
+              className="text-gray-400 select-none text-right"
+              style={{ minWidth: 40 }}
+            >
+              {log.offset} |
+            </td>
+            <td>
+              <span className="text-purple-600">{log.date}</span>{' '}
+              <span className="text-gray-300 whitespace-pre-wrap">
+                {log.msg}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 };
 

@@ -8,7 +8,7 @@ const logsReducer = (state = [], action) => {
 
   if (state.length) {
     const end = state[state.length - 1];
-    if (action[0].offset < end.offset) {
+    if (action[0].offset <= end.offset) {
       return state;
     }
   }
