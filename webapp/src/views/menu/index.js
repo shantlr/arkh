@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faList, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router';
-import classnames from 'classnames';
 import { Link } from 'react-router-dom';
+import { Button } from 'components/entry/button';
 
 const Item = ({ path, children }) => {
   const loc = useLocation();
@@ -10,20 +10,9 @@ const Item = ({ path, children }) => {
 
   return (
     <Link to={path}>
-      <div
-        className={classnames(
-          'flex justify-center items-center cursor-pointer mb-1 rounded p-0.5 transition-all',
-          'hover:bg-blue-300',
-          {
-            'pb-2 bg-blue-400': active,
-            'hover:pb-1.5 bg-blue-200': !active,
-          }
-        )}
-      >
-        <div className="p-2 bg-white rounded-sm w-full flex justify-center items-center">
-          {children}
-        </div>
-      </div>
+      <Button className="mb-2" active={active}>
+        {children}
+      </Button>
     </Link>
   );
 };

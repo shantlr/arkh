@@ -1,6 +1,6 @@
-import { Button } from '@chakra-ui/button';
 import { Select } from '@chakra-ui/select';
 import { Spinner } from '@chakra-ui/spinner';
+import { Button } from 'components/entry/button';
 import { FormInput } from 'components/formInput';
 import { CommandFormatted } from 'containers/commandFormatted';
 import { Form, Formik } from 'formik';
@@ -39,6 +39,7 @@ export const CommandForm = ({
     name: '',
     template: '',
     params: {},
+    config: {},
   },
   submitText = 'Create',
   onCancel,
@@ -135,7 +136,7 @@ export const CommandForm = ({
               </Button>
             )}
 
-            <Button type="submit" colorScheme="blue" disabled={!isValid}>
+            <Button type="submit" disabled={!isValid}>
               {submitText}
             </Button>
           </div>

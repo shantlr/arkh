@@ -1,4 +1,3 @@
-import { Button } from '@chakra-ui/button';
 import { Spinner } from '@chakra-ui/spinner';
 import { useToast } from '@chakra-ui/toast';
 import {
@@ -9,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+import { Button } from 'components/entry/button';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
 import {
@@ -139,11 +139,10 @@ export const CommandList = () => {
 
   return (
     <div>
-      <div className="mb-3">
+      <div className="mb-3 flex items-center">
         Commands
         <Button
           className="ml-3"
-          colorScheme="blue"
           size="sm"
           onClick={() => {
             setShowCreate(true);

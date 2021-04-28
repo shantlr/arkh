@@ -15,6 +15,10 @@ export const config = convict({
       default: './data/templates',
     },
   },
+  directory: {
+    env: 'HOME',
+    default: '',
+  },
   command: {
     directory: {
       env: 'COMMAND_DIRECTORY',

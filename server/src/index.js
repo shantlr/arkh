@@ -282,6 +282,12 @@ app.get('/api/templates', async (req, res) => {
   return res.status(200).send(sortBy(templates, 'name'));
 });
 
+app.get('/api/directory', async (req, res) => {
+  const { path } = req.query;
+  if (!path) {
+  }
+});
+
 io.on('connection', (socket) => {
   console.log(socket.id, 'connected');
   socket.on('listen-command-logs', ({ name }) => {

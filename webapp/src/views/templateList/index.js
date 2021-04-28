@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Button, Spinner } from '@chakra-ui/react';
+import { Spinner } from '@chakra-ui/react';
 import { map } from 'lodash';
 
 import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 import { CreateCommandTemplate } from 'containers/createCommandTemplate';
 import { CommandTemplateForm } from 'containers/commandTemplateForm';
 import { useTemplates, useUpdateTemplate } from 'hooks';
+import { Button } from 'components/entry/button';
 
 const AddTemplate = () => {
   const [showForm, setShowForm] = useState(false);
@@ -13,6 +14,7 @@ const AddTemplate = () => {
   if (!showForm) {
     return (
       <Button
+        colorScheme="gray"
         onClick={() => {
           setShowForm(true);
         }}

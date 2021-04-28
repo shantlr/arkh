@@ -1,4 +1,4 @@
-import { Button } from '@chakra-ui/button';
+// import { Button } from '@chakra-ui/button';
 import { Select } from '@chakra-ui/select';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,6 +11,8 @@ import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 import { FieldArray, Form, Formik } from 'formik';
 import { useState } from 'react';
 import classNames from 'classnames';
+import { SelectDirectory } from 'containers/selectDirectory';
+import { Button } from 'components/entry/button';
 
 const ArgForm = ({
   className = '',
@@ -26,9 +28,12 @@ const ArgForm = ({
     <Draggable key={arg.id} draggableId={arg.id} index={index}>
       {(provided, snapshot) => (
         <div
-          className={classNames(`flex ${className} bg-white rounded p-1`, {
-            shadow: snapshot.isDragging,
-          })}
+          className={classNames(
+            `flex ${className} bg-white rounded p-1 hover:shadow mb-2`,
+            {
+              shadow: snapshot.isDragging,
+            }
+          )}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -190,11 +195,7 @@ export const CommandTemplateForm = ({
                 >
                   <Droppable droppableId="droppable">
                     {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        style={{}}
-                        {...provided.droppableProps}
-                      >
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
                         {values.args.map((arg, index) => (
                           <ArgForm
                             key={index}
@@ -216,7 +217,6 @@ export const CommandTemplateForm = ({
                 <Button
                   size="sm"
                   className="ml-3 focus:outline-none"
-                  colorScheme="blue"
                   onClick={() => {
                     arrayHelper.push({
                       id: nanoid(),
@@ -225,11 +225,14 @@ export const CommandTemplateForm = ({
                     });
                   }}
                 >
-                  <FontAwesomeIcon className="text-white" icon={faPlus} />
+                  <FontAwesomeIcon icon={faPlus} />
                 </Button>
               </div>
             )}
           />
+
+          <SelectDirectory />
+
           <div className="flex justify-end">
             {onCancel && (
               <Button colorScheme="red" className="mr-3" onClick={onCancel}>

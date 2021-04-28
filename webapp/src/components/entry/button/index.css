@@ -1,0 +1,20 @@
+.metro-button-size-default {
+  min-height: 42px;
+}
+.metro-button-size-default > button {
+  max-height: 42px;
+}
+.metro-button-container:hover > button {
+  border-bottom-width: 4px;
+}
+.metro-button-container > button:active {
+  border-bottom-width: 2px;
+}
+
+.metro-button-size-sm {
+  min-height: 34px;
+  height: 34px;
+}
+.metro-button-size-sm > button {
+  max-height: 34px;
+}
