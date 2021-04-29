@@ -7,6 +7,7 @@ import { CreateCommandTemplate } from 'containers/createCommandTemplate';
 import { CommandTemplateForm } from 'containers/commandTemplateForm';
 import { useTemplates, useUpdateTemplate } from 'hooks';
 import { Button } from 'components/entry/button';
+import { Card } from 'components/display/card';
 
 const AddTemplate = () => {
   const [showForm, setShowForm] = useState(false);
@@ -41,8 +42,8 @@ export const TemplateItem = ({ template }) => {
   const updateTemplate = useUpdateTemplate();
 
   return (
-    <div
-      className="container rounded shadow mb-5 p-3 cursor-pointer"
+    <Card
+      className="mb-5 cursor-pointer"
       onClick={() => {
         setShowEdit(!showEdit);
       }}
@@ -82,7 +83,7 @@ export const TemplateItem = ({ template }) => {
           />
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
@@ -90,7 +91,7 @@ export const TemplateList = () => {
   const { isLoading, data } = useTemplates();
 
   return (
-    <div className="p-6 w-full">
+    <div className="p-6 w-full h-full overflow-auto">
       {isLoading && (
         <div>
           {' '}

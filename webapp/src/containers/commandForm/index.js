@@ -1,7 +1,7 @@
 import { Select } from '@chakra-ui/select';
 import { Spinner } from '@chakra-ui/spinner';
 import { Button } from 'components/entry/button';
-import { FormInput } from 'components/formInput';
+import { FormInput } from 'components/entry/formInput';
 import { CommandFormatted } from 'containers/commandFormatted';
 import { Form, Formik } from 'formik';
 import { useTemplates } from 'hooks';

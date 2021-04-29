@@ -138,7 +138,7 @@ export const CommandList = () => {
   const createCommand = useCreateCommand();
 
   return (
-    <div>
+    <div className="h-full w-full overflow-auto">
       <div className="mb-3 flex items-center">
         Commands
         <Button

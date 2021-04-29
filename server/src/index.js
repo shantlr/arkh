@@ -283,9 +283,19 @@ app.get('/api/templates', async (req, res) => {
 });
 
 app.get('/api/directory', async (req, res) => {
-  const { path } = req.query;
-  if (!path) {
+  const { path: pwd } = req.query;
+  console.log('aze');
+  if (!pwd) {
+    const files = await fs.promises.readdir(config.get('directory'), {
+      withFileTypes: true,
+    });
+    const directories = files.filter((d) => d.isDirectory);
+    return res.status(200).send({
+      path: path.resolve(config.get('directory')),
+      directories: directories.map((d) => d.name),
+    });
   }
+  return res.status(500).send();
 });
 
 io.on('connection', (socket) => {

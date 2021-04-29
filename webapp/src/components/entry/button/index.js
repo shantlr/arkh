@@ -5,14 +5,15 @@ import './index.css';
 
 const colorSchemes = {
   default:
-    'border-blue-400 text-black bg-blue-400 text-blue-400 hover:border-blue-600 hover:text-blue-600',
+    'border-blue-400 bg-blue-400 text-blue-400 hover:border-blue-600 hover:text-blue-600',
+  pink:
+    'border-pink-400 bg-pink-400 text-pink-400 hover:border-pink-600 hover:text-pink-600',
   red:
     'border-red-400 bg-red-400 text-red-400 hover:border-red-600 hover:text-red-600',
   gray:
     'border-gray-400 bg-gray-400 text-gray-400 hover:border-gray-700 hover:text-gray-700',
-  // gray: 'bg-gray-400 text-white hover:bg-gray-500',
-  // default: 'bg-blue-500 text-white hover:bg-blue-600',
-  // red: 'bg-red-500 text-white hover:bg-red-600',
+  yellow:
+    'border-yellow-400 bg-yellow-400 text-yellow-400 hover:border-yellow-700 hover:text-yellow-700',
 };
 const sizes = {
   sm: 'text-xs py-1 px-2.5',
@@ -36,19 +37,18 @@ export const Button = ({
   return (
     <div
       className={classNames(
-        'metro-button-container inline-flex items-end',
+        'metro-button-container inline-flex items-end transition-all',
         className,
-        containerSizes[size]
+        containerSizes[size],
+        {
+          'metro-button-container-active': active,
+        }
       )}
     >
       <button
         className={classNames(
           colorSchemes[colorScheme],
-          'flex rounded border-2 border-b-8 transition-all',
-          {
-            'border-b-8': !active,
-            'border-b-4': active,
-          }
+          'flex rounded border-2 border-b-8 transition-all'
         )}
         style={{ outline: 'none' }}
         type={type}
@@ -63,7 +63,7 @@ export const Button = ({
 };
 Button.propTypes = {
   size: PropTypes.oneOf(['default', 'sm']),
-  colorScheme: PropTypes.oneOf(['gray', 'default', 'red']),
+  colorScheme: PropTypes.oneOf(['gray', 'default', 'red', 'pink', 'yellow']),
 };
 Button.defaultProps = {
   colorScheme: 'default',

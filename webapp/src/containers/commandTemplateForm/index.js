@@ -1,11 +1,10 @@
-// import { Button } from '@chakra-ui/button';
 import { Select } from '@chakra-ui/select';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { nanoid } from 'nanoid';
 
-import { FormInput } from 'components/formInput';
+import { FormInput } from 'components/entry/formInput';
 import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 
 import { FieldArray, Form, Formik } from 'formik';
@@ -29,9 +28,9 @@ const ArgForm = ({
       {(provided, snapshot) => (
         <div
           className={classNames(
-            `flex ${className} bg-white rounded p-1 hover:shadow mb-2`,
+            `flex ${className} bg-white rounded p-1 border-2 border-b-4 border-transparent transition-all hover:border-gray-300 mb-2`,
             {
-              shadow: snapshot.isDragging,
+              'shadow border-gray-400': snapshot.isDragging,
             }
           )}
           ref={provided.innerRef}

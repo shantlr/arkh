@@ -1,4 +1,4 @@
-import { Input } from '@chakra-ui/input';
+import { Input } from '../input';
 
 export const FormInput = ({
   className,

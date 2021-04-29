@@ -10,7 +10,11 @@ const Item = ({ path, children }) => {
 
   return (
     <Link to={path}>
-      <Button className="mb-2" active={active}>
+      <Button
+        className="mb-2"
+        colorScheme={active ? 'pink' : 'default'}
+        active={active}
+      >
         {children}
       </Button>
     </Link>
