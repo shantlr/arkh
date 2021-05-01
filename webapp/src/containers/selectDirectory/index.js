@@ -4,7 +4,7 @@ import { useDirectory } from 'hooks';
 import { Button } from 'components/entry/button';
 import { Spinner } from '@chakra-ui/spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import { faCaretUp, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { map } from 'lodash-es';
 import classNames from 'classnames';
 
@@ -62,7 +62,12 @@ export const SelectDirectory = ({
             {dir}
           </Button>
         ))}
-        <Button className="ml-0.5" size="sm" onClick={() => setOpen(!open)}>
+        <Button
+          className="ml-0.5"
+          colorScheme="pink"
+          size="sm"
+          onClick={() => setOpen(!open)}
+        >
           <div
             className={classNames('transition-all', {
               'transform rotate-180': open,
@@ -71,6 +76,19 @@ export const SelectDirectory = ({
             <FontAwesomeIcon icon={faCaretUp} />
           </div>
         </Button>
+        {Boolean(value && value.length) && (
+          <Button
+            colorScheme="red"
+            className="ml-0.5"
+            size="sm"
+            onClick={() => {
+              setOpen(false);
+              onChange([]);
+            }}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </Button>
+        )}
       </div>
       {open && (
         <div className="flex">

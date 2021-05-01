@@ -53,7 +53,15 @@ export const Pushable = ({
 };
 Pushable.propTypes = {
   className: PropTypes.string,
-  colorScheme: PropTypes.oneOf(['default', 'gray', 'red', 'pink', 'none']),
+  colorScheme: PropTypes.oneOf([
+    'default',
+    'gray',
+    'red',
+    'pink',
+    'none',
+    'yellow',
+    'green',
+  ]),
   size: PropTypes.oneOf(['sm', 'default']),
   active: PropTypes.bool,
   pushed: PropTypes.bool,
