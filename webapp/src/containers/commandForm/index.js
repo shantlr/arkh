@@ -7,9 +7,12 @@ import { SelectDirectory } from 'containers/selectDirectory';
 import { Form, Formik } from 'formik';
 import { useTemplates } from 'hooks';
 import { map } from 'lodash-es';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 const TemplateParametersForm = ({ template, params, errors, onChange }) => {
+  if (!template) {
+    return null;
+  }
   const variables = template.args.filter((a) => a.type === 'variable');
 
   return (
@@ -58,19 +61,21 @@ export const CommandForm = ({
       if (!values.template) {
         errors.template = 'Template is required';
       } else {
-        const template = templates.find((t) => t.name === values.template);
-        const params = {};
-        template.args.forEach((arg) => {
-          if (
-            arg.type === 'variable' &&
-            typeof values.params[arg.name] === 'undefined'
-          ) {
-            params[arg.name] = `Parameter ${arg.name} is required`;
-          }
-        });
+        if (templates) {
+          const template = templates.find((t) => t.name === values.template);
+          const params = {};
+          template.args.forEach((arg) => {
+            if (
+              arg.type === 'variable' &&
+              typeof values.params[arg.name] === 'undefined'
+            ) {
+              params[arg.name] = `Parameter ${arg.name} is required`;
+            }
+          });
 
-        if (Object.keys(params).length) {
-          errors.params = params;
+          if (Object.keys(params).length) {
+            errors.params = params;
+          }
         }
       }
 
@@ -117,7 +122,7 @@ export const CommandForm = ({
               }))}
             />
           </div>
-          {values.template && (
+          {values.template && Array.isArray(templates) && (
             <CommandFormatted
               className="text-gray-400"
               template={templates.find((t) => t.name === values.template)}
@@ -125,7 +130,7 @@ export const CommandForm = ({
             />
           )}
 
-          {values.template && (
+          {values.template && Array.isArray(templates) && (
             <TemplateParametersForm
               template={templates.find((t) => t.name === values.template)}
               params={values.params}

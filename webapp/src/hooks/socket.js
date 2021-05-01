@@ -27,7 +27,6 @@ export const useCommandLogs = (commandName) => {
 
   useEffect(() => {
     const listener = (data) => {
-      console.log('data', data);
       dispatch(data);
     };
     socket.on(`command-logs:${commandName}`, listener);

@@ -5,6 +5,7 @@ import {
   faPause,
   faPlay,
   faPlus,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -18,6 +19,7 @@ import {
   useCreateCommand,
   useExecCommand,
   useStopCommand,
+  useUpdateCommand,
 } from 'hooks';
 import { map } from 'lodash';
 import { useState } from 'react';
@@ -56,6 +58,9 @@ const CommandItem = ({ command }) => {
   const toast = useToast();
   const exec = useExecCommand();
   const stop = useStopCommand();
+  const update = useUpdateCommand();
+
+  const [edit, setEdit] = useState(false);
 
   return (
     <Card colorScheme={command.state === 'running' ? 'green' : 'default'}>
@@ -93,7 +98,7 @@ const CommandItem = ({ command }) => {
           )}
           {command.state === 'running' && (
             <FontAwesomeIcon
-              className="text-white mr-3 cursor-pointer hover:text-red-500"
+              className="mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
               onClick={() => {
                 stop.mutate(command.name, {
@@ -111,14 +116,53 @@ const CommandItem = ({ command }) => {
             />
           )}
           <FontAwesomeIcon
-            className="cursor-pointer text-gray-600 hover:text-blue-600"
+            className={classNames(
+              command.state !== 'running'
+                ? 'cursor-pointer text-gray-600 hover:text-blue-600'
+                : 'text-gray-200'
+            )}
             icon={faCog}
             onClick={() => {
-              //
+              if (command.state === 'running') {
+                return;
+              }
+              setEdit(!edit);
             }}
           />
         </div>
       </div>
+
+      {edit && (
+        <CommandForm
+          submitText="Update"
+          initialValues={{
+            ...command,
+            template: command.template.name,
+          }}
+          onCancel={() => {
+            setEdit(false);
+          }}
+          onSubmit={(values) => {
+            update.mutate(
+              { name: command.name, command: values },
+              {
+                onSuccess: () => {
+                  setEdit(false);
+                },
+                onError: (err) => {
+                  toast({
+                    status: 'error',
+                    position: 'top-right',
+                    title: 'Could not update command',
+                    description: err.message,
+                    isClosable: true,
+                  });
+                },
+              }
+            );
+          }}
+        />
+      )}
       {command.state === 'running' && <CommandLogs command={command} />}
     </Card>
   );

@@ -98,6 +98,47 @@ app.post('/api/commands/create', async (req, res) => {
   );
   return res.status(200).send(true);
 });
+app.post('/api/commands/:name/update', async (req, res) => {
+  const { name: orginalName } = req.params;
+  const { name, template: templateName, path: pwd, params } = req.body;
+
+  if (!NAME_REGEX.test(orginalName) || !NAME_REGEX.test(name)) {
+    return res.status(422).send('Invalid name');
+  }
+
+  const command = await getCommand(orginalName);
+  if (!command) {
+    return res.status(422).send('Invalid command');
+  }
+
+  const template = await getTemplate(templateName);
+  if (!template) {
+    return res.status(422).send('Invalid template');
+  }
+
+  const p = path.resolve(config.get('command.directory'), `${name}.yml`);
+  if (orginalName !== name) {
+    try {
+      await fs.promises.access(p, fs.constants.F_OK);
+      return res.status(422).send('Name already used');
+    } catch {
+      //
+    }
+    await fs.promises.unlink(
+      path.resolve(config.get('command.directory'), `${orginalName}.yml`)
+    );
+  }
+
+  await fs.promises.writeFile(
+    p,
+    YAML.stringify({
+      name,
+      template: templateName,
+      params,
+    })
+  );
+  return res.status(200).send(true);
+});
 
 app.post('/api/commands/:name/exec', async (req, res) => {
   const { name } = req.params;

@@ -90,6 +90,7 @@ export const SelectDirectory = ({
           </Button>
         )}
       </div>
+
       {open && (
         <div className="flex">
           <DirectoryList
