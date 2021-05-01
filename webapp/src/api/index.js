@@ -6,6 +6,15 @@ const SOCKET_URL =
 
 export const API = {
   socketUrl: SOCKET_URL,
+  directory: {
+    subdirectories: (path) =>
+      fetch(`${BASE_URL}/directory?path=${path}`).then(async (r) => {
+        if (r.status === 200) {
+          return r.json();
+        }
+        throw new Error(`${r.status}: ${await r.text()}`);
+      }),
+  },
   command: {
     exec: (name) =>
       fetch(`${BASE_URL}/commands/${name}/exec`, {

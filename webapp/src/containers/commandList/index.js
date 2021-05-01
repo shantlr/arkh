@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+import { Card } from 'components/display/card';
 import { Button } from 'components/entry/button';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
@@ -57,14 +58,7 @@ const CommandItem = ({ command }) => {
   const stop = useStopCommand();
 
   return (
-    <div
-      className={classNames(
-        'mb-3 container shadow p-3 rounded transition-all',
-        {
-          'bg-green-400 text-white': command.state === 'running',
-        }
-      )}
-    >
+    <Card colorScheme={command.state === 'running' ? 'green' : 'default'}>
       <div className="flex justify-between">
         <div>
           {command.name}
@@ -126,7 +120,7 @@ const CommandItem = ({ command }) => {
         </div>
       </div>
       {command.state === 'running' && <CommandLogs command={command} />}
-    </div>
+    </Card>
   );
 };
 

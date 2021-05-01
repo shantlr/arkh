@@ -67,3 +67,9 @@ export const useStopCommand = () => {
     },
   });
 };
+
+export const useDirectory = (path = []) => {
+  return useQuery(['directory', path.join('/')], ({ queryKey: [, pwd] }) => {
+    return API.directory.subdirectories(pwd);
+  });
+};

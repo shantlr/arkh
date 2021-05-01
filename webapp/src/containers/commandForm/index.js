@@ -1,8 +1,9 @@
-import { Select } from '@chakra-ui/select';
 import { Spinner } from '@chakra-ui/spinner';
 import { Button } from 'components/entry/button';
 import { FormInput } from 'components/entry/formInput';
+import { Select } from 'components/entry/select';
 import { CommandFormatted } from 'containers/commandFormatted';
+import { SelectDirectory } from 'containers/selectDirectory';
 import { Form, Formik } from 'formik';
 import { useTemplates } from 'hooks';
 import { map } from 'lodash-es';
@@ -93,6 +94,7 @@ export const CommandForm = ({
             error={errors.name}
             onChange={(e) => setFieldValue('name', e)}
           />
+          <SelectDirectory />
           <div className="mb-3">
             <Select
               value={values.template}
@@ -102,16 +104,15 @@ export const CommandForm = ({
                   }
                 : null)}
               onChange={(e) => {
-                setFieldValue('template', e.target.value);
+                setFieldValue('template', e.value);
                 setFieldValue('params', {});
               }}
-            >
-              {map(templates, (template) => (
-                <option key={template.name} value={template.name}>
-                  {template.name}
-                </option>
-              ))}
-            </Select>
+              placeholder="Template"
+              options={map(templates, (template) => ({
+                value: template.name,
+                label: template.name,
+              }))}
+            />
           </div>
           {values.template && (
             <CommandFormatted

@@ -1,4 +1,3 @@
-import { Select } from '@chakra-ui/select';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -12,6 +11,7 @@ import { useState } from 'react';
 import classNames from 'classnames';
 import { SelectDirectory } from 'containers/selectDirectory';
 import { Button } from 'components/entry/button';
+import { Select } from 'components/entry/select';
 
 const ArgForm = ({
   className = '',
@@ -40,16 +40,23 @@ const ArgForm = ({
           <div className="mr-3 min-w-3">
             <Select
               value={type}
-              onChange={(e) => {
+              onChange={({ value }) => {
                 onChange({
                   ...arg,
-                  type: e.target.value,
+                  type: value,
                 });
               }}
-            >
-              <option value="static">Static</option>
-              <option value="variable">Variable</option>
-            </Select>
+              options={[
+                {
+                  value: 'static',
+                  label: 'Static',
+                },
+                {
+                  value: 'variable',
+                  label: 'Variable',
+                },
+              ]}
+            />
           </div>
 
           {type === 'variable' && (
