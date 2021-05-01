@@ -28,7 +28,7 @@ const ArgForm = ({
       {(provided, snapshot) => (
         <div
           className={classNames(
-            `flex ${className} bg-white rounded p-1 border-2 border-b-4 border-transparent transition-all hover:border-gray-300 mb-2`,
+            `flex ${className} bg-white rounded p-1 border-2 border-b-4 border-transparent transition-all hover:border-gray-300 mb-1`,
             {
               'shadow border-gray-400': snapshot.isDragging,
             }
@@ -37,9 +37,11 @@ const ArgForm = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          <div className="mr-3 min-w-3">
+          <div className="mr-3">
             <Select
               value={type}
+              placeholder="Type"
+              style={{ minWidth: 120 }}
               onChange={({ value }) => {
                 onChange({
                   ...arg,
@@ -64,7 +66,7 @@ const ArgForm = ({
               className="mr-3"
               placeholder="Arg name"
               error={error && error.name}
-              value={arg.name}
+              value={arg.name || ''}
               onChange={(name) => {
                 onChange({
                   ...arg,
@@ -76,7 +78,7 @@ const ArgForm = ({
 
           {type === 'static' && (
             <FormInput
-              value={arg.value}
+              value={arg.value || ''}
               placeholder="Value"
               className="mr-3"
               error={error && error.value}

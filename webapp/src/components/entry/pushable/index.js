@@ -6,12 +6,14 @@ import './style.css';
 
 export const Pushable = ({
   className,
+  style,
   innerClassName,
   colorScheme,
   size,
   children,
   active,
   pushed,
+  onClick,
 }) => {
   const ref = useRef();
   const [height, setHeight] = useState(null);
@@ -27,7 +29,11 @@ export const Pushable = ({
   return (
     <div
       className={classNames(className, 'inline-flex items-end')}
-      style={{ maxHeight: containerHeight, height: containerHeight }}
+      style={{
+        maxHeight: containerHeight,
+        height: containerHeight,
+        ...(style || null),
+      }}
     >
       <div
         className={classNames(
@@ -37,6 +43,7 @@ export const Pushable = ({
           pushed ? 'metro-pushable-pushed' : 'metro-pushable-not-pushed',
           `metro-pushable-size-${size}`
         )}
+        onClick={onClick}
       >
         {children(ref, `metro-pushable-inner`, `metro-pushable-content`)}
         <div className="metro-pushable-bottom" />

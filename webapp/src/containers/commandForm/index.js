@@ -94,7 +94,10 @@ export const CommandForm = ({
             error={errors.name}
             onChange={(e) => setFieldValue('name', e)}
           />
-          <SelectDirectory />
+          <SelectDirectory
+            value={values.path}
+            onChange={(p) => setFieldValue('path', p)}
+          />
           <div className="mb-3">
             <Select
               value={values.template}

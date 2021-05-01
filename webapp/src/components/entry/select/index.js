@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import classNames from 'classnames';
+import { useMemo, useState } from 'react';
 import ReactSelect, { components } from 'react-select';
 import { Pushable } from '../pushable';
 
@@ -33,11 +34,30 @@ const ValueContainer = ({ children, ...props }) => (
   </components.ValueContainer>
 );
 
-export const Select = ({ placeholder, value, options, onChange }) => {
+export const Select = ({
+  className,
+  style,
+  placeholder,
+  value,
+  options,
+  onChange,
+}) => {
   const [pushed, setPushed] = useState(false);
+
+  const v = useMemo(() => {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    if (options && Array.isArray(options)) {
+      return options.filter((op) => op.value === value);
+    }
+    return null;
+  }, [options, value]);
+
   return (
     <Pushable
-      className="w-full"
+      className={classNames('w-full', className)}
+      style={style}
       colorScheme="gray"
       innerClassName="w-full"
       size="sm"
@@ -50,7 +70,7 @@ export const Select = ({ placeholder, value, options, onChange }) => {
           classNamePrefix="react-select"
           controlClassName={innerClassName}
           valueClassName={contentClassName}
-          value={value}
+          value={v}
           placeholder={placeholder}
           onFocus={() => {
             setPushed(true);
