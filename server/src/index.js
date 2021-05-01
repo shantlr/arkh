@@ -71,7 +71,7 @@ const mapCommand = (cmd) => {
 };
 
 app.post('/api/commands/create', async (req, res) => {
-  const { name, template: templateName, params } = req.body;
+  const { name, template: templateName, params, path: pwd } = req.body;
   if (!NAME_REGEX.test(name)) {
     return res.status(422).send('Invalid name');
   }
@@ -94,6 +94,7 @@ app.post('/api/commands/create', async (req, res) => {
       name,
       template: templateName,
       params,
+      path: pwd || [],
     })
   );
   return res.status(200).send(true);
@@ -135,6 +136,7 @@ app.post('/api/commands/:name/update', async (req, res) => {
       name,
       template: templateName,
       params,
+      path: pwd || [],
     })
   );
   return res.status(200).send(true);
@@ -155,7 +157,12 @@ app.post('/api/commands/:name/exec', async (req, res) => {
   const { bin, args } = mapCommand(cmd);
 
   COMMANDS[name] = {
-    process: childProcess.spawn(bin, args, {}),
+    process: childProcess.spawn(bin, args, {
+      cwd:
+        cmd.path && cmd.path.length
+          ? path.resolve(config.get('directory'), ...cmd.path)
+          : undefined,
+    }),
     logs: [],
     offset: 0,
   };
