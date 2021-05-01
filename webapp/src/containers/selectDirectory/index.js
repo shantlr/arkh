@@ -70,7 +70,7 @@ export const SelectDirectory = ({
         >
           <div
             className={classNames('transition-all', {
-              'transform rotate-180': open,
+              'transform rotate-180': open && value && value.length,
             })}
           >
             <FontAwesomeIcon icon={faCaretUp} />
