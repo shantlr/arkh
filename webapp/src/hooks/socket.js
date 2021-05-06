@@ -1,5 +1,6 @@
 import { useSocket } from 'containers/socket';
 import { useEffect, useReducer } from 'react';
+import { useQueryClient } from 'react-query';
 
 const MAX_LOGS = 5000;
 
@@ -35,11 +36,42 @@ export const useCommandLogs = (commandName) => {
       name: commandName,
     });
     return () => {
-      socket.off(`command-logs:${commandName}`);
+      socket.off(`command-logs:${commandName}`, listener);
       socket.emit(`stop-listen-command-logs`, {
         name: commandName,
       });
     };
   }, [socket, commandName]);
   return logs;
+};
+
+export const useSubscribeCommandState = (commandName) => {
+  const socket = useSocket();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const listener = (newState) => {
+      queryClient.setQueryData(['command', commandName], (old) => {
+        if (old) {
+          return {
+            ...old,
+            state: newState,
+          };
+        }
+        return old;
+      });
+    };
+    socket.on(`command-state:${commandName}`, listener);
+    socket.emit('listen-command-state', {
+      name: commandName,
+    });
+
+    return () => {
+      console.log('LEAVE');
+      socket.off(`command-state:${commandName}`, listener);
+      socket.emit(`stop-listen-command-state`, {
+        name: commandName,
+      });
+    };
+  }, [socket, commandName, queryClient]);
 };

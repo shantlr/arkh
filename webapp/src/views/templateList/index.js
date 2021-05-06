@@ -69,7 +69,7 @@ export const TemplateItem = ({ template }) => {
             onSubmit={(values) => {
               updateTemplate.mutate(
                 {
-                  name: template.name,
+                  id: template.id,
                   template: values,
                 },
                 {

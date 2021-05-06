@@ -16,6 +16,13 @@ export const API = {
       }),
   },
   command: {
+    get: (name) =>
+      fetch(`${BASE_URL}/commands/${name}`).then(async (r) => {
+        if (r.status === 200) {
+          return r.json();
+        }
+        throw new Error(`${r.status}: ${await r.text()}`);
+      }),
     exec: (name) =>
       fetch(`${BASE_URL}/commands/${name}/exec`, {
         method: 'POST',

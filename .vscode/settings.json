@@ -1,6 +1,7 @@
 {
   "eslint.workingDirectories": [
     "webapp",
-    "server"
+    "server",
+    "runner"
   ]
 }

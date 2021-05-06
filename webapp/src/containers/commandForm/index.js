@@ -41,7 +41,7 @@ const TemplateParametersForm = ({ template, params, errors, onChange }) => {
 export const CommandForm = ({
   initialValues = {
     name: '',
-    template: '',
+    template_id: null,
     params: {},
     config: {},
   },
@@ -58,11 +58,11 @@ export const CommandForm = ({
       if (!values.name) {
         errors.name = 'Command name is required';
       }
-      if (!values.template) {
+      if (!values.template_id) {
         errors.template = 'Template is required';
       } else {
         if (templates) {
-          const template = templates.find((t) => t.name === values.template);
+          const template = templates.find((t) => t.id === values.template_id);
           const params = {};
           template.args.forEach((arg) => {
             if (
@@ -105,34 +105,35 @@ export const CommandForm = ({
           />
           <div className="mb-3">
             <Select
-              value={values.template}
+              value={values.template_id}
               {...(isLoading
                 ? {
                     icon: <Spinner />,
                   }
                 : null)}
               onChange={(e) => {
-                setFieldValue('template', e.value);
+                setFieldValue('template_id', e.value);
                 setFieldValue('params', {});
               }}
               placeholder="Template"
               options={map(templates, (template) => ({
-                value: template.name,
+                value: template.id,
                 label: template.name,
               }))}
             />
           </div>
+
           {values.template && Array.isArray(templates) && (
             <CommandFormatted
               className="text-gray-400"
-              template={templates.find((t) => t.name === values.template)}
+              template={templates.find((t) => t.id === values.template_id)}
               params={values.params}
             />
           )}
 
-          {values.template && Array.isArray(templates) && (
+          {values.template_id && Array.isArray(templates) && (
             <TemplateParametersForm
-              template={templates.find((t) => t.name === values.template)}
+              template={templates.find((t) => t.id === values.template_id)}
               params={values.params}
               onChange={(params) => setFieldValue('params', params)}
               errors={errors.params}

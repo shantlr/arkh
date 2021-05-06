@@ -5,7 +5,6 @@ import {
   faPause,
   faPlay,
   faPlus,
-  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -14,6 +13,7 @@ import { Button } from 'components/entry/button';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
 import {
+  useCommand,
   useCommandLogs,
   useCommands,
   useCreateCommand,
@@ -25,7 +25,7 @@ import { map } from 'lodash';
 import { useState } from 'react';
 
 const CommandLogs = ({ command }) => {
-  const logs = useCommandLogs(command.name);
+  const logs = useCommandLogs(command.id);
 
   return (
     <table
@@ -54,13 +54,22 @@ const CommandLogs = ({ command }) => {
   );
 };
 
-const CommandItem = ({ command }) => {
+const CommandItem = ({ commandId }) => {
+  const { isLoading, data: command } = useCommand(commandId);
   const toast = useToast();
   const exec = useExecCommand();
   const stop = useStopCommand();
   const update = useUpdateCommand();
 
   const [edit, setEdit] = useState(false);
+
+  if (isLoading || !command) {
+    return (
+      <Card>
+        <Spinner />
+      </Card>
+    );
+  }
 
   return (
     <Card colorScheme={command.state === 'running' ? 'green' : 'default'}>
@@ -82,7 +91,7 @@ const CommandItem = ({ command }) => {
               )}
               icon={faPlay}
               onClick={() => {
-                exec.mutate(command.name, {
+                exec.mutate(command.id, {
                   onError: (err) => {
                     toast({
                       position: 'top-right',
@@ -101,7 +110,7 @@ const CommandItem = ({ command }) => {
               className="mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
               onClick={() => {
-                stop.mutate(command.name, {
+                stop.mutate(command.id, {
                   onError: (err) => {
                     toast({
                       position: 'top-right',
@@ -144,7 +153,7 @@ const CommandItem = ({ command }) => {
           }}
           onSubmit={(values) => {
             update.mutate(
-              { name: command.name, command: values },
+              { id: command.id, command: values },
               {
                 onSuccess: () => {
                   setEdit(false);
@@ -217,7 +226,7 @@ export const CommandList = () => {
         </div>
       )}
       {map(data, (command) => (
-        <CommandItem key={command.name} command={command} />
+        <CommandItem key={command.id} commandId={command.id} />
       ))}
     </div>
   );

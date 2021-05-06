@@ -1,0 +1,29 @@
+{
+  "name": "metro-runner",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "DEBUG=metro:* nodemon --delay 500ms --exec babel-node src/index.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/node": "^7.13.13",
+    "@babel/preset-env": "^7.14.0",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "nodemon": "^2.0.7",
+    "prettier": "^2.2.1",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.6.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.14.0",
+    "debug": "^4.3.1",
+    "nanoid": "^3.1.22",
+    "queue": "^6.0.2",
+    "socket.io-client": "^4.0.1"
+  }
+}

@@ -1,14 +1,23 @@
 import { API } from 'api';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useSubscribeCommandState } from './socket';
 
 export * from './socket';
+export * from './state';
 
 export const useCommands = () => useQuery('commands', () => API.command.list());
 
-export const useTemplates = () =>
-  useQuery('templates', () => {
-    return API.template.list();
-  });
+export const useCommand = (id) => {
+  const res = useQuery(['command', id], () => API.command.get(id));
+  useSubscribeCommandState(id);
+
+  return res;
+};
+
+// export const useTemplates = () =>
+//   useQuery('templates', () => {
+//     return API.template.list();
+//   });
 
 export const useCreateTemplate = () => {
   const queryClient = useQueryClient();
@@ -22,14 +31,11 @@ export const useCreateTemplate = () => {
 export const useUpdateTemplate = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(
-    ({ name, template }) => API.template.update(name, template),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('templates');
-      },
-    }
-  );
+  return useMutation(({ id, template }) => API.template.update(id, template), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('templates');
+    },
+  });
 };
 
 export const useCreateCommand = () => {
@@ -44,28 +50,18 @@ export const useCreateCommand = () => {
 
 export const useUpdateCommand = () => {
   const queryClient = useQueryClient();
-  return useMutation(({ name, command }) => API.command.update(name, command), {
-    onSuccess: () => {
-      queryClient.invalidateQueries('commands');
+  return useMutation(({ id, command }) => API.command.update(id, command), {
+    onSuccess: (r, { id }) => {
+      queryClient.invalidateQueries(['command', id]);
     },
   });
 };
 
 export const useExecCommand = () => {
-  const queryClient = useQueryClient();
-  return useMutation((name) => API.command.exec(name), {
-    onSuccess: () => {
-      queryClient.invalidateQueries('commands');
-    },
-  });
+  return useMutation((id) => API.command.exec(id), {});
 };
 export const useStopCommand = () => {
-  const queryClient = useQueryClient();
-  return useMutation((name) => API.command.stop(name), {
-    onSuccess: () => {
-      queryClient.invalidateQueries('commands');
-    },
-  });
+  return useMutation((id) => API.command.stop(id), {});
 };
 
 export const useDirectory = (path = []) => {

@@ -1,28 +1,27 @@
-import convict from 'convict';
+require('./env');
+const convict = require('convict');
 
-import './env';
-
-export const config = convict({
+module.exports.config = convict({
   service: {
     port: {
       env: 'SERVICE_PORT',
       default: 3005,
     },
-  },
-  template: {
-    directory: {
-      env: 'TEMPLATE_DIRECTORY',
-      default: './data/templates',
+    name: {
+      env: 'SERVICE_NAME',
+      default: 'metro-server',
     },
   },
   directory: {
     env: 'HOME',
     default: '',
   },
-  command: {
-    directory: {
-      env: 'COMMAND_DIRECTORY',
-      default: './data/commands',
+  sqlite: {
+    file: {
+      default: './data/db.sqlite',
     },
   },
 });
+module.exports.debug = require('debug')(
+  module.exports.config.get('service.name')
+);

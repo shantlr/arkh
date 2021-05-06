@@ -4289,6 +4289,11 @@ compose-function@3.0.3:
   dependencies:
     arity-n "^1.0.4"
 
+compose-reducer@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/compose-reducer/-/compose-reducer-0.1.8.tgz#0c5d8c3a473bcf3f5e97ef2b68e08030c2649f8b"
+  integrity sha512-inYnePM+2Ueontwz79sRTDs9bGQbV5XRQTqGCfuA5prxIGeqhiZEW6GBXscKHRmKUEB6WsIUYbpQNb6fHsOmUA==
+
 compressible@~2.0.16:
   version "2.0.18"
   resolved "https://registry.yarnpkg.com/compressible/-/compressible-2.0.18.tgz#af53cca6b070d4c3c0750fbd77286a6d7cc46fba"
@@ -10412,7 +10417,7 @@ react-query@^3.13.12:
     broadcast-channel "^3.4.1"
     match-sorter "^6.0.2"
 
-react-redux@^7.2.0:
+react-redux@^7.2.0, react-redux@^7.2.4:
   version "7.2.4"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.4.tgz#1ebb474032b72d806de2e0519cd07761e222e225"
   integrity sha512-hOQ5eOSkEJEXdpIKbnRyl04LhaWabkDPV+Ix97wqQX3T3d2NQ8DUblNXXtNMavc7DpswyQM6xfaN4HQDKNY2JA==
@@ -10680,7 +10685,7 @@ reduce-css-calc@^2.1.8:
     css-unit-converter "^1.1.1"
     postcss-value-parser "^3.3.0"
 
-redux@^4.0.0, redux@^4.0.4:
+redux@^4.0.0, redux@^4.0.4, redux@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.1.0.tgz#eb049679f2f523c379f1aff345c8612f294c88d4"
   integrity sha512-uI2dQN43zqLWCt6B/BMGRMY6db7TTY4qeHHfGeKb3EOhmOKjU3KdWvNLJyqaHRksv/ErdNH7cFZWg9jXtewy4g==

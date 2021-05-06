@@ -1,5 +1,5 @@
 {
-  "name": "webapp",
+  "name": "metro-webapp",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,6 +16,7 @@
     "@testing-library/user-event": "^12.1.10",
     "autoprefixer": "^9",
     "classnames": "^2.3.1",
+    "compose-reducer": "^0.1.8",
     "formik": "^2.2.6",
     "framer-motion": "^4",
     "lodash": "^4.17.21",
@@ -25,9 +26,11 @@
     "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.0.1",
     "react-query": "^3.13.12",
+    "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
     "react-select": "^4.3.0",
+    "redux": "^4.1.0",
     "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",

@@ -5,7 +5,7 @@ import { Button } from 'components/entry/button';
 import { Spinner } from '@chakra-ui/spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretUp, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { map } from 'lodash-es';
+import { map, noop } from 'lodash-es';
 import classNames from 'classnames';
 
 const DirectoryList = ({ path, showSeparator, onSelect }) => {
@@ -58,7 +58,13 @@ export const SelectDirectory = ({
     <div>
       <div className="flex mb-1">
         {map(value, (dir, index) => (
-          <Button key={index} size="sm">
+          <Button
+            key={index}
+            size="sm"
+            onClick={() => {
+              onChange(value.slice(0, index + 1));
+            }}
+          >
             {dir}
           </Button>
         ))}
@@ -125,4 +131,5 @@ SelectDirectory.defaultProps = {
   placeholder: 'Select directory',
   prefix: [],
   initialPath: [],
+  onChange: noop,
 };
