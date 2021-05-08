@@ -9,10 +9,11 @@ export const CreateCommandTemplate = ({
   onCreated,
 }) => {
   const toast = useToast();
-  const createTemplate = useCreateTemplate();
+  const [createTemplate] = useCreateTemplate();
+
   const onSubmit = useCallback(
     async ({ name, bin, args }) => {
-      createTemplate.mutate(
+      createTemplate(
         { name, bin, args },
         {
           onSuccess: () => {

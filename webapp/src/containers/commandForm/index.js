@@ -7,7 +7,7 @@ import { SelectDirectory } from 'containers/selectDirectory';
 import { Form, Formik } from 'formik';
 import { useTemplates } from 'hooks';
 import { map } from 'lodash-es';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 const TemplateParametersForm = ({ template, params, errors, onChange }) => {
   if (!template) {

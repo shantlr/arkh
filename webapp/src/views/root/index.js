@@ -12,6 +12,8 @@ import { RootMenu } from '../menu';
 import { TemplateList } from '../templateList';
 import { CommandView } from 'views/commands';
 import { SocketProvider } from 'containers/socket';
+import { Provider } from 'react-redux';
+import { store } from 'state';
 
 export const Content = () => {
   return (
@@ -27,19 +29,21 @@ const client = new QueryClient();
 
 export const Root = () => {
   return (
-    <Router>
-      <ChakraProvider>
-        <QueryClientProvider client={client}>
-          <SocketProvider>
-            <DragDropContext>
-              <div className="flex h-full w-full overflow-hidden">
-                <RootMenu />
-                <Content />
-              </div>
-            </DragDropContext>
-          </SocketProvider>
-        </QueryClientProvider>
-      </ChakraProvider>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <ChakraProvider>
+          <QueryClientProvider client={client}>
+            <SocketProvider>
+              <DragDropContext>
+                <div className="flex h-full w-full overflow-hidden">
+                  <RootMenu />
+                  <Content />
+                </div>
+              </DragDropContext>
+            </SocketProvider>
+          </QueryClientProvider>
+        </ChakraProvider>
+      </Router>
+    </Provider>
   );
 };

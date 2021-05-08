@@ -65,7 +65,7 @@ export const API = {
         body: JSON.stringify(command),
       }).then(async (r) => {
         if (r.status === 200) {
-          return true;
+          return r.json();
         }
         throw new Error(`${r.status}: ${await r.text()}`);
       });
@@ -96,7 +96,7 @@ export const API = {
         body: JSON.stringify(template),
       }).then(async (r) => {
         if (r.status === 200) {
-          return true;
+          return r.json();
         }
         throw new Error(`${r.status}: ${await r.text()}`);
       });

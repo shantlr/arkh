@@ -81,7 +81,7 @@ export const createApiTemplateRouter = () => {
         .where({
           id,
         });
-      return res.status(200).send();
+      return res.status(200).send(await CommandTemplate.getById(id));
     } catch (err) {
       console.error(err);
       return res.status(500).send('');

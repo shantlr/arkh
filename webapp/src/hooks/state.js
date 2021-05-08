@@ -1,61 +1,61 @@
 import { API } from 'api';
-import { useEffect, useReducer } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateTemplates } from 'state';
-import { selectTemplates } from 'state/selector';
-
-const defaultState = { isLoading: false };
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'LOADING':
-      return { ...state, isLoading: true };
-    case 'SUCCESS':
-      return { ...state, error: null, isLoading: false };
-    case 'ERROR': {
-      return { ...state, error: null, isLoading: false };
-    }
-    default:
-  }
-};
-
-export const useQuery = ({ selector, fetcher, actionToDispatch }) => {
-  const [localState, dispatchLocalState] = useReducer(reducer, defaultState);
-  const dispatch = useDispatch();
-  const value = useSelector(selector);
-
-  useEffect(() => {
-    let cancel = false;
-    const handler = async () => {
-      dispatchLocalState({ type: 'LOADING' });
-      try {
-        const res = await fetcher();
-        if (cancel) {
-          return;
-        }
-
-        dispatch(actionToDispatch(res));
-        dispatchLocalState({ type: 'SUCCESS' });
-      } catch (err) {
-        dispatchLocalState({ type: 'ERROR' });
-      }
-    };
-    handler();
-
-    return () => {
-      cancel = true;
-    };
-  }, [fetcher, dispatch]);
-
-  return {
-    isLoading: localState.isLoading,
-    data: value,
-  };
-};
+import { useMutation, useQuery } from 'state/lib';
 
 export const useTemplates = () => {
   return useQuery({
-    selector: selectTemplates,
-    fetcher: API.template.list,
-    actionToDispatch: updateTemplates,
+    key: 'templates',
   });
+};
+
+export const useCreateTemplate = () => {
+  return useMutation(
+    (p, template) => ['template', template.id],
+    (template) => API.template.create(template),
+    {
+      onSuccess: ({ dataCache }) => {
+        dataCache.invalidateQuery('templates');
+      },
+    }
+  );
+};
+export const useUpdateTemplate = () => {
+  return useMutation(
+    ({ id }) => ['template', id],
+    ({ id, template }) => API.template.update(id, template)
+  );
+};
+
+export const useCommand = (id) => {
+  const res = useQuery({
+    key: 'command',
+    params: id,
+    cache: {
+      key: 'command',
+      params: id,
+    },
+  });
+
+  return res;
+};
+export const useCommands = () => {
+  return useQuery({
+    key: 'commands',
+  });
+};
+export const useCreateCommand = () => {
+  return useMutation(
+    (p, cmd) => ['command', cmd.id],
+    (command) => API.command.create(command),
+    {
+      onSuccess: ({ dataCache }) => {
+        dataCache.invalidateQuery('commands');
+      },
+    }
+  );
+};
+export const useUpdateCommand = () => {
+  return useMutation(
+    ({ id }) => ['command', id],
+    ({ id, command }) => API.command.update(id, command)
+  );
 };

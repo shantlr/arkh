@@ -39,7 +39,7 @@ const AddTemplate = () => {
 
 export const TemplateItem = ({ template }) => {
   const [showEdit, setShowEdit] = useState(false);
-  const updateTemplate = useUpdateTemplate();
+  const [updateTemplate] = useUpdateTemplate();
 
   return (
     <Card
@@ -67,7 +67,7 @@ export const TemplateItem = ({ template }) => {
               setShowEdit(false);
             }}
             onSubmit={(values) => {
-              updateTemplate.mutate(
+              updateTemplate(
                 {
                   id: template.id,
                   template: values,
