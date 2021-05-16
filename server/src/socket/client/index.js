@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { MESSAGES } from '../../pubsub';
-import { CLIENT_ROOMS } from './rooms';
+import { CLIENT_PUBLISH, CLIENT_ROOMS } from './constants';
 
 /**
  *
@@ -9,19 +9,19 @@ import { CLIENT_ROOMS } from './rooms';
  */
 export const setupClientSubscription = async ({ io }) => {
   MESSAGES.command.created.subscribe((cmd) => {
-    io.in(CLIENT_ROOMS.commands).emit('publish-command', {
+    io.in(CLIENT_ROOMS.commands).emit(CLIENT_PUBLISH.command, {
       type: 'created',
       command: cmd,
     });
   });
   MESSAGES.command.deleted.subscribe((cmd) => {
-    io.in(CLIENT_ROOMS.commands).emit('publish-command', {
+    io.in(CLIENT_ROOMS.commands).emit(CLIENT_PUBLISH.command, {
       type: 'deleted',
       commandId: cmd.id,
     });
   });
   MESSAGES.command.updated.subscribe((cmd) => {
-    io.in(CLIENT_ROOMS.commands).emit('publish-command', {
+    io.in(CLIENT_ROOMS.commands).emit(CLIENT_PUBLISH.command, {
       type: 'updated',
       command: cmd,
     });
@@ -30,14 +30,14 @@ export const setupClientSubscription = async ({ io }) => {
   MESSAGES.runner.connected.subscribe(() => {
     const number = io.of('runner').sockets.size;
     io.in(CLIENT_ROOMS.runnerAvailable).emit(
-      'publish-runner-available',
+      CLIENT_PUBLISH.runnerAvailable,
       number > 0
     );
   });
   MESSAGES.runner.disconnected.subscribe(() => {
     const number = io.of('runner').sockets.size;
     io.in('subscribe-runner-available').emit(
-      'publish-runner-available',
+      CLIENT_PUBLISH.runnerAvailable,
       number > 0
     );
   });
@@ -60,7 +60,10 @@ export const setupClientSocket = ({ io, socket }) => {
   socket.on('subscribe-runner-available', () => {
     socket.join(CLIENT_ROOMS.runnerAvailable);
     // send current state on subscribe
-    socket.emit('publish-runner-available', io.of('runner').sockets.size > 0);
+    socket.emit(
+      CLIENT_PUBLISH.runnerAvailable,
+      io.of('runner').sockets.size > 0
+    );
   });
   socket.on('unsubscribe-runner-available', () => {
     socket.leave(CLIENT_ROOMS.runnerAvailable);
