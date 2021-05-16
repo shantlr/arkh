@@ -26,6 +26,15 @@ const main = async () => {
     console.log(`Listening to http://localhost:${config.get('service.port')}/`);
   });
   process.once('SIGUSR2', () => {
+    // Disconnect all client sockets
+    io.sockets.sockets.forEach((socket) => {
+      socket.disconnect();
+    });
+    // Disconnect all runner sockets
+    io.of('runner').sockets.forEach((socket) => {
+      socket.disconnect();
+    });
+
     server.close(() => {
       console.log('Exiting...');
       process.exit(1);

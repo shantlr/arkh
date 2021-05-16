@@ -11,8 +11,15 @@ const socket = io('ws://localhost:3005/runner', {
 socket.on('connect', () => {
   debug('connected');
 });
-socket.on('disconnect', () => {
-  debug('disconnected');
+socket.on('disconnect', (reason) => {
+  if (reason === 'io server disconnect') {
+    debug('disconnected by server, retrying connection in 3s');
+    setTimeout(() => {
+      socket.connect();
+    }, 3000);
+  } else {
+    debug('disconnected %s', reason);
+  }
 });
 socket.on('reconnect', () => {
   debug('reconnected');
