@@ -1,18 +1,19 @@
 import { API } from 'api';
-import { useMutation, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
+import { useCache } from 'state/lib';
+import { useSubscribeRunnerAvailable } from './socket';
 
 export * from './socket';
 export * from './state';
-
-export const useExecCommand = () => {
-  return useMutation((id) => API.command.exec(id), {});
-};
-export const useStopCommand = () => {
-  return useMutation((id) => API.command.stop(id), {});
-};
 
 export const useDirectory = (path = []) => {
   return useQuery(['directory', path.join('/')], ({ queryKey: [, pwd] }) => {
     return API.directory.subdirectories(pwd);
   });
+};
+
+export const useRunnerAvailalble = () => {
+  const runnerAvailable = useCache('runner-available');
+  useSubscribeRunnerAvailable();
+  return runnerAvailable;
 };

@@ -4,12 +4,14 @@ import { faCog, faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { Card } from 'components/display/card';
+import { IconButton } from 'components/entry/iconButton';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
 import {
   useCommand,
   useCommandLogs,
   useExecCommand,
+  useRunnerAvailalble,
   useStopCommand,
   useUpdateCommand,
 } from 'hooks';
@@ -48,9 +50,11 @@ const CommandLogs = ({ command }) => {
 
 export const CommandItem = ({ commandId }) => {
   const { isLoading, data: command } = useCommand(commandId);
+  const runnerAvailable = useRunnerAvailalble();
+
   const toast = useToast();
-  const exec = useExecCommand();
-  const stop = useStopCommand();
+  const [exec] = useExecCommand();
+  const [stop] = useStopCommand();
   const [update] = useUpdateCommand();
 
   const [edit, setEdit] = useState(false);
@@ -76,14 +80,12 @@ export const CommandItem = ({ commandId }) => {
         </div>
         <div>
           {command.state === 'stopped' && (
-            <FontAwesomeIcon
-              className={classNames(
-                'mr-3 cursor-pointer',
-                'text-gray-600 hover:text-blue-600'
-              )}
+            <IconButton
               icon={faPlay}
+              disabled
+              className="mr-3"
               onClick={() => {
-                exec.mutate(command.id, {
+                exec(command.id, {
                   onError: (err) => {
                     toast({
                       position: 'top-right',
@@ -102,7 +104,7 @@ export const CommandItem = ({ commandId }) => {
               className="mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
               onClick={() => {
-                stop.mutate(command.id, {
+                stop(command.id, {
                   onError: (err) => {
                     toast({
                       position: 'top-right',

@@ -1,23 +1,35 @@
 import { noop } from 'lodash';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 /**
  *
  * @param {string} key
  * @param {Object} option
+ * @param {(input: { key: string, io: Server }) => Promise<void>} option.init
  * @param {(key: string, input: { args: any[] }) => string} option.room
- * @param {(input: { socket: Socket, args: any[] }) => void} option.onJoin
- * @param {(input: { socket: Socket, args: any[] }) => void} option.onLeave
+ * @param {(input: { socket: Socket, args: any[] }) => string} option.responseChannel
+ * @param {(input: { socket: Socket, args: any[] }) => void} [option.onJoin]
+ * @param {(input: { socket: Socket, args: any[] }) => void} [option.onLeave]
  * @returns
  */
 export const createRoomSubscription = (
   key,
-  { room, onJoin = noop, onLeave = noop } = {}
+  { init, room, onJoin = noop, onLeave = noop } = {}
 ) => {
   const sub = {
     key,
+    inited: false,
+    async init({ io }) {
+      if (!sub.inited) {
+        await init({
+          io,
+          key,
+          publish: () => {},
+        });
+      }
+    },
     getRoomKey({ args }) {
-      return room(key, ...args);
+      return room(key, args);
     },
     /**
      *
@@ -26,7 +38,7 @@ export const createRoomSubscription = (
      * @param {any[]} arg.args
      */
     async join({ socket, args }) {
-      const roomKey = sub.getRoomKey({ args });
+      const roomKey = sub.getRoomKey({ socket, args });
       if (!socket.rooms.has(roomKey)) {
         await socket.join(roomKey);
         onJoin({ socket, args });

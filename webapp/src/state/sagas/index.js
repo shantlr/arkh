@@ -35,6 +35,14 @@ const handlers = {
         value: r,
       })
     ),
+  runners: async ({ key }) =>
+    API.runner.list().then((r) =>
+      normalizedQueryArrayResult({
+        key,
+        itemKey: 'runner',
+        value: r,
+      })
+    ),
 };
 
 export function* rootSaga() {

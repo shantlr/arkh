@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 
 import { Command, CommandTemplate, NAME_REGEX } from '../data';
 import { sortBy } from 'lodash';
+import { MESSAGES } from '../pubsub';
 /**
  *
  * @param {{ io: Server }} input
@@ -43,7 +44,7 @@ export const createApiCommandRouter = ({ io }) => {
       });
 
       const cmd = await Command.getById(id, { withTemplate: true });
-      io.of('runner').emit('update-command', cmd);
+      MESSAGES.command.created.publish(cmd);
 
       return res.status(200).send(cmd);
     } catch (err) {
@@ -99,7 +100,7 @@ export const createApiCommandRouter = ({ io }) => {
       });
 
     const cmd = await Command.getById(id, { withTemplate: true });
-    io.of('runner').emit('update-command', cmd);
+    MESSAGES.command.updated.publish(cmd);
 
     return res.status(200).send(cmd);
   });

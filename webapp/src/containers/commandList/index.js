@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'components/entry/button';
 import { CommandForm } from 'containers/commandForm';
 import { CommandItem } from 'containers/commandItem';
-import { useCommands, useCreateCommand } from 'hooks';
+import { useCommands, useCreateCommand, useSubscribeCommands } from 'hooks';
 import { map } from 'lodash';
 import { useState } from 'react';
 
@@ -15,6 +15,7 @@ export const CommandList = () => {
 
   const { isLoading, data } = useCommands();
   const [createCommand] = useCreateCommand();
+  useSubscribeCommands();
 
   return (
     <div className="h-full w-full overflow-auto">

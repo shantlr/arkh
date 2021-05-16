@@ -4,7 +4,7 @@ import { debug } from './debug';
 import { deleteCommand, getCommand, setCommand } from './data';
 import { CMD_JOBS, getCommandQueue } from './queue';
 
-const socket = io('http://localhost:3005/runner', {
+const socket = io('ws://localhost:3005/runner', {
   path: '/socket',
 });
 

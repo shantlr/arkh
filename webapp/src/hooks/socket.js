@@ -1,6 +1,6 @@
-import { useSocket } from 'containers/socket';
+import { useGlobalSocketSubscription, useSocket } from 'containers/socket';
 import { useEffect, useReducer } from 'react';
-import { useQueryClient } from 'react-query';
+import { useDataCache } from 'state/lib';
 
 const MAX_LOGS = 5000;
 
@@ -45,33 +45,39 @@ export const useCommandLogs = (commandName) => {
   return logs;
 };
 
-export const useSubscribeCommandState = (commandName) => {
-  const socket = useSocket();
-  const queryClient = useQueryClient();
+export const useSubscribeCommands = () => {
+  const dataCache = useDataCache();
 
-  useEffect(() => {
-    const listener = (newState) => {
-      queryClient.setQueryData(['command', commandName], (old) => {
-        if (old) {
-          return {
-            ...old,
-            state: newState,
-          };
-        }
-        return old;
-      });
-    };
-    socket.on(`command-state:${commandName}`, listener);
-    socket.emit('listen-command-state', {
-      name: commandName,
-    });
+  useGlobalSocketSubscription({
+    key: 'publish-command',
+    init: ({ socket }) => {
+      socket.emit('subscribe-commands');
+    },
+    listener: (event) => {
+      if (event.type === 'created' || event.type === 'deleted') {
+        dataCache.invalidateQuery('commands');
+      }
+      dataCache.updateKey('command', event.command.id, event.command);
+    },
+    cleanup: ({ socket }) => {
+      socket.emit('unsubscribe-commands');
+    },
+  });
+};
 
-    return () => {
-      console.log('LEAVE');
-      socket.off(`command-state:${commandName}`, listener);
-      socket.emit(`stop-listen-command-state`, {
-        name: commandName,
-      });
-    };
-  }, [socket, commandName, queryClient]);
+export const useSubscribeRunnerAvailable = () => {
+  const dataCache = useDataCache();
+
+  useGlobalSocketSubscription({
+    key: 'publish-runner-available',
+    init: ({ socket }) => {
+      socket.emit('subscribe-runner-available');
+    },
+    listener: (event) => {
+      dataCache.updateKey('runner-available', null, event);
+    },
+    cleanup: ({ socket }) => {
+      socket.emit('unsubscribe-runner-available');
+    },
+  });
 };
