@@ -6,16 +6,20 @@ export const selectTemplates = (state) =>
 
 export const selectTemplate = (state, id) => state.templates.docs[id];
 
+export const selectCacheValue = (state, path) => {
+  return get(state.data, path);
+};
+
 export const selectQueryKey = (state, path) => {
   const container = state.data;
 
   const value = get(container, path);
-  if (!value) {
+  if (value === undefined) {
     return null;
   }
   let data = value.data;
 
-  if (value.data) {
+  if (data) {
     if (isNormalizedArray(value.data)) {
       const normalizedArray = value.data;
 

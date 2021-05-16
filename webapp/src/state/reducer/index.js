@@ -5,9 +5,13 @@ import {
   composeReducer,
   getAction,
   initState,
+  mapAction,
   mapActions,
+  mergeValue,
   setValue,
+  unsetValue,
 } from 'compose-reducer';
+import { isNil, isPlainObject } from 'lodash';
 import {
   QUERY_ERROR,
   QUERY_INVALIDATE_QUERY,
@@ -30,60 +34,46 @@ export const reducer = composeReducer(
         }, true)
       ),
       [QUERY_ERROR]: composable(
-        setValue(
-          (state, { key, params }) => [
-            QUERY_TYPE,
-            key,
-            hashParams(params),
-            'isLoading',
-          ],
-          false
-        ),
-        setValue(
-          (state, { key, params }) => [
-            QUERY_TYPE,
-            key,
-            hashParams(params),
-            'error',
-          ],
-          getAction('error')
+        at(
+          (state, { key, params }) => [QUERY_TYPE, key, hashParams(params)],
+
+          mergeValue('', {
+            isLoading: false,
+          }),
+          setValue('error', getAction('error'))
         )
       ),
       [QUERY_SUCCESS]: composable(
-        setValue(
-          (state, { key, params }) => [
-            QUERY_TYPE,
-            key,
-            hashParams(params),
-            'isLoading',
-          ],
-          false
-        ),
-        setValue(
-          (state, { key, params }) => [
-            QUERY_TYPE,
-            key,
-            hashParams(params),
-            'error',
-          ],
-          () => null
-        ),
-        setValue(
-          (state, { key, params }) => [
-            QUERY_TYPE,
-            key,
-            hashParams(params),
-            'isInvalidated',
-          ],
-          false
+        mergeValue(
+          (state, { key, params }) => [QUERY_TYPE, key, hashParams(params)],
+          {
+            isLoading: false,
+            error: null,
+            isInvalidated: false,
+          }
         ),
         mapActions(
           (state, action) => action.result,
-          setValue((state, action) => action.path, getAction('value'))
+          mergeValue((state, action) => action.path, getAction('value'))
         )
       ),
       [QUERY_UPDATE_CACHE]: composable(
-        setValue((state, { path }) => path, getAction('value'))
+        mapAction(
+          (state, action) => ({
+            type: isNil(action)
+              ? 'delete'
+              : isPlainObject(action.value)
+              ? 'merge'
+              : 'set',
+            path: action.path,
+            value: action.value,
+          }),
+          branchAction({
+            merge: mergeValue(getAction('path'), getAction('value')),
+            delete: unsetValue(getAction('path')),
+            set: setValue(getAction('path'), getAction('value')),
+          })
+        )
       ),
       [QUERY_INVALIDATE_QUERY]: composable(
         setValue(

@@ -8,7 +8,7 @@ export const Q_TYPE_ITEM_REF = 'ref';
 export const Q_TYPE_NORMALIZED_ARRAY = 'normalized_array';
 
 export const hashParams = (params) => {
-  if (params === undefined) {
+  if (params === undefined || params === null) {
     return Q_EMPTY_PARAMS;
   }
   if (typeof params === 'string') {

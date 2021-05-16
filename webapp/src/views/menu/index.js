@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faList, faPlay, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Button } from 'components/entry/button';
@@ -29,6 +29,9 @@ export const RootMenu = () => {
       </Item>
       <Item path="/templates">
         <FontAwesomeIcon icon={faList} />
+      </Item>
+      <Item path="/runners">
+        <FontAwesomeIcon icon={faServer} />
       </Item>
     </div>
   );

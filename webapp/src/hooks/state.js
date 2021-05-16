@@ -25,25 +25,17 @@ export const useUpdateTemplate = () => {
   );
 };
 
-export const useCommand = (id) => {
-  const res = useQuery({
+export const useCommand = (id) =>
+  useQuery({
     key: 'command',
     params: id,
-    cache: {
-      key: 'command',
-      params: id,
-    },
   });
-
-  return res;
-};
-export const useCommands = () => {
-  return useQuery({
+export const useCommands = () =>
+  useQuery({
     key: 'commands',
   });
-};
-export const useCreateCommand = () => {
-  return useMutation(
+export const useCreateCommand = () =>
+  useMutation(
     (p, cmd) => ['command', cmd.id],
     (command) => API.command.create(command),
     {
@@ -52,10 +44,18 @@ export const useCreateCommand = () => {
       },
     }
   );
-};
-export const useUpdateCommand = () => {
-  return useMutation(
+export const useUpdateCommand = () =>
+  useMutation(
     ({ id }) => ['command', id],
     ({ id, command }) => API.command.update(id, command)
   );
+export const useExecCommand = () =>
+  useMutation(null, (id) => API.command.exec(id));
+export const useStopCommand = () =>
+  useMutation(null, (id) => API.command.stop(id), {});
+
+export const useRunners = () => {
+  return useQuery({
+    key: 'runners',
+  });
 };

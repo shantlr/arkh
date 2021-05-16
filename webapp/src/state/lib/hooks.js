@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { queryStart } from 'state';
 import { queryInvalidateQuery, queryUpdateCache } from 'state/action';
-import { selectQueryKey } from 'state/selector';
+import { selectCacheValue, selectQueryKey } from 'state/selector';
 import { hashParams, QUERY_TYPE } from './key';
 
 export const useDataCache = () => {
@@ -17,6 +17,11 @@ export const useDataCache = () => {
 
   return useMemo(
     () => ({
+      /**
+       * @param {string} key
+       * @param {any} params
+       * @param {any} value
+       */
       updateKey(key, params, value) {
         store.dispatch(
           queryUpdateCache({
@@ -25,6 +30,10 @@ export const useDataCache = () => {
           })
         );
       },
+      /**
+       * @param {string} key
+       * @param {any} params
+       */
       invalidateQuery(key, params) {
         store.dispatch(
           queryInvalidateQuery({
@@ -35,6 +44,16 @@ export const useDataCache = () => {
       },
     }),
     [store]
+  );
+};
+
+export const useCache = (key, params) => {
+  const paramHash = useMemo(() => hashParams(params), [params]);
+  return useSelector(
+    useCallback((state) => selectCacheValue(state, [key, paramHash]), [
+      key,
+      paramHash,
+    ])
   );
 };
 
@@ -65,11 +84,12 @@ export const useQuery = ({ key, params, debug = false }) => {
         })
       );
     }
-  }, [value, key, paramHash, dispatch]);
+  }, [value, key, paramHash, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     isLoading: value ? value.isLoading : true,
-    data: value ? value.data : optimistic ? optimistic : null,
+    data:
+      value && value.data ? value.data : optimistic ? optimistic.data : null,
   };
 };
 
