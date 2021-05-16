@@ -11,6 +11,20 @@ export const SocketProvider = ({ children }) => {
     });
   });
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('socket connected');
+    });
+    socket.on('disconnect', (reason) => {
+      console.log('socket disconnect', reason);
+      if (reason === 'io server disconnect') {
+        setTimeout(() => {
+          socket.connect();
+        }, 3000);
+      }
+    });
+  }, [socket]);
+
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
@@ -127,7 +141,12 @@ export const SocketGlobalListenerProvider = ({ children }) => {
 export const useSocketSubscription = () => useContext(SocketListenerContext);
 
 /**
- * ensure subscription
+ * Ensure only one global subscription is active for given key
+ * @param {Object} input
+ * @param {string} input.key
+ * @param {(input: { socket: Socket }) => void} [input.init]
+ * @param {(event: any) => void} input.listener
+ * @param {(input: { socket: Socket }) => void} [input.cleanup]
  */
 export const useGlobalSocketSubscription = ({
   key,
