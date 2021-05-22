@@ -1,11 +1,11 @@
 import { all } from 'redux-saga/effects';
 
+import { API } from 'api';
 import {
-  createQuerySaga,
   normalizedQueryArrayResult,
   normalizedQuerySingleResult,
-} from 'state/lib';
-import { API } from 'api';
+} from 'lib/cache';
+import { createCacheQuerySaga } from 'lib/cache/redux/saga';
 
 const handlers = {
   templates: async ({ key, params }) => {
@@ -46,5 +46,5 @@ const handlers = {
 };
 
 export function* rootSaga() {
-  yield all([createQuerySaga(handlers)]);
+  yield all([createCacheQuerySaga(handlers)]);
 }

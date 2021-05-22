@@ -18,6 +18,7 @@ export const IconButton = ({
         },
         className
       )}
+      style={{ outline: 'none' }}
       disabled={disabled}
       onClick={onClick}
     >

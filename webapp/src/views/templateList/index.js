@@ -5,7 +5,7 @@ import { map } from 'lodash';
 import { TemplateFormattedCommand } from 'containers/templateFormattedCommand';
 import { CreateCommandTemplate } from 'containers/createCommandTemplate';
 import { CommandTemplateForm } from 'containers/commandTemplateForm';
-import { useTemplates, useUpdateTemplate } from 'hooks';
+import { useTemplate, useTemplates, useUpdateTemplate } from 'hooks';
 import { Button } from 'components/entry/button';
 import { Card } from 'components/display/card';
 
@@ -37,9 +37,14 @@ const AddTemplate = () => {
   );
 };
 
-export const TemplateItem = ({ template }) => {
+export const TemplateItem = ({ templateId }) => {
   const [showEdit, setShowEdit] = useState(false);
   const [updateTemplate] = useUpdateTemplate();
+  const { isLoading, data: template } = useTemplate(templateId);
+
+  if (isLoading || !template) {
+    return null;
+  }
 
   return (
     <Card
@@ -99,8 +104,8 @@ export const TemplateList = () => {
         </div>
       )}
       {data && !data.length && <div className="text-gray-800">No template</div>}
-      {map(data, (template) => (
-        <TemplateItem key={template.name} template={template} />
+      {map(data, (templateId) => (
+        <TemplateItem key={templateId} templateId={templateId} />
       ))}
 
       <AddTemplate />

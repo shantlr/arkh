@@ -1,6 +1,6 @@
 import { API } from 'api';
+import { useCacheValue } from 'lib/cache';
 import { useQuery } from 'react-query';
-import { useCache } from 'state/lib';
 import { useSubscribeRunnerAvailable } from './socket';
 
 export * from './socket';
@@ -13,7 +13,7 @@ export const useDirectory = (path = []) => {
 };
 
 export const useRunnerAvailalble = () => {
-  const runnerAvailable = useCache('runner-available');
+  const runnerAvailable = useCacheValue('runner-available');
   useSubscribeRunnerAvailable();
   return runnerAvailable;
 };

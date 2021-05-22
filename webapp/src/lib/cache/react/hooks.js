@@ -5,25 +5,44 @@ import {
   getAction,
   setValue,
 } from 'compose-reducer';
+import { get } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { queryStart } from 'state';
-import { queryInvalidateQuery, queryUpdateCache } from 'state/action';
-import { selectCacheValue, selectQueryKey } from 'state/selector';
-import { hashParams, QUERY_TYPE } from './key';
+import { createSelector } from 'reselect';
 
-export const useDataCache = () => {
+import {
+  cacheInvalidateQuery,
+  cacheStartQuery,
+  cacheUpdate,
+  getQueryPath,
+  selectQueryValue,
+  selectCacheValue,
+  selectCacheMappedData,
+} from '../redux';
+import {
+  getCachePath,
+  getCachePathUsingHash,
+  getQueryPathUsingHash,
+  hashParams,
+  isNormalizedArray,
+  isRefValue,
+} from '../redux/utils';
+
+/**
+ * Get cache accessor object
+ */
+export const useCacheAccessor = () => {
   const store = useStore();
 
   return useMemo(
     () => ({
       get(key, params) {
         const state = store.getState();
-        return selectCacheValue(state, [key, hashParams(params)]);
+        return selectCacheValue(state, getCachePath(key, params));
       },
       getQuery(key, params) {
         const state = store.getState();
-        return selectQueryKey(state, [QUERY_TYPE, key, hashParams(params)]);
+        return selectQueryValue(state, getQueryPath(key, params));
       },
       /**
        * @param {string} key
@@ -32,8 +51,8 @@ export const useDataCache = () => {
        */
       updateKey(key, params, value) {
         store.dispatch(
-          queryUpdateCache({
-            path: [key, hashParams(params)],
+          cacheUpdate({
+            path: getCachePath(key, params),
             value,
           })
         );
@@ -44,7 +63,7 @@ export const useDataCache = () => {
        */
       invalidateQuery(key, params) {
         store.dispatch(
-          queryInvalidateQuery({
+          cacheInvalidateQuery({
             key,
             params,
           })
@@ -55,8 +74,9 @@ export const useDataCache = () => {
   );
 };
 
-export const useCache = (key, params) => {
+export const useCacheValue = (key, params) => {
   const paramHash = useMemo(() => hashParams(params), [params]);
+
   return useSelector(
     useCallback((state) => selectCacheValue(state, [key, paramHash]), [
       key,
@@ -65,39 +85,98 @@ export const useCache = (key, params) => {
   );
 };
 
-export const useQuery = ({ key, params, debug = false }) => {
-  const paramHash = hashParams(params);
-  const value = useSelector(
-    useCallback(
-      (state) => selectQueryKey(state, [QUERY_TYPE, key, paramHash]),
-      [key, paramHash]
-    )
-  );
+export const useQuery = ({
+  key,
+  params,
+  withMappedData = false,
+  withOptimistic = false,
+}) => {
+  const paramsHash = hashParams(params);
 
-  const optimistic = useSelector(
-    useCallback((state) => selectQueryKey(state, [key, paramHash]), [
+  const queryState = useSelector(
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useCallback((state) => get(state, getQueryPathUsingHash(key, paramsHash)), [
       key,
-      paramHash,
+      paramsHash,
     ])
   );
+
+  const selectData = useMemo(
+    () =>
+      createSelector(
+        (state) => get(state, getQueryPathUsingHash(key, paramsHash, 'data')),
+        (state) => {
+          if (!withMappedData) {
+            return null;
+          }
+          const data = get(
+            state,
+            getQueryPathUsingHash(key, paramsHash, 'data')
+          );
+          if (isRefValue(data)) {
+            return get(state, getCachePath(data.key, data.params));
+          }
+          if (isNormalizedArray(data)) {
+            return data.value.map((params) =>
+              get(state, getCachePath(data.itemKey, params))
+            );
+          }
+          return null;
+        },
+        (state) =>
+          withOptimistic
+            ? selectCacheMappedData(
+                state,
+                getCachePathUsingHash(key, paramsHash)
+              )
+            : null,
+        (queryData, deps, optimistic) => {
+          if (!queryData) {
+            return optimistic;
+          }
+          if (!withMappedData) {
+            if (isNormalizedArray(queryData)) {
+              return queryData.value;
+            }
+            if (isRefValue(queryData)) {
+              return queryData.value;
+            }
+            return queryData;
+          }
+
+          if (isRefValue(queryData)) {
+            return deps;
+          }
+          if (isNormalizedArray(queryData)) {
+            return queryData.value;
+          }
+
+          return queryData;
+        }
+      ),
+    [withOptimistic, withMappedData, key, paramsHash]
+  );
+  const value = useSelector(selectData);
+
   const dispatch = useDispatch();
+
+  const shouldStartQuery = !queryState || queryState.isInvalidated;
 
   useEffect(() => {
     // Start query only if no value or invalidated
-    if (!value || value.isInvalidated) {
+    if (shouldStartQuery) {
       dispatch(
-        queryStart({
+        cacheStartQuery({
           key,
           params,
         })
       );
     }
-  }, [value, key, paramHash, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shouldStartQuery, key, paramsHash, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
-    isLoading: value ? value.isLoading : true,
-    data:
-      value && value.data ? value.data : optimistic ? optimistic.data : null,
+    isLoading: queryState ? queryState.isLoading : true,
+    data: value,
   };
 };
 
@@ -114,7 +193,7 @@ const mutationStateReducer = composeReducer(
 export const useMutation = (key, fetcher, callbacks) => {
   const [state, dispatchLocal] = useReducer(mutationStateReducer, null);
 
-  const dataCache = useDataCache();
+  const dataCache = useCacheAccessor();
   const ref = useRef();
   ref.current = { key, callbacks };
 

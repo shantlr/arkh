@@ -58,8 +58,8 @@ export const CommandList = () => {
           <Spinner />
         </div>
       )}
-      {map(data, (command) => (
-        <CommandItem key={command.id} commandId={command.id} />
+      {map(data, (commandId) => (
+        <CommandItem key={commandId} commandId={commandId} />
       ))}
     </div>
   );

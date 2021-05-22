@@ -1,9 +1,17 @@
 import { API } from 'api';
-import { useMutation, useQuery } from 'state/lib';
+import { useMutation, useQuery } from 'lib/cache';
 
 export const useTemplates = () => {
   return useQuery({
     key: 'templates',
+  });
+};
+export const useTemplate = (templateId) => {
+  return useQuery({
+    key: 'template',
+    params: templateId,
+    withMappedData: true,
+    withOptimistic: true,
   });
 };
 
@@ -29,6 +37,8 @@ export const useCommand = (id) =>
   useQuery({
     key: 'command',
     params: id,
+    withMappedData: true,
+    withOptimistic: true,
   });
 export const useCommands = () =>
   useQuery({
