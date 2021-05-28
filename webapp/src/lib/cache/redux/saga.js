@@ -1,4 +1,4 @@
-import { call, put, select, takeEvery } from '@redux-saga/core/effects';
+import { all, call, put, select, takeEvery } from '@redux-saga/core/effects';
 import {
   cacheQueryError,
   cacheQueryStarted,
@@ -12,7 +12,7 @@ import { selectQueryIsLoading } from './selectors';
  * @param {Object<string, (input: { key: string, params: any }) => Promise<{ path: string[], value: any }[]>>} queryHandlerMap
  * @returns
  */
-export const createCacheQuerySaga = (queryHandlerMap) => {
+const querySaga = (queryHandlerMap) =>
   function* querySaga(action) {
     const { key, params } = action;
 
@@ -74,7 +74,14 @@ export const createCacheQuerySaga = (queryHandlerMap) => {
         })
       );
     }
-  }
+  };
 
-  return takeEvery(CACHE_QUERY_START, querySaga);
-};
+/**
+ *
+ * @param {Object} input
+ * @param {Object<string, (input: { key: string, params: any })>} input.queryHandlers
+ * @returns
+ */
+export function* cacheSaga({ queryHandlers, reducers }) {
+  yield all([takeEvery(CACHE_QUERY_START, querySaga(queryHandlers))]);
+}

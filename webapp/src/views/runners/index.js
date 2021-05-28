@@ -1,6 +1,6 @@
-import { useRunners } from 'hooks';
+// import { useRunners } from 'hooks';
 
 export const RunnersView = () => {
-  const { data, isLoading } = useRunners();
+  // const { data, isLoading } = useRunners();
   return <div></div>;
 };

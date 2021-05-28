@@ -1,6 +1,6 @@
 import { useGlobalSocketSubscription, useSocket } from 'containers/socket';
+import { useCacheAccessor } from 'lib/cache';
 import { useEffect, useReducer } from 'react';
-import { useDataCache } from 'state/lib';
 
 const MAX_LOGS = 5000;
 
@@ -46,7 +46,7 @@ export const useCommandLogs = (commandName) => {
 };
 
 export const useSubscribeCommands = () => {
-  const dataCache = useDataCache();
+  const dataCache = useCacheAccessor();
 
   useGlobalSocketSubscription({
     key: 'publish-command',
@@ -66,7 +66,7 @@ export const useSubscribeCommands = () => {
 };
 
 export const useSubscribeRunnerAvailable = () => {
-  const dataCache = useDataCache();
+  const dataCache = useCacheAccessor();
 
   useGlobalSocketSubscription({
     key: 'publish-runner-available',
@@ -78,6 +78,23 @@ export const useSubscribeRunnerAvailable = () => {
     },
     cleanup: ({ socket }) => {
       socket.emit('unsubscribe-runner-available');
+    },
+  });
+};
+
+export const useSubscribeCommandTask = (commandId) => {
+  const dataCache = useCacheAccessor();
+
+  useGlobalSocketSubscription({
+    key: `publish-command-task:${commandId}`,
+    init: ({ socket }) => {
+      socket.emit('subscribe-command-tasks', { commandId });
+    },
+    listener: (event) => {
+      dataCache.dispatch('command-task', event);
+    },
+    cleanup: ({ socket }) => {
+      socket.emit('unsubscribe-command-tasks', { commandId });
     },
   });
 };

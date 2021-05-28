@@ -1,7 +1,8 @@
-import { useRunnerAvailalble } from 'hooks';
+import { useRunnerAvailable } from 'hooks';
 
 export const TopMessages = () => {
-  const runnerAvailable = useRunnerAvailalble();
+  const runnerAvailable = useRunnerAvailable();
+
   return (
     <div>
       {runnerAvailable === false && (

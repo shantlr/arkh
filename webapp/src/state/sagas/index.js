@@ -5,7 +5,7 @@ import {
   normalizedQueryArrayResult,
   normalizedQuerySingleResult,
 } from 'lib/cache';
-import { createCacheQuerySaga } from 'lib/cache/redux/saga';
+import { cacheSaga } from 'lib/cache/redux/saga';
 
 const handlers = {
   templates: async ({ key, params }) => {
@@ -18,6 +18,9 @@ const handlers = {
       value: result,
     });
   },
+  // template: async ({ key, params }) => {
+  //   // const result = await API.template.ge;
+  // },
   commands: async ({ key, params }) =>
     API.command.list().then((r) =>
       normalizedQueryArrayResult({
@@ -46,5 +49,9 @@ const handlers = {
 };
 
 export function* rootSaga() {
-  yield all([createCacheQuerySaga(handlers)]);
+  yield all([
+    cacheSaga({
+      queryHandlers: handlers,
+    }),
+  ]);
 }

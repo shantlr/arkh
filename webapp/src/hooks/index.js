@@ -12,7 +12,7 @@ export const useDirectory = (path = []) => {
   });
 };
 
-export const useRunnerAvailalble = () => {
+export const useRunnerAvailable = () => {
   const runnerAvailable = useCacheValue('runner-available');
   useSubscribeRunnerAvailable();
   return runnerAvailable;

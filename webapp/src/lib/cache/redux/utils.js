@@ -28,15 +28,15 @@ export const hashParams = (params) => {
   return objHash(params);
 };
 
-export const getQueryPathUsingHash = (key, paramsHash, ...fields) => [
+export const getQueryStatePathUsingHash = (key, paramsHash, ...fields) => [
   CACHE_FIELDS.CONTAINER,
   CACHE_FIELDS.QUERY,
   key,
   paramsHash,
   ...fields,
 ];
-export const getQueryPath = (key, params, ...fields) =>
-  getQueryPathUsingHash(key, hashParams(params), ...fields);
+export const getQueryStatePath = (key, params, ...fields) =>
+  getQueryStatePathUsingHash(key, hashParams(params), ...fields);
 
 export const getCachePathUsingHash = (key, paramsHash, ...fields) => [
   CACHE_FIELDS.CONTAINER,
@@ -72,25 +72,48 @@ export const mapQueryData = (data) => {
   return data;
 };
 
-export const normalizedQuerySingleResult = ({
+export const opNormalized = ({
   key,
+  itemKey,
   params,
   value,
   getId = (item) => item.id,
 }) => [
   {
-    path: getQueryPath(key, params, 'data'),
+    path: getCachePath(key, params),
     value: {
-      [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.REF,
-      key,
-      params: getId(value),
+      [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.NORMALIZED_ARRAY,
+      itemKey,
+      value: map(value, getId),
     },
   },
-  {
-    path: getCachePath(key, getId(value)),
-    value,
-  },
+  ...map(value, (item, index) => ({
+    path: getCachePath(itemKey, getId(item, index)),
+    value: item,
+  })),
 ];
+
+export const normalizedQuerySingleResult = ({
+  key,
+  queryKey = key,
+  params,
+  value,
+  getId = (item) => item.id,
+}) => {
+  const res = [
+    {
+      path: getCachePath(key, getId(value)),
+      value,
+    },
+  ];
+  if (queryKey !== key) {
+    res.push({
+      path: getCachePath(queryKey, params),
+      value: opRef(key, getId(value)),
+    });
+  }
+  return res;
+};
 export const normalizedQueryArrayResult = ({
   key,
   params,
@@ -100,7 +123,7 @@ export const normalizedQueryArrayResult = ({
 }) => {
   const results = [
     {
-      path: getQueryPath(key, params, 'data'),
+      path: getCachePath(key, params),
       value: {
         [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.NORMALIZED_ARRAY,
         itemKey,
@@ -115,3 +138,14 @@ export const normalizedQueryArrayResult = ({
 
   return results;
 };
+
+export const opRef = (key, id) => ({
+  [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.REF,
+  key,
+  params: id,
+});
+
+export const opBase = (key, params, value) => ({
+  path: getCachePath(key, params),
+  value,
+});

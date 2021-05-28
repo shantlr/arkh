@@ -1,5 +1,5 @@
 import { API } from 'api';
-import { useMutation, useQuery } from 'lib/cache';
+import { useCacheValue, useMutation, useQuery } from 'lib/cache';
 
 export const useTemplates = () => {
   return useQuery({
@@ -40,6 +40,11 @@ export const useCommand = (id) =>
     withMappedData: true,
     withOptimistic: true,
   });
+
+export const useRecentTask = (commandId) => {
+  return useCacheValue('command-tasks', commandId);
+};
+
 export const useCommands = () =>
   useQuery({
     key: 'commands',

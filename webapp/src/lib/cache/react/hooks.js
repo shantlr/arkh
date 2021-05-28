@@ -8,24 +8,19 @@ import {
 import { get } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { createSelector } from 'reselect';
 
 import {
   cacheInvalidateQuery,
   cacheStartQuery,
   cacheUpdate,
-  getQueryPath,
-  selectQueryValue,
-  selectCacheValue,
-  selectCacheMappedData,
+  cacheReducerAction,
 } from '../redux';
+import { createSelectData } from '../redux/selectors';
 import {
   getCachePath,
-  getCachePathUsingHash,
-  getQueryPathUsingHash,
+  getQueryStatePath,
+  getQueryStatePathUsingHash,
   hashParams,
-  isNormalizedArray,
-  isRefValue,
 } from '../redux/utils';
 
 /**
@@ -38,11 +33,14 @@ export const useCacheAccessor = () => {
     () => ({
       get(key, params) {
         const state = store.getState();
-        return selectCacheValue(state, getCachePath(key, params));
+        return get(state, getCachePath(key, params));
       },
       getQuery(key, params) {
         const state = store.getState();
-        return selectQueryValue(state, getQueryPath(key, params));
+        return get(state, getQueryStatePath(key, params));
+      },
+      dispatch(actionType, payload) {
+        store.dispatch(cacheReducerAction(actionType, payload));
       },
       /**
        * @param {string} key
@@ -51,11 +49,16 @@ export const useCacheAccessor = () => {
        */
       updateKey(key, params, value) {
         store.dispatch(
-          cacheUpdate({
-            path: getCachePath(key, params),
-            value,
-          })
+          cacheUpdate([
+            {
+              path: getCachePath(key, params),
+              value,
+            },
+          ])
         );
+      },
+      updateData(data) {
+        // store.dispatch();
       },
       /**
        * @param {string} key
@@ -74,89 +77,67 @@ export const useCacheAccessor = () => {
   );
 };
 
-export const useCacheValue = (key, params) => {
-  const paramHash = useMemo(() => hashParams(params), [params]);
+export const useCacheValue = (key, params, { withMappedData = false } = {}) => {
+  const paramsHash = useMemo(() => hashParams(params), [params]);
 
-  return useSelector(
-    useCallback((state) => selectCacheValue(state, [key, paramHash]), [
-      key,
-      paramHash,
-    ])
+  const selectData = useMemo(
+    () => createSelectData(key, paramsHash, { mapData: withMappedData }),
+    [key, paramsHash, withMappedData]
   );
+  // const selectData = useMemo(
+  //   () =>
+  //     createSelector(
+  //       (state) => get(state, getCachePathUsingHash(key, paramsHash)),
+  //       (state) => {
+  //         if (!withMappedData) {
+  //           return null;
+  //         }
+  //         const data = get(
+  //           state,
+  //           getQueryPathUsingHash(key, paramsHash, 'data')
+  //         );
+  //         if (isRefValue(data)) {
+  //           return get(state, getCachePath(data.key, data.params));
+  //         }
+  //         if (isNormalizedArray(data)) {
+  //           return data.value.map((params) =>
+  //             get(state, getCachePath(data.itemKey, params))
+  //           );
+  //         }
+  //       },
+  //       (data, deps) => {
+  //         return data;
+  //       }
+  //     ),
+  //   [key, paramsHash, withMappedData]
+  // );
+
+  return useSelector(selectData);
 };
 
-export const useQuery = ({
-  key,
-  params,
-  withMappedData = false,
-  withOptimistic = false,
-}) => {
+/**
+ *
+ * @param {Object} input
+ * @param {string} input.key
+ * @param {any} input.params
+ * @param {'value'|'raw'|'join'} input.format
+ * @returns
+ */
+export const useQuery = ({ key, params, format = 'value' }) => {
   const paramsHash = hashParams(params);
 
   const queryState = useSelector(
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useCallback((state) => get(state, getQueryPathUsingHash(key, paramsHash)), [
-      key,
-      paramsHash,
-    ])
+    useCallback(
+      (state) => get(state, getQueryStatePathUsingHash(key, paramsHash)),
+      [key, paramsHash]
+    )
   );
 
   const selectData = useMemo(
-    () =>
-      createSelector(
-        (state) => get(state, getQueryPathUsingHash(key, paramsHash, 'data')),
-        (state) => {
-          if (!withMappedData) {
-            return null;
-          }
-          const data = get(
-            state,
-            getQueryPathUsingHash(key, paramsHash, 'data')
-          );
-          if (isRefValue(data)) {
-            return get(state, getCachePath(data.key, data.params));
-          }
-          if (isNormalizedArray(data)) {
-            return data.value.map((params) =>
-              get(state, getCachePath(data.itemKey, params))
-            );
-          }
-          return null;
-        },
-        (state) =>
-          withOptimistic
-            ? selectCacheMappedData(
-                state,
-                getCachePathUsingHash(key, paramsHash)
-              )
-            : null,
-        (queryData, deps, optimistic) => {
-          if (!queryData) {
-            return optimistic;
-          }
-          if (!withMappedData) {
-            if (isNormalizedArray(queryData)) {
-              return queryData.value;
-            }
-            if (isRefValue(queryData)) {
-              return queryData.value;
-            }
-            return queryData;
-          }
-
-          if (isRefValue(queryData)) {
-            return deps;
-          }
-          if (isNormalizedArray(queryData)) {
-            return queryData.value;
-          }
-
-          return queryData;
-        }
-      ),
-    [withOptimistic, withMappedData, key, paramsHash]
+    () => createSelectData(key, paramsHash, { format }),
+    [key, paramsHash, format]
   );
-  const value = useSelector(selectData);
+  const data = useSelector(selectData);
 
   const dispatch = useDispatch();
 
@@ -175,8 +156,9 @@ export const useQuery = ({
   }, [shouldStartQuery, key, paramsHash, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
+    error: queryState ? queryState.error : null,
     isLoading: queryState ? queryState.isLoading : true,
-    data: value,
+    data,
   };
 };
 

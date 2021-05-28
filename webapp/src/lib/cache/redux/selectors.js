@@ -1,7 +1,8 @@
 import { get } from 'lodash';
 import {
   getCachePath,
-  getQueryPath,
+  getCachePathUsingHash,
+  getQueryStatePath,
   isNormalizedArray,
   isRefValue,
 } from './utils';
@@ -22,33 +23,69 @@ export const mapData = (state, value) => {
   return value;
 };
 
-export const selectCacheValue = (state, path) => {};
 export const selectCacheMappedData = (state, path) => {
   const value = get(state, path);
   return mapData(state, value);
 };
 
 export const selectQueryIsLoading = (state, key, params) => {
-  const queryState = get(state, getQueryPath(key, params));
+  const queryState = get(state, getQueryStatePath(key, params));
   if (!queryState) {
     return null;
   }
   return queryState.isLoading;
 };
 
-export const selectQueryValue = (state, key, params) =>
-  get(state, getQueryPath(key, params));
+export const selectCacheValue = (state, key, params) =>
+  get(state, getCachePath(key, params));
 
-// export const selectQueryState = (state, key, params) => {
-//   const queryState = get(state, getQueryPath(key, params));
-//   if (!queryState) {
-//     return null;
-//   }
+/**
+ *
+ * @param {string} key
+ * @param {string} paramsHash
+ * @param {Object} [options]
+ * @param {'value'|'raw'|'join'} [options.format]
+ * @returns
+ */
+export const createSelectData = (
+  key,
+  paramsHash,
+  { format = 'value' } = {}
+) => {
+  const dataPath = getCachePathUsingHash(key, paramsHash);
 
-//   return {
-//     isLoading: queryState.isLoading,
-//     value: mapData(state, queryState.data),
-//     error: queryState.error,
-//     isInvalidated: queryState.isInvalidated,
-//   };
-// };
+  let prevDeps = [];
+  let prevRes = null;
+
+  // const selectRecur = () => {};
+  return (state) => {
+    const data = get(state, dataPath);
+
+    if (format === 'raw') {
+      // data as is
+      if (data !== prevRes) {
+        prevRes = data;
+        prevDeps = [];
+      }
+      return prevRes;
+    } else if (format === 'value') {
+      // if is normalized object => value instead of normalized object
+      let value = data;
+      if (isRefValue(data)) {
+        value = data.params;
+      } else if (isNormalizedArray(data)) {
+        value = data.value;
+      }
+
+      if (value !== prevRes) {
+        prevRes = value;
+        prevDeps = [];
+      }
+      return prevRes;
+    } else if (format === 'join') {
+      return data;
+    }
+
+    return null;
+  };
+};

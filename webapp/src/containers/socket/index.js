@@ -91,6 +91,7 @@ export const SocketGlobalListenerProvider = ({ children }) => {
         }
 
         if (!subscription.socketListener) {
+          // Actually add socket listener
           subscription.socketListener = (event) => {
             subscription.listeners.forEach((listener) => {
               listener.callback(event, { socket });

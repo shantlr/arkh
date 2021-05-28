@@ -11,8 +11,10 @@ import {
   useCommand,
   useCommandLogs,
   useExecCommand,
-  useRunnerAvailalble,
+  useRecentTask,
+  useRunnerAvailable,
   useStopCommand,
+  useSubscribeCommandTask,
   useUpdateCommand,
 } from 'hooks';
 import { map } from 'lodash-es';
@@ -50,7 +52,11 @@ const CommandLogs = ({ command }) => {
 
 export const CommandItem = ({ commandId }) => {
   const { isLoading, data: command } = useCommand(commandId);
-  const runnerAvailable = useRunnerAvailalble();
+  const tasks = useRecentTask(commandId);
+  console.log('tasks', tasks);
+
+  const runnerAvailable = useRunnerAvailable();
+  useSubscribeCommandTask(commandId);
 
   const toast = useToast();
   const [exec] = useExecCommand();
@@ -82,7 +88,7 @@ export const CommandItem = ({ commandId }) => {
           {command.state === 'stopped' && (
             <IconButton
               icon={faPlay}
-              disabled
+              disabled={!runnerAvailable}
               className="mr-3"
               onClick={() => {
                 exec(command.id, {

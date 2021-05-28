@@ -1,11 +1,11 @@
 export { cacheReducer } from './reducer';
-export { createCacheQuerySaga } from './saga';
+export { cacheSaga } from './saga';
 
 export * from './actions';
 export * from './selectors';
 
 export {
-  getQueryPath,
+  opNormalized,
   normalizedQueryArrayResult,
   normalizedQuerySingleResult,
 } from './utils';
