@@ -72,6 +72,12 @@ export const mapQueryData = (data) => {
   return data;
 };
 
+const createDataRef = (key, params) => ({
+  [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.REF,
+  key,
+  params,
+});
+
 export const opNormalized = ({
   key,
   itemKey,
@@ -100,17 +106,9 @@ export const normalizedQuerySingleResult = ({
   value,
   getId = (item) => item.id,
 }) => {
-  const res = [
-    {
-      path: getCachePath(key, getId(value)),
-      value,
-    },
-  ];
+  const res = [opBase(key, getId(value), value)];
   if (queryKey !== key) {
-    res.push({
-      path: getCachePath(queryKey, params),
-      value: opRef(key, getId(value)),
-    });
+    res.push(opRef(queryKey, params, key, getId(value)));
   }
   return res;
 };
@@ -130,21 +128,29 @@ export const normalizedQueryArrayResult = ({
         value: map(value, getId),
       },
     },
-    ...map(value, (item, index) => ({
-      path: getCachePath(itemKey, getId(item, index)),
-      value: item,
-    })),
+    ...map(value, (item, index) => opBase(itemKey, getId(item, index), item)),
   ];
 
   return results;
 };
 
-export const opRef = (key, id) => ({
-  [CACHE_FIELDS.DATA.TYPE]: CACHE_FIELDS.DATA.TYPES.REF,
-  key,
-  params: id,
+/**
+ *
+ * @param {string} key
+ * @param {any} params
+ * @returns
+ */
+export const opRef = (key, params, targetKey, targetParams) => ({
+  path: getCachePath(key, params),
+  value: createDataRef(targetKey, targetParams),
 });
 
+/**
+ * @param {string} key
+ * @param {any} params
+ * @param {any} value
+ * @returns
+ */
 export const opBase = (key, params, value) => ({
   path: getCachePath(key, params),
   value,

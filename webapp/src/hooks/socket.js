@@ -98,3 +98,24 @@ export const useSubscribeCommandTask = (commandId) => {
     },
   });
 };
+
+export const useSubscribeTaskLogs = (taskId, { skip = false } = {}) => {
+  const dataCache = useCacheAccessor();
+
+  useGlobalSocketSubscription({
+    key: `publish-task-logs:${taskId}`,
+    skip: skip || !taskId,
+    init: ({ socket }) => {
+      socket.emit('subscribe-task-logs', { taskId });
+    },
+    listener: (logs) => {
+      dataCache.dispatch('task-logs', {
+        taskId,
+        logs,
+      });
+    },
+    cleanup: ({ socket }) => {
+      socket.emit('unsubscribe-task-logs', { taskId });
+    },
+  });
+};

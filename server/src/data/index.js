@@ -47,6 +47,10 @@ Command.getById = async (id, { withTemplate = false } = {}) => {
     })
     .then(parseCommand);
 
+  if (!cmd) {
+    return null;
+  }
+
   if (withTemplate) {
     cmd.template = await CommandTemplate.getById(cmd.template_id);
   }
@@ -94,6 +98,38 @@ CommandTemplate.getByName = (name) =>
     })
     .then(parseTemplate);
 
+const parseTask = (task) => {
+  if (task) {
+    if (task.result) {
+      task.result = JSON.parse(task.result);
+    }
+  }
+  return task;
+};
 export const Task = (t = knex) => t('tasks');
+Task.getById = (id) =>
+  Task()
+    .select()
+    .first()
+    .where({
+      id,
+    })
+    .then(parseTask);
+Task.activeOf = (commandId) =>
+  Task()
+    .select()
+    .where({
+      command_id: commandId,
+      ended_at: null,
+    })
+    .then((r) => r.map(parseTask));
 
 export const TaskLog = (t = knex) => t('task_logs');
+TaskLog.getById = (id) =>
+  TaskLog().select().first().where({
+    id,
+  });
+TaskLog.ofTask = (taskId) =>
+  TaskLog().select().where({
+    task_id: taskId,
+  });

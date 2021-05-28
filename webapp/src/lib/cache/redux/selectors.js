@@ -22,6 +22,9 @@ export const mapData = (state, value) => {
 
   return value;
 };
+const selectActualRefData = (state, dataRef) => {
+  return get(state, getCachePath(dataRef.key, dataRef.params));
+};
 
 export const selectCacheMappedData = (state, path) => {
   const value = get(state, path);
@@ -55,19 +58,41 @@ export const createSelectData = (
   const dataPath = getCachePathUsingHash(key, paramsHash);
 
   let prevDeps = [];
-  let prevRes = null;
+  let prevValue = null;
 
-  // const selectRecur = () => {};
+  const selectJoin = (state, data) => {
+    const deps = [];
+    let resolvedData = data;
+
+    if (isRefValue(data)) {
+      resolvedData = selectActualRefData(state, data);
+      deps.push(resolvedData);
+    }
+
+    return [deps, resolvedData];
+  };
+
+  const isSameDeps = (deps, prevDeps) => {
+    if (deps.length !== prevDeps) {
+      return false;
+    }
+
+    return deps.some((depValue, index) => {
+      const prevDepValue = prevDeps[index];
+      return depValue === prevDepValue;
+    });
+  };
+
   return (state) => {
     const data = get(state, dataPath);
 
     if (format === 'raw') {
       // data as is
-      if (data !== prevRes) {
-        prevRes = data;
+      if (data !== prevValue) {
+        prevValue = data;
         prevDeps = [];
       }
-      return prevRes;
+      return prevValue;
     } else if (format === 'value') {
       // if is normalized object => value instead of normalized object
       let value = data;
@@ -77,13 +102,20 @@ export const createSelectData = (
         value = data.value;
       }
 
-      if (value !== prevRes) {
-        prevRes = value;
+      if (value !== prevValue) {
+        prevValue = value;
         prevDeps = [];
       }
-      return prevRes;
+      return prevValue;
     } else if (format === 'join') {
-      return data;
+      const [deps, value] = selectJoin(state, data);
+
+      if (value !== prevValue && !isSameDeps(deps, prevDeps)) {
+        prevDeps = deps;
+        prevValue = value;
+      }
+
+      return prevValue;
     }
 
     return null;

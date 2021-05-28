@@ -31,12 +31,11 @@ export const MESSAGES = {
     created: createBase('command-created'),
     updated: createBase('command-updated'),
     deleted: createBase('command-deleted'),
-    logs: createBase('command-logs'),
   },
   task: {
     created: createBase('task-created'),
-    updated: createBase('task-updated'),
-    deleted: createBase('task-deleted'),
+    ended: createBase('task-ended'),
+    logs: createBase('task-logs'),
   },
   template: {
     created: createBase('template-created'),

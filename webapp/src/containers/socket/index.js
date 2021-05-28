@@ -151,6 +151,7 @@ export const useSocketSubscription = () => useContext(SocketListenerContext);
  */
 export const useGlobalSocketSubscription = ({
   key,
+  skip = false,
   init,
   listener,
   cleanup,
@@ -158,12 +159,17 @@ export const useGlobalSocketSubscription = ({
   const subscription = useSocketSubscription();
 
   useEffect(() => {
-    subscription.listen(key, listener, {
+    if (skip) {
+      return;
+    }
+
+    const clean = subscription.listen(key, listener, {
       listenerKey: '@global',
       init,
       cleanup,
     });
-  }, [subscription]); // eslint-disable-line react-hooks/exhaustive-deps
+    return clean;
+  }, [key, skip, subscription]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return subscription;
 };

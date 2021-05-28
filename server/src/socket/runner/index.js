@@ -9,9 +9,10 @@ import { MESSAGES } from '../../pubsub';
  */
 export const setupRunnerSocket = (socket) => {
   MESSAGES.runner.connected.publish(socket.id);
-  console.log('connect');
+  debug('runner connected');
 
   socket.on('disconnect', () => {
+    debug('runner disconnected');
     MESSAGES.runner.disconnected.publish(socket.id);
   });
 
@@ -22,22 +23,22 @@ export const setupRunnerSocket = (socket) => {
     });
   });
 
-  socket.on('get-command', async (cmdId, cb) => {
-    cb(await Command.getById(cmdId, { withTemplate: true }));
+  socket.on('get-command', async (cmdId, reply) => {
+    reply(await Command.getById(cmdId, { withTemplate: true }));
   });
 
   socket.on('task-started', async (start) => {
     try {
       debug(`task '${start.id}' started`);
-      const [task] = await Task()
-        .insert({
-          id: start.id,
-          command_id: start.command_id,
-          created_at: new Date(),
-          updated_at: new Date(),
-          started_at: start.date,
-        })
-        .returning('*');
+      await Task().insert({
+        id: start.id,
+        command_id: start.command_id,
+        created_at: new Date(),
+        updated_at: new Date(),
+        started_at: start.date,
+      });
+
+      const task = await Task.getById(start.id);
       MESSAGES.task.created.publish(task);
     } catch (err) {
       console.error(err);
@@ -47,7 +48,7 @@ export const setupRunnerSocket = (socket) => {
     await Task()
       .update({
         updated_at: new Date(),
-        result: stopped.result,
+        result: JSON.stringify(stopped.result),
         ended_at: stopped.date,
       })
       .where({
@@ -56,7 +57,7 @@ export const setupRunnerSocket = (socket) => {
       });
 
     const task = await Task.getById(stopped.id);
-    MESSAGES.task.updated.publish(task);
+    MESSAGES.task.ended.publish(task);
     debug(`task '${stopped.id}' stopped`);
   });
   socket.on('task-log', async ({ id, log }) => {
@@ -67,6 +68,8 @@ export const setupRunnerSocket = (socket) => {
       level: log.level,
       date: log.date,
     });
+    const createdLog = await TaskLog.getById(log.id);
+    MESSAGES.task.logs.publish(createdLog);
     debug(`task '${id}' log`);
   });
 };

@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import { Task, TaskLog } from '../../data';
 import { MESSAGES } from '../../pubsub';
 import { CLIENT_PUBLISH, CLIENT_ROOMS } from './constants';
 
@@ -25,6 +26,31 @@ export const setupClientSubscription = async ({ io }) => {
       type: 'updated',
       command: cmd,
     });
+  });
+
+  MESSAGES.task.created.subscribe((task) => {
+    io.in(CLIENT_ROOMS.commandTasks(task.command_id)).emit(
+      CLIENT_PUBLISH.commandTask(task.command_id),
+      {
+        type: 'created',
+        task,
+      }
+    );
+  });
+  MESSAGES.task.ended.subscribe((task) => {
+    io.in(CLIENT_ROOMS.commandTasks(task.command_id)).emit(
+      CLIENT_PUBLISH.commandTask(task.command_id),
+      {
+        type: 'ended',
+        task,
+      }
+    );
+  });
+  MESSAGES.task.logs.subscribe((log) => {
+    io.in(CLIENT_ROOMS.taskLogs(log.task_id)).emit(
+      CLIENT_PUBLISH.taskLogs(log.task_id),
+      [log]
+    );
   });
 
   MESSAGES.runner.connected.subscribe(() => {
@@ -69,10 +95,24 @@ export const setupClientSocket = ({ io, socket }) => {
     socket.leave(CLIENT_ROOMS.runnerAvailable);
   });
 
-  socket.on('subscribe-command-logs', ({ commandId }) => {
-    socket.join(CLIENT_ROOMS.commandLog(commandId));
+  socket.on('subscribe-command-tasks', async ({ commandId }) => {
+    socket.join(CLIENT_ROOMS.commandTasks(commandId));
+    const tasks = await Task.activeOf(commandId);
+    tasks.forEach((task) => {
+      socket.emit(CLIENT_PUBLISH.commandTask(commandId), task);
+    });
   });
-  socket.on('unsubscribe-command-logs', ({ commandId }) => {
-    socket.leave(CLIENT_ROOMS.commandLog(commandId));
+  socket.on('unsubscribe-command-tasks', ({ commandId }) => {
+    socket.leave(CLIENT_ROOMS.commandTasks(commandId));
+  });
+
+  socket.on('subscribe-task-logs', async ({ taskId }) => {
+    console.log('SUB');
+    socket.join(CLIENT_ROOMS.taskLogs(taskId));
+    const logs = await TaskLog.ofTask(taskId);
+    socket.emit(CLIENT_PUBLISH.taskLogs(taskId), logs);
+  });
+  socket.on('unsubscribe-task-logs', ({ taskId }) => {
+    socket.leave(CLIENT_ROOMS.taskLogs(taskId));
   });
 };

@@ -77,40 +77,21 @@ export const useCacheAccessor = () => {
   );
 };
 
-export const useCacheValue = (key, params, { withMappedData = false } = {}) => {
+/**
+ *
+ * @param {string} key
+ * @param {any} params
+ * @param {Object} [option]
+ * @param {'value'|'raw'|'join'} [option.format]
+ * @returns
+ */
+export const useCacheValue = (key, params, { format = 'value' } = {}) => {
   const paramsHash = useMemo(() => hashParams(params), [params]);
 
   const selectData = useMemo(
-    () => createSelectData(key, paramsHash, { mapData: withMappedData }),
-    [key, paramsHash, withMappedData]
+    () => createSelectData(key, paramsHash, { format }),
+    [key, paramsHash, format]
   );
-  // const selectData = useMemo(
-  //   () =>
-  //     createSelector(
-  //       (state) => get(state, getCachePathUsingHash(key, paramsHash)),
-  //       (state) => {
-  //         if (!withMappedData) {
-  //           return null;
-  //         }
-  //         const data = get(
-  //           state,
-  //           getQueryPathUsingHash(key, paramsHash, 'data')
-  //         );
-  //         if (isRefValue(data)) {
-  //           return get(state, getCachePath(data.key, data.params));
-  //         }
-  //         if (isNormalizedArray(data)) {
-  //           return data.value.map((params) =>
-  //             get(state, getCachePath(data.itemKey, params))
-  //           );
-  //         }
-  //       },
-  //       (data, deps) => {
-  //         return data;
-  //       }
-  //     ),
-  //   [key, paramsHash, withMappedData]
-  // );
 
   return useSelector(selectData);
 };
@@ -200,7 +181,9 @@ export const useMutation = (key, fetcher, callbacks) => {
             p = computed[1];
           }
 
-          dataCache.updateKey(k, p, result);
+          if (k !== null) {
+            dataCache.updateKey(k, p, result);
+          }
           dispatchLocal({
             type: 'SUCCESS',
           });

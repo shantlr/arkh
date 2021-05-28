@@ -1,6 +1,6 @@
 import { composeReducer, initState } from 'compose-reducer';
-import { cacheReducer, opNormalized } from 'lib/cache';
-import { opBase, opRef } from 'lib/cache/redux/utils';
+import { cacheReducer } from 'lib/cache';
+import { opBase, opNormalized, opRef } from 'lib/cache/redux/utils';
 
 export const reducer = composeReducer(
   initState({
@@ -10,27 +10,27 @@ export const reducer = composeReducer(
     reducers: {
       'command-task': (dataAccessor, { type, task }) => {
         if (type === 'created') {
-          const tasks =
-            dataAccessor.get('command-tasks', task.command_id) || [];
+          // const tasks =
+          //   dataAccessor.get('command-tasks', task.command_id) || [];
 
           dataAccessor.update(
             opNormalized({
               key: 'command-tasks',
-              itemKey: 'task',
               params: task.command_id,
+              itemKey: 'task',
               value: [task],
             })
           );
-          dataAccessor.update(
-            opBase('command-last-task', task.command_id, opRef('task', task.id))
-          );
 
-          // dataAccessor.update();
-          // console.log(tasks);
+          dataAccessor.update(
+            opRef('command-last-task', task.command_id, 'task', task.id)
+          );
         } else if (type === 'ended') {
-          dataAccessor.update();
+          dataAccessor.update(opBase('task', task.id, task));
         }
-        console.log(dataAccessor, type, task);
+      },
+      'task-logs': (dataAccessor, { taskId, logs }) => {
+        dataAccessor.update(opBase('task-logs', taskId, logs));
       },
     },
   })

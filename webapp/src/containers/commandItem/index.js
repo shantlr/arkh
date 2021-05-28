@@ -3,57 +3,54 @@ import { useToast } from '@chakra-ui/toast';
 import { faCog, faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+
 import { Card } from 'components/display/card';
 import { IconButton } from 'components/entry/iconButton';
 import { CommandForm } from 'containers/commandForm';
 import { CommandFormatted } from 'containers/commandFormatted';
 import {
   useCommand,
-  useCommandLogs,
   useExecCommand,
-  useRecentTask,
   useRunnerAvailable,
   useStopCommand,
   useSubscribeCommandTask,
   useUpdateCommand,
 } from 'hooks';
-import { map } from 'lodash-es';
 import { useState } from 'react';
+import { CommandLastTask } from './commandLastTask';
 
-const CommandLogs = ({ command }) => {
-  const logs = useCommandLogs(command.id);
+// const CommandLogs = ({ command }) => {
+//   const logs = useCommandLogs(command.id);
 
-  return (
-    <table
-      className="bg-black text-sm overflow-auto p-1 w-full"
-      style={{ maxHeight: 400 }}
-    >
-      <tbody>
-        {map(logs, (log) => (
-          <tr key={log.offset}>
-            <td
-              className="text-gray-400 select-none text-right"
-              style={{ minWidth: 40 }}
-            >
-              {log.offset} |
-            </td>
-            <td>
-              <span className="text-purple-600">{log.date}</span>{' '}
-              <span className="text-gray-300 whitespace-pre-wrap">
-                {log.msg}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
+//   return (
+//     <table
+//       className="bg-black text-sm overflow-auto p-1 w-full"
+//       style={{ maxHeight: 400 }}
+//     >
+//       <tbody>
+//         {map(logs, (log) => (
+//           <tr key={log.offset}>
+//             <td
+//               className="text-gray-400 select-none text-right"
+//               style={{ minWidth: 40 }}
+//             >
+//               {log.offset} |
+//             </td>
+//             <td>
+//               <span className="text-purple-600">{log.date}</span>{' '}
+//               <span className="text-gray-300 whitespace-pre-wrap">
+//                 {log.msg}
+//               </span>
+//             </td>
+//           </tr>
+//         ))}
+//       </tbody>
+//     </table>
+//   );
+// };
 
 export const CommandItem = ({ commandId }) => {
   const { isLoading, data: command } = useCommand(commandId);
-  const tasks = useRecentTask(commandId);
-  console.log('tasks', tasks);
 
   const runnerAvailable = useRunnerAvailable();
   useSubscribeCommandTask(commandId);
@@ -172,7 +169,8 @@ export const CommandItem = ({ commandId }) => {
           }}
         />
       )}
-      {command.state === 'running' && <CommandLogs command={command} />}
+
+      <CommandLastTask className="mt-1" commandId={commandId} />
     </Card>
   );
 };
