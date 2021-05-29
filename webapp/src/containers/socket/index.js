@@ -36,6 +36,27 @@ export const SocketProvider = ({ children }) => {
 export const useSocket = () => {
   return useContext(SocketContext);
 };
+export const useSocketIsConnected = () => {
+  const socket = useSocket();
+  const [isConnected, setIsConnected] = useState(() => socket.connected);
+
+  useEffect(() => {
+    if (!socket) {
+      setIsConnected(false);
+      return;
+    }
+
+    setIsConnected(socket.connected);
+    socket.on('connected', () => {
+      setIsConnected(true);
+    });
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
+  }, [socket]);
+
+  return isConnected;
+};
 
 const SocketListenerContext = React.createContext();
 export const SocketGlobalListenerProvider = ({ children }) => {
