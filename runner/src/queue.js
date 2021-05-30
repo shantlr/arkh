@@ -1,53 +1,33 @@
-import Queue from 'queue';
-import { getCommand, getTask, startTask } from './data';
-import { debug } from './debug';
+import { startTask, stopTask } from './data';
+import { QueueManager } from './lib/queue';
 
-const cmdQueues = new Map();
-
-/**
- *
- * @param {string} commandId
- * @returns {Queue}
- */
-export const getCommandQueue = (commandId) => {
-  if (!cmdQueues.has(commandId)) {
-    const queue = new Queue({
-      autostart: true,
-    });
-    cmdQueues.set(commandId, queue);
+export const commandTaskQueue = new QueueManager(
+  async ({ data: { type, task } }) => {
+    if (type === 'exec') {
+      startTask(task);
+    } else if (type === 'stop') {
+      stopTask(task);
+    }
   }
-  return cmdQueues.get(commandId);
+);
+
+export const pushCommandTaskJob = (commandId, job) => {
+  commandTaskQueue.push(commandId, job);
 };
 
 export const CMD_JOBS = {
-  getAndExec({ cmdId }) {
-    return () => {};
-  },
-  exec({ socket, cmdId }) {
-    return () => {
-      const cmd = getCommand(cmdId);
-      if (!cmd) {
-        debug(`Command ${cmdId} not found`);
-        return;
-      }
-
-      const existingTask = getTask(cmdId);
-      if (existingTask) {
-        debug(`Command ${cmd.name} task already ongoing`);
-        return;
-      }
-
-      startTask({ socket, cmd });
-    };
-  },
-  stop({ cmdId }) {
-    return () => {
-      const cmd = getCommand(cmdId);
-      if (!cmd) {
-        debug(`[stop] Command ${cmdId} not found`);
-        return;
-      }
-      cmd.process.kill('SIGTERM');
-    };
-  },
+  exec: (task) => ({
+    id: `${task.id}:exec`,
+    data: {
+      type: 'exec',
+      task,
+    },
+  }),
+  stop: (task) => ({
+    id: `${task.id}:stop`,
+    data: {
+      type: 'stop',
+      task,
+    },
+  }),
 };

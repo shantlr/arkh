@@ -2,9 +2,10 @@ import { Router } from 'express';
 import { nanoid } from 'nanoid';
 import { Server } from 'socket.io';
 
-import { Command, CommandTemplate, NAME_REGEX } from '../data';
+import { Command, CommandTemplate, NAME_REGEX, Task } from '../data';
 import { sortBy } from 'lodash';
 import { MESSAGES } from '../pubsub';
+import { CLIENT_PUBLISH, CLIENT_ROOMS } from '../socket/client/constants';
 /**
  *
  * @param {{ io: Server }} input
@@ -112,11 +113,27 @@ export const createApiCommandRouter = ({ io }) => {
       return res.status(422).send('Invalid command');
     }
 
-    io.of('runner').emit('command-exec', id);
+    const taskId = nanoid();
+    await Task().insert({
+      id: taskId,
+      command_id: id,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    const task = await Task.getById(taskId);
+    io.of('runner').emit('command-exec', {
+      id: taskId,
+      command_id: id,
+    });
+    io.in(CLIENT_ROOMS.commandTasks(id)).emit(
+      CLIENT_PUBLISH.commandTask(id),
+      task
+    );
 
     return res.status(200).send('');
   });
-  router.post('/commands/:id/stop', async (req, res) => {
+  router.post('/tasks/:id/stop', async (req, res) => {
     const { id } = req.params;
 
     const command = await Command.getById(id);
@@ -124,7 +141,8 @@ export const createApiCommandRouter = ({ io }) => {
       return res.status(422).send('Invalid command');
     }
 
-    io.of('runner').send('command-stop', id);
+    const task = await Task.getById(id);
+    io.of('runner').send('command-stop', task);
 
     return res.status(200).send('');
   });

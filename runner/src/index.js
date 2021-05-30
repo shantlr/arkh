@@ -2,11 +2,12 @@ import { io } from 'socket.io-client';
 
 import { debug } from './debug';
 import { deleteCommand, getCommand, setCommand } from './data';
-import { CMD_JOBS, getCommandQueue } from './queue';
+import { CMD_JOBS, commandTaskQueue, pushCommandTaskJob } from './queue';
 
 const socket = io('ws://localhost:3005/runner', {
   path: '/socket',
 });
+export const getSocket = () => socket;
 
 socket.on('connect', () => {
   debug('connected');
@@ -37,29 +38,27 @@ socket.on('remove-command', (cmdId) => {
   }
 });
 
-socket.on('command-exec', (cmdId) => {
-  const cmd = getCommand(cmdId);
-  const queue = getCommandQueue(cmdId);
-
-  if (!cmd) {
-    debug(`command-exec '${cmdId}' not found. push get-and-exec`);
-    queue.push(CMD_JOBS.getAndExec({ socket, cmdId }));
-  } else {
-    debug(`command-exec '${cmdId}' push exec`);
-    queue.push(CMD_JOBS.exec({ socket, cmdId }));
-  }
+socket.on('command-exec', (task) => {
+  debug(`command-exec '${task.command_id}' push exec`);
+  pushCommandTaskJob(
+    task.command_id,
+    CMD_JOBS.exec({
+      id: task.id,
+      command_id: task.command_id,
+    })
+  );
 });
-socket.on('command-stop', (cmdId) => {
-  const cmd = getCommand(cmdId);
-  if (!cmd) {
-    debug(`command`);
-    return;
-  }
-
-  const queue = getCommandQueue(cmdId);
-  debug(`command-stop '${cmdId}' push stop`);
-  queue.push(CMD_JOBS.stop({ socket, cmdId }));
+socket.on('command-stop', (task) => {
+  pushCommandTaskJob(
+    task.command_id,
+    CMD_JOBS.stop({
+      id: task.id,
+    })
+  );
 });
+
+// START QUEUES
+commandTaskQueue.start();
 
 process.once('SIGUSR2', () => {
   socket.close();

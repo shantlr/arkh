@@ -107,7 +107,6 @@ export const setupClientSocket = ({ io, socket }) => {
   });
 
   socket.on('subscribe-task-logs', async ({ taskId }) => {
-    console.log('SUB');
     socket.join(CLIENT_ROOMS.taskLogs(taskId));
     const logs = await TaskLog.ofTask(taskId);
     socket.emit(CLIENT_PUBLISH.taskLogs(taskId), logs);

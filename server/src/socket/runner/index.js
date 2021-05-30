@@ -27,38 +27,39 @@ export const setupRunnerSocket = (socket) => {
     reply(await Command.getById(cmdId, { withTemplate: true }));
   });
 
-  socket.on('task-started', async (start) => {
+  socket.on('task-started', async ({ id: taskId, started_at: date }) => {
     try {
-      debug(`task '${start.id}' started`);
-      await Task().insert({
-        id: start.id,
-        command_id: start.command_id,
-        created_at: new Date(),
-        updated_at: new Date(),
-        started_at: start.date,
-      });
+      debug(`task '${taskId}' started`);
+      await Task()
+        .update({
+          started_at: date,
+        })
+        .where({
+          id: taskId,
+          started_at: null,
+        });
 
-      const task = await Task.getById(start.id);
+      const task = await Task.getById(taskId);
       MESSAGES.task.created.publish(task);
     } catch (err) {
       console.error(err);
     }
   });
-  socket.on('task-stopped', async (stopped) => {
+  socket.on('task-stopped', async ({ id: taskId, result, ended_at: date }) => {
     await Task()
       .update({
         updated_at: new Date(),
-        result: JSON.stringify(stopped.result),
-        ended_at: stopped.date,
+        result: JSON.stringify(result),
+        ended_at: date,
       })
       .where({
-        id: stopped.id,
+        id: taskId,
         ended_at: null,
       });
 
-    const task = await Task.getById(stopped.id);
+    const task = await Task.getById(taskId);
     MESSAGES.task.ended.publish(task);
-    debug(`task '${stopped.id}' stopped`);
+    debug(`task '${taskId}' stopped`);
   });
   socket.on('task-log', async ({ id, log }) => {
     await TaskLog().insert({

@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import { spawn } from 'child_process';
 import path from 'path';
 import { debug } from '../debug';
+import { getSocket } from '..';
 
 const COMMANDS = {};
 
@@ -17,15 +18,16 @@ export const deleteCommand = (cmdId) => {
 };
 
 const TASKS = {};
-export const getTask = (cmdId) => {
-  return TASKS[cmdId];
+export const getTask = (taskId) => {
+  return TASKS[taskId];
 };
-export const startTask = ({ socket, cmd }) => {
-  if (TASKS[cmd.id]) {
-    throw new Error(
-      `Task already existing for command ${cmd.name} (${cmd.id})`
-    );
+export const startTask = (task) => {
+  if (TASKS[task.id]) {
+    debug(`task already started '${task.id}'`);
+    return;
   }
+
+  const cmd = getCommand(task.command_id);
 
   const bin = cmd.template.bin;
   const args = cmd.template.args.map((arg) => {
@@ -38,21 +40,23 @@ export const startTask = ({ socket, cmd }) => {
     return null;
   });
 
-  const task = {
-    id: nanoid(),
+  const taskState = {
+    id: task.id,
     process: spawn(bin, args, {
       cwd: cmd.path && cmd.path.length > 0 ? path.resolve(cmd.path) : null,
     }),
+    started_at: new Date(),
   };
+
+  const socket = getSocket();
 
   socket.emit('task-started', {
     id: task.id,
-    command_id: cmd.id,
-    date: new Date(),
+    started_at: taskState.started_at,
   });
   debug(`start task '${task.id}' of command '${cmd.name}' (${cmd.id})`);
 
-  task.process.stdout.on('data', (l) => {
+  taskState.process.stdout.on('data', (l) => {
     const log = {
       id: nanoid(),
       task_id: task.id,
@@ -65,7 +69,7 @@ export const startTask = ({ socket, cmd }) => {
       log,
     });
   });
-  task.process.stderr.on('data', (l) => {
+  taskState.process.stderr.on('data', (l) => {
     const log = {
       id: nanoid(),
       task_id: task.id,
@@ -78,20 +82,38 @@ export const startTask = ({ socket, cmd }) => {
       log,
     });
   });
-  task.process.on('close', (code, signal) => {
+
+  taskState.process.on('close', (code, signal) => {
     debug(
       `end of task '${task.id}' of command '${cmd.name}' (${cmd.id}): ${code} (${signal})`
     );
-    delete TASKS[cmd.id];
-    socket.emit('task-stopped', {
-      id: task.id,
-      result: {
-        code,
-        signal,
+    socket.emit(
+      'task-stopped',
+      {
+        id: task.id,
+        result: {
+          code,
+          signal,
+        },
+        ended_at: new Date(),
       },
-      date: new Date(),
-    });
+      () => {
+        // Clean when
+        delete TASKS[task.id];
+        debug(`task '${task.id}' cleaned`);
+      }
+    );
   });
 
-  TASKS[cmd.id] = task;
+  TASKS[task.id] = taskState;
+};
+
+export const stopTask = (task) => {
+  const taskState = getTask(task.id);
+  if (!taskState) {
+    debug(`task '${task.id}' not started or already cleaned`);
+    return;
+  }
+
+  taskState.process.kill('SIGTERM');
 };

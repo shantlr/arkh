@@ -47,7 +47,7 @@ export const useSocketIsConnected = () => {
     }
 
     setIsConnected(socket.connected);
-    socket.on('connected', () => {
+    socket.on('connect', () => {
       setIsConnected(true);
     });
     socket.on('disconnect', () => {

@@ -10,7 +10,7 @@ exports.up = function (knex) {
         created_at timestamptz NOT NULL,
         updated_at timestamptz NOT NULL,
 
-        started_at timestampts NOT NULL,
+        started_at timestamptz,
         ended_at timestamptz
       );
     `);
