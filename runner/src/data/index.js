@@ -83,6 +83,11 @@ export const startTask = (task) => {
     });
   });
 
+  taskState.process.on('error', (err) => {
+    debug(
+      `task '${task.id}' of command '${cmd.name}' (${cmd.id}) failed: ${err.message}`
+    );
+  });
   taskState.process.on('close', (code, signal) => {
     debug(
       `end of task '${task.id}' of command '${cmd.name}' (${cmd.id}): ${code} (${signal})`
