@@ -41,6 +41,8 @@ export const selectQueryIsLoading = (state, key, params) => {
 
 export const selectCacheValue = (state, key, params) =>
   get(state, getCachePath(key, params));
+export const selectQueryState = (state, key, params) =>
+  get(state, getQueryStatePath(key, params));
 
 /**
  *

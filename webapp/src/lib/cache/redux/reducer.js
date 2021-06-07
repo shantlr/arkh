@@ -18,7 +18,7 @@ import {
   CACHE_UPDATE,
   CACHE_REDUCER_ACTION,
 } from './actions';
-import { selectCacheValue } from './selectors';
+import { selectCacheValue, selectQueryState } from './selectors';
 import { getQueryStatePath } from './utils';
 
 const callWithAction = (trackingState, reducer, action) => {
@@ -112,10 +112,10 @@ export const cacheReducer = ({ reducers = {} } = {}) => {
           const state = trackingState.nextState;
           return selectCacheValue(state, key, params);
         },
-        // getQuery(key, params) {
-        //   const state = trackingState.nextState;
-        //   return selectQueryValue(state, key, params);
-        // },
+        getQueryState(key, params) {
+          const state = trackingState.nextState;
+          return selectQueryState(state, key, params);
+        },
         update(ops) {
           if (Array.isArray(ops)) {
             ops.forEach((op) => {

@@ -9,7 +9,7 @@ import { useCommands, useCreateCommand, useSubscribeCommands } from 'hooks';
 import { map } from 'lodash';
 import { useState } from 'react';
 
-export const CommandList = () => {
+export const CommandList = ({ selectedCommandId, onSelect }) => {
   const [showCreate, setShowCreate] = useState(false);
   const toast = useToast();
 
@@ -59,7 +59,12 @@ export const CommandList = () => {
         </div>
       )}
       {map(data, (commandId) => (
-        <CommandItem key={commandId} commandId={commandId} />
+        <CommandItem
+          key={commandId}
+          commandId={commandId}
+          selected={selectedCommandId === commandId}
+          onClick={() => onSelect(commandId)}
+        />
       ))}
     </div>
   );

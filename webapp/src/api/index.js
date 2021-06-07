@@ -71,6 +71,13 @@ export const API = {
       });
     },
   },
+  tasks: {
+    list: (commandId) => {
+      return fetch(`${BASE_URL}/commands/${commandId}/tasks`).then((r) =>
+        r.json()
+      );
+    },
+  },
   template: {
     list: () => fetch(`${BASE_URL}/templates`).then((r) => r.json()),
     create: (template) => {

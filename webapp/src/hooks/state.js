@@ -41,12 +41,20 @@ export const useCommand = (id) =>
     withOptimistic: true,
   });
 
+export const useCommandTasks = (commandId) => {
+  return useQuery({
+    key: 'command-tasks',
+    params: commandId,
+  });
+};
 export const useCommandLastTask = (commandId) => {
   return useCacheValue('command-last-task', commandId, { format: 'join' });
 };
 export const useRecentTask = (commandId) => {
   return useCacheValue('command-tasks', commandId);
 };
+
+export const useTask = (taskId) => useCacheValue('task', taskId);
 export const useTaskLogs = (taskId) => useCacheValue('task-logs', taskId);
 
 export const useCommands = () =>

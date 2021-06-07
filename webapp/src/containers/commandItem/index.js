@@ -1,6 +1,6 @@
 import { Spinner } from '@chakra-ui/spinner';
 import { useToast } from '@chakra-ui/toast';
-import { faCog, faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 
@@ -49,7 +49,7 @@ import { CommandLastTask } from './commandLastTask';
 //   );
 // };
 
-export const CommandItem = ({ commandId }) => {
+export const CommandItem = ({ commandId, selected, onClick }) => {
   const { isLoading, data: command } = useCommand(commandId);
 
   const runnerAvailable = useRunnerAvailable();
@@ -71,7 +71,11 @@ export const CommandItem = ({ commandId }) => {
   }
 
   return (
-    <Card colorScheme={command.state === 'running' ? 'green' : 'default'}>
+    <Card
+      colorScheme={selected ? 'green' : 'default'}
+      className="cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex justify-between">
         <div>
           {command.name}
@@ -82,27 +86,28 @@ export const CommandItem = ({ commandId }) => {
           />
         </div>
         <div>
-          {command.state === 'stopped' && (
-            <IconButton
-              icon={faPlay}
-              disabled={!runnerAvailable}
-              className="mr-3"
-              onClick={() => {
-                exec(command.id, {
-                  onError: (err) => {
-                    toast({
-                      position: 'top-right',
-                      title: `Could not exec '${command.name}'`,
-                      description: err.message,
-                      status: 'error',
-                      isClosable: true,
-                    });
-                  },
-                });
-              }}
-            />
-          )}
-          {command.state === 'running' && (
+          {/* {command.state === 'stopped' && ( */}
+          <IconButton
+            icon={faPlay}
+            disabled={!runnerAvailable}
+            className="mr-3"
+            onClick={(e) => {
+              e.stopPropagation();
+              exec(command.id, {
+                onError: (err) => {
+                  toast({
+                    position: 'top-right',
+                    title: `Could not exec '${command.name}'`,
+                    description: err.message,
+                    status: 'error',
+                    isClosable: true,
+                  });
+                },
+              });
+            }}
+          />
+          {/* )} */}
+          {/* {command.state === 'running' && (
             <FontAwesomeIcon
               className="mr-3 cursor-pointer hover:text-red-500"
               icon={faPause}
@@ -120,7 +125,7 @@ export const CommandItem = ({ commandId }) => {
                 });
               }}
             />
-          )}
+          )} */}
           <FontAwesomeIcon
             className={classNames(
               command.state !== 'running'
@@ -128,7 +133,7 @@ export const CommandItem = ({ commandId }) => {
                 : 'text-gray-200'
             )}
             icon={faCog}
-            onClick={() => {
+            onClick={(e) => {
               if (command.state === 'running') {
                 return;
               }

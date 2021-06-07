@@ -5,10 +5,13 @@ import dayjs from 'dayjs';
 import { useCommandLastTask, useSubscribeTaskLogs, useTaskLogs } from 'hooks';
 import { useState } from 'react';
 
-const Date = ({ task }) => {
+const Title = ({ task }) => {
   if (task.ended_at) {
     return (
-      <span>Ended at {dayjs(task.ended_at).format('DD/MM/YYYY HH:mm:ss')}</span>
+      <span>
+        Ended at {dayjs(task.ended_at).format('DD/MM/YYYY HH:mm:ss')} (
+        {task.result.code})
+      </span>
     );
   }
 
@@ -23,12 +26,12 @@ const Date = ({ task }) => {
   return null;
 };
 
-const CommandLogs = ({ taskId }) => {
+const CommandLogs = ({ className, taskId }) => {
   useSubscribeTaskLogs(taskId);
   const logs = useTaskLogs(taskId);
 
   return (
-    <div className="text-white bg-black p-1">
+    <div className={classNames('text-white bg-black p-1', className)}>
       {Boolean(logs) &&
         logs.map((log) => (
           <div key={log.id} className="whitespace-pre">
@@ -52,12 +55,12 @@ export const CommandLastTask = ({ className, commandId }) => {
       <div
         onClick={() => setShowLogs(!showLogs)}
         className={classNames('cursor-pointer border-l-4 rounded pl-1', {
-          'border-blue-300': !lastTask.result,
-          'border-green-300': lastTask.result && lastTask.result.code === 0,
-          'border-red-300': lastTask.result && lastTask.result.code !== 0,
+          'border-blue-500': !lastTask.result,
+          'border-green-500': lastTask.result && lastTask.result.code === 0,
+          'border-red-500': lastTask.result && lastTask.result.code !== 0,
         })}
       >
-        <Date task={lastTask} />
+        <Title task={lastTask} />
         <FontAwesomeIcon
           className={classNames('ml-2 transition', {
             'transform rotate-180': !showLogs,
@@ -66,7 +69,7 @@ export const CommandLastTask = ({ className, commandId }) => {
         />
       </div>
 
-      {showLogs && <CommandLogs taskId={lastTask.id} />}
+      {showLogs && <CommandLogs className="mt-1" taskId={lastTask.id} />}
     </div>
   );
 };

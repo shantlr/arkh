@@ -64,7 +64,6 @@ export const createApiCommandRouter = ({ io }) => {
 
     return res.status(200).send({
       ...command,
-      state: 'stopped',
     });
   });
 
@@ -133,6 +132,13 @@ export const createApiCommandRouter = ({ io }) => {
 
     return res.status(200).send('');
   });
+
+  router.get('/commands/:id/tasks', async (req, res) => {
+    const { id } = req.params;
+    const tasks = await Task.ofCommand(id);
+    return res.status(200).send(tasks);
+  });
+
   router.post('/tasks/:id/stop', async (req, res) => {
     const { id } = req.params;
 

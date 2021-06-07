@@ -38,6 +38,18 @@ const handlers = {
         value: r,
       })
     ),
+
+  'command-tasks': async ({ key, params: commandId }) => {
+    return API.tasks.list(commandId).then((r) =>
+      normalizedQueryArrayResult({
+        key,
+        params: commandId,
+        itemKey: 'task',
+        value: r,
+      })
+    );
+  },
+
   runners: async ({ key }) =>
     API.runner.list().then((r) =>
       normalizedQueryArrayResult({

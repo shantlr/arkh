@@ -115,6 +115,15 @@ Task.getById = (id) =>
       id,
     })
     .then(parseTask);
+
+Task.ofCommand = (commandId) =>
+  Task()
+    .select()
+    .where({
+      command_id: commandId,
+    })
+    .orderBy('ended_at', 'desc')
+    .then((r) => r.map(parseTask));
 Task.activeOf = (commandId) =>
   Task()
     .select()
