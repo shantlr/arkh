@@ -1,2 +1,8 @@
 node_modules/
 dist/
+
+.vscode-server/
+.cache/
+.config/
+.yarn/
+.ash_history

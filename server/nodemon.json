@@ -1,8 +1,0 @@
-{
-  "restartable": "rs",
-  "verbose": false,
-  "delay": 1000,
-  "extension": ".js,.gql",
-  "watch": ["./src", ".env"],
-  "signal": "SIGUSR2"
-}

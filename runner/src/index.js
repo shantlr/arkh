@@ -3,14 +3,19 @@ import { io } from 'socket.io-client';
 import { debug } from './debug';
 import { deleteCommand, getCommand, setCommand } from './data';
 import { CMD_JOBS, commandTaskQueue, pushCommandTaskJob } from './queue';
+import { config } from './config';
 
-const socket = io('ws://localhost:3005/runner', {
+debug(`Connecting to metro server at ${config.get('server.url')}/runner`);
+const socket = io(`${config.get('server.url')}/runner`, {
   path: '/socket',
 });
 export const getSocket = () => socket;
 
 socket.on('connect', () => {
   debug('connected');
+});
+socket.on('connect_error', (err) => {
+  debug('connect_error', err.message);
 });
 socket.on('disconnect', (reason) => {
   if (reason === 'io server disconnect') {
