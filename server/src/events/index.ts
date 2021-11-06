@@ -1,5 +1,5 @@
 import { EventQueue } from '../lib/queue';
-import { loadQueue } from './consumers/loadConfig';
+import { loadQueue } from './consumers/load';
 import { serviceQueue } from './consumers/service';
 import { stackQueue } from './consumers/stack';
 

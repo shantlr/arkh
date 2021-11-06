@@ -1,7 +1,7 @@
 export type ServiceConfig = {
   path?: string;
-  env?: Record<string, string | number | boolean>;
-  cmd: string;
+  env?: Record<string, string>;
+  cmd: string[];
 };
 
 export type StackConfig = {
