@@ -1,77 +1,65 @@
-// @ts-ignore
-import Loki from 'lokijs';
-import LokiFsStructuredAdapter from 'lokijs/src/loki-fs-structured-adapter';
+import { MetroConfig, ServiceConfig, StackConfig } from 'src/events/types';
+import { createCollectionAccessor } from 'src/lib/db';
+import { knex } from './knex';
 
-import { config } from 'src/config';
-import { ServiceConfig, StackConfig } from 'src/events/types';
+export { doMigrations } from './knex';
 
-const adapter = new LokiFsStructuredAdapter();
-export const db = new Loki(config.get('loki.path'), {
-  adapter,
-  autosave: true,
-  autoload: true,
+export const Config = createCollectionAccessor<{
+  spec: MetroConfig;
+}>({
+  name: 'configs',
+  knex,
+  mapDoc(doc) {
+    return {
+      ...doc,
+      spec: JSON.parse(doc.spec),
+    };
+  },
+  serializeDoc(doc) {
+    const a: any = doc;
+    if (doc.spec) {
+      a.spec = JSON.stringify(doc.spec);
+    }
+    return a;
+  },
 });
-
-export type EntityType = 'config' | 'stack' | 'service';
-
-export type IEntity<T = any, U = any> = {
+export const Stack = createCollectionAccessor<{
+  spec: StackConfig;
+  to_remove?: boolean;
+}>({
+  name: 'stacks',
+  knex,
+  mapDoc: (doc) => {
+    return {
+      ...doc,
+      spec: JSON.parse(doc.spec) as StackConfig,
+    };
+  },
+  serializeDoc: (doc) => {
+    const a: any = doc;
+    if (doc.spec) {
+      // @ts-ignore
+      a.spec = JSON.stringify(doc.spec);
+    }
+    return a;
+  },
+});
+export const Service = createCollectionAccessor<{
+  spec: ServiceConfig;
   key: string;
-  type: EntityType;
-  name: string;
-  spec: T;
-  metadata: U;
-  created_at: Date;
-  updated_at: Date;
-};
-export type ServiceEntity = IEntity<
-  ServiceConfig,
-  {
-    stack: string;
-    name: string;
-  }
->;
-export type StackEntity = IEntity<StackConfig>;
-
-const entities = db.addCollection<IEntity>('entities', {
-  unique: ['key'],
+  stack: string;
+}>({
+  name: 'services',
+  knex,
+  mapDoc: (doc) => ({
+    ...doc,
+    spec: JSON.parse(doc.spec),
+  }),
+  serializeDoc: (doc) => {
+    const a: any = doc;
+    if (doc.spec) {
+      a.spec = JSON.stringify(doc.spec);
+    }
+    return a;
+  },
 });
-
-export const Entity = {
-  key(type: EntityType, name: string) {
-    return `${type}:${name}`;
-  },
-  getOne(type: EntityType, name: string) {
-    return entities.by('key', Entity.key(type, name));
-  },
-  matchMeta(type: EntityType, metadata) {
-    return entities.find({
-      type,
-      metadata,
-    });
-  },
-  insertOne(entity: Omit<IEntity, 'key' | 'created_at' | 'updated_at'>) {
-    return entities.insertOne({
-      key: Entity.key(entity.type, entity.name),
-      created_at: new Date(),
-      updated_at: new Date(),
-      ...entity,
-    });
-  },
-  updateOne(type: EntityType, name: string, entity) {
-    const doc = Entity.getOne(type, name);
-    if (!doc) {
-      return;
-    }
-    Object.assign(doc, entity);
-    return entities.update(doc);
-  },
-
-  removeOne(type: EntityType, name: string) {
-    const doc = Entity.getOne(type, name);
-    if (doc) {
-      entities.remove(doc);
-      return doc;
-    }
-    return null;
-  },
-};

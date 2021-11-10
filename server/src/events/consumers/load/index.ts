@@ -5,7 +5,7 @@ import { forEach, isEqual } from 'lodash';
 
 import { createEventQueue } from 'src/lib/queue/createEvents';
 import { HandlerContext } from 'src/lib/queue/base';
-import { Entity } from 'src/data';
+import { Config } from 'src/data';
 import { MetroConfig } from '../../types';
 import { EVENTS } from '../..';
 import { InvalidConfig, parseConfig } from './parseConfig';
@@ -58,7 +58,7 @@ export const loadQueue = createEventQueue('load', {
         return;
       }
 
-      const existing = Entity.getOne('config', key);
+      const existing = await Config.getOne(key);
 
       const config = parseConfig(configRaw);
       forEach(config.stacks, (stack, name) => {
@@ -86,16 +86,14 @@ export const loadQueue = createEventQueue('load', {
         // Save config
         if (!isEqual(prevConfig, config)) {
           // Update if changed
-          Entity.updateOne('config', key, {
+          await Config.updateOne(key, {
             spec: config,
           });
         }
       } else {
-        Entity.insertOne({
+        await Config.insertOne({
           name: key,
-          type: 'config',
           spec: config,
-          metadata: {},
         });
       }
 

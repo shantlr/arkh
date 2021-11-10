@@ -20,4 +20,16 @@ export const config = convict({
       default: './data/db.loki',
     },
   },
+  db: {
+    path: {
+      env: 'DB_PATH',
+      default: './data/db.sqlite',
+    },
+    migrations: {
+      directory: {
+        env: 'DB_MIGRATIONS_DIRECTORY',
+        default: './migrations',
+      },
+    },
+  },
 });

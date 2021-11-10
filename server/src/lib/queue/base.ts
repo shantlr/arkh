@@ -202,5 +202,11 @@ export class EventQueue {
 }
 
 export const handler = <T>(
-  handler: (eventPayload: T, context: HandlerContext) => void | Promise<void>
-) => handler;
+  fn: (eventPayload: T, context: HandlerContext) => void | Promise<void>
+) => fn;
+export const handlers = <T>(
+  fns: Record<
+    string,
+    (eventPayload: T, context: HandlerContext) => void | Promise<void>
+  >
+) => fns;

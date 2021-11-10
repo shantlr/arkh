@@ -1,5 +1,5 @@
-import { forEach } from 'lodash';
-import { Entity, ServiceEntity } from 'src/data';
+import { forEach, isEqual } from 'lodash';
+import { Service, Stack } from 'src/data';
 import { EVENTS } from 'src/events';
 import { StackConfig } from 'src/events/types';
 import { handler } from 'src/lib/queue/base';
@@ -7,14 +7,30 @@ import { createEventQueue } from 'src/lib/queue/createEvents';
 
 export const stackQueue = createEventQueue('stack', {
   save: handler(
-    (
+    async (
       { name, spec }: { name: string; spec: StackConfig },
       { dispatcher, logger }
     ) => {
-      const existingServices = Entity.matchMeta(
-        'stack',
-        name
-      ) as ServiceEntity[];
+      const existingStack = await Stack.getOne(name);
+      if (!existingStack) {
+        await Stack.insertOne({
+          name,
+          spec,
+        });
+        logger.info(`'${name}' created`);
+      } else {
+        if (!isEqual(existingStack.spec, spec) || existingStack.to_remove) {
+          await Stack.updateOne(name, {
+            spec,
+          });
+          logger.info(`'${name}' updated`);
+        } else {
+          logger.info(`'${name}' unchanged`);
+        }
+      }
+      const existingServices = await Service.find({
+        stack: name,
+      });
 
       forEach(spec.services, (service, serviceName) => {
         dispatcher.push(
@@ -27,7 +43,7 @@ export const stackQueue = createEventQueue('stack', {
       });
       if (existingServices) {
         existingServices.forEach((service) => {
-          if (!spec.services[service.metadata.name]) {
+          if (!spec.services[service.key]) {
             dispatcher.push(
               EVENTS.service.remove({
                 name: service.name,
@@ -37,19 +53,40 @@ export const stackQueue = createEventQueue('stack', {
           }
         });
       }
-
-      logger.info(`${name} saved`);
     }
   ),
-  remove: handler(({ name }: { name: string }, { dispatcher }) => {
-    const stack = Entity.getOne('stack', name);
-    if (stack) {
-      const spec = stack.spec as StackConfig;
-      forEach(spec.services, (service, serviceName) => {
-        dispatcher.push(
-          EVENTS.service.remove({ name: serviceName, stackName: name })
-        );
-      });
+  remove: handler(
+    async ({ name }: { name: string }, { dispatcher, logger }) => {
+      const stack = await Stack.getOne(name);
+      if (stack) {
+        await Stack.updateOne(name, { to_remove: true });
+
+        const spec = stack.spec as StackConfig;
+        logger.info(`start removing stack '${name}' services`);
+        forEach(spec.services, (service, serviceName) => {
+          dispatcher.push(
+            EVENTS.service.remove({ name: serviceName, stackName: name })
+          );
+        });
+      } else {
+        logger.info(`'${name}' not found`);
+      }
     }
-  }),
+  ),
+  removeIfAllServiceRemoved: handler(
+    async ({ name }: { name: string }, { logger }) => {
+      const stack = await Stack.getOne(name);
+      if (!stack.to_remove) {
+        logger.info(`'${name}' is not expected to be removed (ignored)`);
+        return;
+      }
+      const services = await Service.find({
+        stack: name,
+      });
+      if (!services.length) {
+        await Stack.removeOne(name);
+        logger.info(`'${name}' removed`);
+      }
+    }
+  ),
 });
