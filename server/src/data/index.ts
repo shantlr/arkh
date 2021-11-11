@@ -1,5 +1,5 @@
 import { MetroConfig, ServiceConfig, StackConfig } from 'src/events/types';
-import { createCollectionAccessor } from 'src/lib/db';
+import { createCollectionAccessor, deserializer, serializer } from 'src/lib/db';
 import { knex } from './knex';
 
 export { doMigrations } from './knex';
@@ -9,19 +9,14 @@ export const Config = createCollectionAccessor<{
 }>({
   name: 'configs',
   knex,
-  mapDoc(doc) {
-    return {
-      ...doc,
-      spec: JSON.parse(doc.spec),
-    };
-  },
-  serializeDoc(doc) {
-    const a: any = doc;
-    if (doc.spec) {
-      a.spec = JSON.stringify(doc.spec);
-    }
-    return a;
-  },
+  mapDoc: deserializer({
+    spec(value) {
+      return JSON.parse(value);
+    },
+  }),
+  serializeDoc: serializer({
+    spec: (v) => JSON.stringify(v),
+  }),
 });
 export const Stack = createCollectionAccessor<{
   spec: StackConfig;
@@ -29,20 +24,14 @@ export const Stack = createCollectionAccessor<{
 }>({
   name: 'stacks',
   knex,
-  mapDoc: (doc) => {
-    return {
-      ...doc,
-      spec: JSON.parse(doc.spec) as StackConfig,
-    };
-  },
-  serializeDoc: (doc) => {
-    const a: any = doc;
-    if (doc.spec) {
-      // @ts-ignore
-      a.spec = JSON.stringify(doc.spec);
-    }
-    return a;
-  },
+  mapDoc: deserializer({
+    spec(value) {
+      return JSON.parse(value);
+    },
+  }),
+  serializeDoc: serializer({
+    spec: (v) => JSON.stringify(v),
+  }),
 });
 export const Service = createCollectionAccessor<{
   spec: ServiceConfig;
@@ -51,15 +40,12 @@ export const Service = createCollectionAccessor<{
 }>({
   name: 'services',
   knex,
-  mapDoc: (doc) => ({
-    ...doc,
-    spec: JSON.parse(doc.spec),
+  mapDoc: deserializer({
+    spec(value) {
+      return JSON.parse(value);
+    },
   }),
-  serializeDoc: (doc) => {
-    const a: any = doc;
-    if (doc.spec) {
-      a.spec = JSON.stringify(doc.spec);
-    }
-    return a;
-  },
+  serializeDoc: serializer({
+    spec: (v) => JSON.stringify(v),
+  }),
 });

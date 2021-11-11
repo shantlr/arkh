@@ -98,3 +98,51 @@ export const createCollectionAccessor = <
   };
   return accessor;
 };
+
+type NonScalarFields<T, K = keyof T> = K extends keyof T
+  ? T[K] extends string | number | boolean | Date
+    ? never
+    : K
+  : never;
+
+type FieldSerializerMap<T> = {
+  [key in NonScalarFields<T>]: (value: T[key], doc: T) => string;
+};
+type Serializer<T, U> = (doc: T) => U;
+export const serializer = <T, U>(
+  handlers: FieldSerializerMap<T>
+): Serializer<T, U> => {
+  if (!Object.keys(handlers).length) {
+    return identity;
+  }
+  const keys = Object.keys(handlers);
+  return (doc) => {
+    const res = { ...doc };
+
+    keys.forEach((key) => {
+      res[key] = handlers[key](res[key], res);
+    });
+    // @ts-ignore
+    return res as U;
+  };
+};
+
+type FieldDeserializerMap<T> = {
+  [key in NonScalarFields<T>]: (value: string, doc: T) => T[key];
+};
+type Deserializer<T, U> = (doc: T) => U;
+export const deserializer = <SerializedType, DeserializedType>(
+  handlers: FieldDeserializerMap<DeserializedType>
+): Deserializer<SerializedType, DeserializedType> => {
+  if (!Object.keys(handlers).length) {
+    return identity;
+  }
+  const keys = Object.keys(handlers);
+  return (doc) => {
+    keys.forEach((key) => {
+      doc[key] = handlers[key](doc[key], doc);
+    });
+    // @ts-ignore
+    return doc as T;
+  };
+};
