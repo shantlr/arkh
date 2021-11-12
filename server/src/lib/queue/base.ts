@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import debug from 'debug';
 import { createLogger, Logger } from '../logger';
 
 export type EventPayload<T> = T extends { payload: infer U } ? U : never;
@@ -9,8 +8,9 @@ export type Event<Payload, EventType extends string = string> = {
   queue?: string;
   payload: Payload;
 };
+export type AnyEvent = Event<any>;
 
-type Handler<T extends Event<any>> = (
+type Handler<T extends AnyEvent> = (
   event: T,
   context: HandlerContext
 ) => void | Promise<void>;
@@ -20,7 +20,7 @@ export type HandlerContext = {
   logger: Logger;
 };
 
-export class Queue<T extends Event<any>> {
+export class Queue<T extends AnyEvent> {
   name: string;
   events: T[] = [];
   consumers: QueueConsumer<T>[] = [];
@@ -36,7 +36,9 @@ export class Queue<T extends Event<any>> {
   push(event: T) {
     this.events.push(event);
     this.consumers.forEach((consumer) => {
-      consumer.consume();
+      consumer.consume().catch((err) => {
+        throw err;
+      });
     });
   }
 
@@ -46,7 +48,9 @@ export class Queue<T extends Event<any>> {
     }
     this.started = true;
     this.consumers.forEach((consumer) => {
-      consumer.start();
+      consumer.start().catch((err) => {
+        throw err;
+      });
     });
   }
   async stop() {
@@ -66,16 +70,16 @@ export class Queue<T extends Event<any>> {
 }
 
 export const QUEUE_DEF = Symbol('Queue definition');
-export interface QueueDef<T extends Event<any>> {
+export interface QueueDef<T extends AnyEvent> {
   name: string;
   consumers?: ConsumerDef<T>[];
 }
-export interface ConsumerDef<T extends Event<any>> {
+export interface ConsumerDef<T extends AnyEvent> {
   name: string;
   handler: Handler<T>;
 }
 
-export class QueueConsumer<T extends Event<any>> {
+export class QueueConsumer<T extends AnyEvent> {
   ongoing = false;
   shouldStop = false;
   queue: Queue<T>;
@@ -102,13 +106,13 @@ export class QueueConsumer<T extends Event<any>> {
   }
 
   start() {
-    this.consume();
+    return this.consume();
   }
   consume() {
     if (this.ongoing) {
       return;
     }
-    this.consumeEvents();
+    return this.consumeEvents();
   }
   async consumeEvents() {
     this.ongoing = true;
@@ -136,12 +140,13 @@ export class QueueConsumer<T extends Event<any>> {
   }
 }
 
+type AnyQueue = Queue<any>;
 export class EventQueue {
-  queues: Map<string, Queue<any>> = new Map();
+  queues: Map<string, AnyQueue> = new Map();
   started = false;
   logger = createLogger('eventmanager');
 
-  getQueue<T extends Event<any>>(queueName: string): Queue<T> {
+  getQueue<T extends AnyEvent>(queueName: string): Queue<T> {
     if (!this.queues.has(queueName)) {
       this.queues.set(
         queueName,
@@ -157,7 +162,7 @@ export class EventQueue {
     queue.push(event);
   }
 
-  addQueue<T extends Event<any>>(queueDef: QueueDef<T>) {
+  addQueue<T extends AnyEvent>(queueDef: QueueDef<T>) {
     const queue = new Queue<T>({
       name: queueDef.name,
     });

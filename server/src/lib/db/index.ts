@@ -13,6 +13,7 @@ type StringifyNonScalar<T extends Record<string, any>> = {
 
 export interface EntityAccessor<Deserialized> {
   getOne(name: string): Promise<IEntity & Deserialized>;
+  getIn(name: string[]): Promise<(IEntity & Deserialized)[]>;
   getAll(): Promise<(IEntity & Deserialized)[]>;
   find(
     query: Partial<IEntity & Deserialized>
@@ -64,6 +65,16 @@ export const createCollectionAccessor = <
     async find(query) {
       const res = await getCollection<IEntity>().select().where(query);
       return res.map((i) => mapDoc(i as IEntity & SerializedExtraData));
+    },
+    async getIn(names) {
+      if (!names.length) {
+        return [];
+      }
+
+      const res = await getCollection<IEntity>()
+        .select()
+        .whereIn('name', names);
+      return res.map((r) => mapDoc(r as IEntity & SerializedExtraData));
     },
     async getAll() {
       const res = (await getCollection<IEntity>().select()) as (IEntity &

@@ -1,8 +1,13 @@
 {
-  "parser": "babel-eslint",
-  "env": {
-    "node": true,
-    "es6": true
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
   },
-  "extends": ["eslint:recommended", "prettier"]
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "rules": {
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-floating-promises": ["error"]
+  }
 }

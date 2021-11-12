@@ -5,6 +5,8 @@
   "repository": "git@github.com:shantlr/metro.git",
   "author": "Patrick <shantry@hotmail.fr>",
   "license": "MIT",
+  "private": true,
+  "workspaces": [],
   "scripts": {
     "start": "concurrently -n back,app \"cd server && yarn start\" \"cd webapp && yarn start\""
   },

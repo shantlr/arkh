@@ -1,10 +1,10 @@
 {
-  "name": "metro-server",
+  "name": "@shantr/metro-server",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "DEBUG=*,-express:*,-knex:* ts-node -r tsconfig-paths/register ./src/index.ts",
+    "start": "DEBUG=metro:* nodemon --exec ts-node -r tsconfig-paths/register ./src/index.ts",
     "migrate:make": "ts-node -r tsconfig-paths/register ./src/scripts/makeMigration.ts"
   },
   "devDependencies": {
@@ -18,7 +18,7 @@
     "@typescript-eslint/eslint-plugin": "^5.3.0",
     "@typescript-eslint/parser": "^5.3.0",
     "eslint": "^8.1.0",
-    "nodemon": "^2.0.14",
+    "nodemon": "^2.0.15",
     "prettier": "^2.4.1",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.11.0",
@@ -31,6 +31,8 @@
     "express": "^4.17.1",
     "knex": "^0.95.13",
     "lodash": "^4.17.21",
+    "nanoid": "^3.1.30",
+    "socket.io": "^4.3.2",
     "sqlite3": "^5.0.2",
     "yaml": "^1.10.2"
   }

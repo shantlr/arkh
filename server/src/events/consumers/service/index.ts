@@ -1,5 +1,6 @@
-import { isEqual } from 'lodash';
+import { isEqual, keyBy } from 'lodash';
 import { Service, Stack } from 'src/data';
+import { State } from 'src/data/state';
 import { EVENTS } from 'src/events';
 import { ServiceConfig } from 'src/events/types';
 import { handler, handlers } from 'src/lib/queue/base';
@@ -70,4 +71,86 @@ export const serviceQueue = createEventQueue('service', {
       }
     },
   }),
+  run: handler(
+    async (
+      { name, stackName }: { name: string; stackName: string },
+      { dispatcher, logger }
+    ) => {
+      const serviceName = `${stackName}.${name}`;
+      const service = await Service.getOne(serviceName);
+      if (service) {
+        logger.error(`'${serviceName}' not found`);
+        return;
+      }
+      if (State.service.isRunning(serviceName)) {
+        logger.info(`'${serviceName}' is already running`);
+        return;
+      }
+
+      dispatcher.push(
+        EVENTS.service.assignRunner({
+          name: serviceName,
+          spec: service.spec,
+        })
+      );
+    }
+  ),
+  assignPendingAssignments: handler(
+    async (arg: Record<string, never>, { dispatcher, logger }) => {
+      const pendingServices = State.service.findState('pending-assignment');
+      if (!pendingServices.length) {
+        return;
+      }
+      if (!State.runner.hasAvailable()) {
+        logger.info(`no runner available`);
+        return;
+      }
+
+      const services = await Service.getIn(
+        pendingServices.map((s) => s.name)
+      ).then((r) => keyBy(r, 'name'));
+
+      pendingServices.forEach((s) => {
+        const service = services[s.name];
+        if (!service) {
+          logger.error(`service '${s.name}' not found`);
+        } else {
+          dispatcher.push(
+            EVENTS.service.assignRunner({
+              name: service.name,
+              spec: service.spec,
+            })
+          );
+        }
+      });
+    }
+  ),
+  assignRunner: handler(
+    (
+      { name, spec }: { name: string; spec: ServiceConfig },
+      { dispatcher, logger }
+    ) => {
+      const state = State.service.get(name);
+      if (state.state !== 'pending-assignment') {
+        logger.info(`runner not pending assignment: ${state.state}`);
+        return null;
+      }
+
+      const runnerId = State.runner.getRoundRobinNext('run-process');
+      if (!runnerId) {
+        logger.info(`no available runner found`);
+        return;
+      }
+
+      State.service.toAssigned(name, runnerId);
+      dispatcher.push(
+        EVENTS.runner.assignService({
+          serviceName: name,
+          spec,
+        })
+      );
+      logger.info(`'${name}' assigned to ${runnerId}`);
+      State.runner.moveRoundRobinCursorForward('run-process');
+    }
+  ),
 });

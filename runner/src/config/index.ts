@@ -1,7 +1,7 @@
-require('./env');
-const convict = require('convict');
+import './env';
+import convict from 'convict';
 
-module.exports.config = convict({
+export const config = convict({
   service: {
     name: {
       env: 'SERVICE_NAME',
@@ -11,7 +11,7 @@ module.exports.config = convict({
   server: {
     url: {
       env: 'SERVER_URL',
-      default: 'ws://localhost:3005'
-    }
+      default: 'ws://localhost:6077',
+    },
   },
 });

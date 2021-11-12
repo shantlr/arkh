@@ -8,6 +8,12 @@ export const config = convict({
       default: 4077,
     },
   },
+  runner: {
+    port: {
+      env: 'RUNNER_PORT',
+      default: 6077,
+    },
+  },
   configs: {
     path: {
       env: 'CONFIGS_PATH',

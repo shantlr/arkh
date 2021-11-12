@@ -89,4 +89,25 @@ export const stackQueue = createEventQueue('stack', {
       }
     }
   ),
+
+  run: handler(async ({ name }: { name: string }, { logger, dispatcher }) => {
+    const stack = await Stack.getOne(name);
+    if (!stack) {
+      logger.warn(`'${name} not found'`);
+      return;
+    }
+    if (stack.to_remove) {
+      logger.warn(`'${name}' is being removed`);
+      return;
+    }
+
+    forEach(stack.spec.services, (service, serviceName) => {
+      dispatcher.push(
+        EVENTS.service.run({
+          name: serviceName,
+          stackName: name,
+        })
+      );
+    });
+  }),
 });
