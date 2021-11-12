@@ -6,7 +6,7 @@ import { forEach, isEqual } from 'lodash';
 import { createEventQueue } from 'src/lib/queue/createEvents';
 import { HandlerContext } from 'src/lib/queue/base';
 import { Config } from 'src/data';
-import { MetroConfig } from '../../types';
+import { MetroSpec } from '@shantr/metro-common-types';
 import { EVENTS } from '../..';
 import { InvalidConfig, parseConfig } from './parseConfig';
 
@@ -71,7 +71,7 @@ export const loadQueue = createEventQueue('load', {
       });
 
       if (existing) {
-        const prevConfig = existing.spec as MetroConfig;
+        const prevConfig = existing.spec as MetroSpec;
         // Remove missing stack
         forEach(prevConfig.stacks, (prevStack, prevStackName) => {
           if (!config.stacks[prevStackName]) {

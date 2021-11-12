@@ -6,3 +6,5 @@ dist/
 .config/
 .yarn/
 .ash_history
+
+yarn-error.log

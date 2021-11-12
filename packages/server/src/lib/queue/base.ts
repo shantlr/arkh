@@ -36,9 +36,7 @@ export class Queue<T extends AnyEvent> {
   push(event: T) {
     this.events.push(event);
     this.consumers.forEach((consumer) => {
-      consumer.consume().catch((err) => {
-        throw err;
-      });
+      void consumer.consume();
     });
   }
 
@@ -48,9 +46,7 @@ export class Queue<T extends AnyEvent> {
     }
     this.started = true;
     this.consumers.forEach((consumer) => {
-      consumer.start().catch((err) => {
-        throw err;
-      });
+      void consumer.start();
     });
   }
   async stop() {

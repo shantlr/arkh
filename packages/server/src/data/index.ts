@@ -1,11 +1,11 @@
-import { MetroConfig, ServiceConfig, StackConfig } from 'src/events/types';
 import { createCollectionAccessor, deserializer, serializer } from 'src/lib/db';
 import { knex } from './knex';
+import { MetroSpec, StackSpec, ServiceSpec } from '@shantr/metro-common-types';
 
 export { doMigrations } from './knex';
 
 export const Config = createCollectionAccessor<{
-  spec: MetroConfig;
+  spec: MetroSpec;
 }>({
   name: 'configs',
   knex,
@@ -19,7 +19,7 @@ export const Config = createCollectionAccessor<{
   }),
 });
 export const Stack = createCollectionAccessor<{
-  spec: StackConfig;
+  spec: StackSpec;
   to_remove?: boolean;
 }>({
   name: 'stacks',
@@ -34,7 +34,7 @@ export const Stack = createCollectionAccessor<{
   }),
 });
 export const Service = createCollectionAccessor<{
-  spec: ServiceConfig;
+  spec: ServiceSpec;
   key: string;
   stack: string;
 }>({

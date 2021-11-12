@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { ServiceConfig } from 'src/events/types';
+import { ServiceSpec } from '@shantr/metro-common-types';
 
 export type RunnerType = 'run-process';
 export type RunnerState = 'ready' | 'disconnected';
@@ -26,7 +26,7 @@ export class Runner {
     this.state = state;
   }
 
-  async assignService({ name, spec }: { name: string; spec: ServiceConfig }) {
+  async assignService({ name, spec }: { name: string; spec: ServiceSpec }) {
     await new Promise<void>((resolve) => {
       this.socket.emit(
         'run-service',

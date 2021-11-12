@@ -2,7 +2,7 @@ import { isEqual, keyBy } from 'lodash';
 import { Service, Stack } from 'src/data';
 import { State } from 'src/data/state';
 import { EVENTS } from 'src/events';
-import { ServiceConfig } from 'src/events/types';
+import { ServiceSpec } from '@shantr/metro-common-types';
 import { handler, handlers } from 'src/lib/queue/base';
 import { createEventQueue } from 'src/lib/queue/createEvents';
 
@@ -13,7 +13,7 @@ export const serviceQueue = createEventQueue('service', {
         name,
         stackName,
         spec,
-      }: { name: string; stackName: string; spec: ServiceConfig },
+      }: { name: string; stackName: string; spec: ServiceSpec },
       { logger }
     ) => {
       const serviceName = `${stackName}.${name}`;
@@ -127,7 +127,7 @@ export const serviceQueue = createEventQueue('service', {
   ),
   assignRunner: handler(
     (
-      { name, spec }: { name: string; spec: ServiceConfig },
+      { name, spec }: { name: string; spec: ServiceSpec },
       { dispatcher, logger }
     ) => {
       const state = State.service.get(name);

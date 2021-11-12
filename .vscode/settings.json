@@ -1,7 +1,7 @@
 {
   "eslint.workingDirectories": [
-    "webapp",
-    "server",
-    "runner"
+    "./packages/webapp",
+    "./packages/server",
+    "./packages/runner"
   ]
 }

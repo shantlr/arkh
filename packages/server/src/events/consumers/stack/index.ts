@@ -1,14 +1,14 @@
 import { forEach, isEqual } from 'lodash';
 import { Service, Stack } from 'src/data';
 import { EVENTS } from 'src/events';
-import { StackConfig } from 'src/events/types';
+import { StackSpec } from '@shantr/metro-common-types';
 import { handler } from 'src/lib/queue/base';
 import { createEventQueue } from 'src/lib/queue/createEvents';
 
 export const stackQueue = createEventQueue('stack', {
   save: handler(
     async (
-      { name, spec }: { name: string; spec: StackConfig },
+      { name, spec }: { name: string; spec: StackSpec },
       { dispatcher, logger }
     ) => {
       const existingStack = await Stack.getOne(name);
@@ -61,7 +61,7 @@ export const stackQueue = createEventQueue('stack', {
       if (stack) {
         await Stack.updateOne(name, { to_remove: true });
 
-        const spec = stack.spec as StackConfig;
+        const spec = stack.spec as StackSpec;
         logger.info(`start removing stack '${name}' services`);
         forEach(spec.services, (service, serviceName) => {
           dispatcher.push(

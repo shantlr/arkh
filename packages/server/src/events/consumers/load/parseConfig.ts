@@ -1,5 +1,5 @@
 import { forEach } from 'lodash';
-import { MetroConfig, ServiceConfig, StackConfig } from 'src/events/types';
+import { MetroSpec, ServiceSpec, StackSpec } from '@shantr/metro-common-types';
 
 export class InvalidConfig extends Error {
   constructor(message: string) {
@@ -12,11 +12,11 @@ export const parseService = (
   name: string,
   stackName: string,
   config: any
-): ServiceConfig => {
+): ServiceSpec => {
   if (typeof config !== 'object') {
     throw new InvalidConfig(`${stackName}.${name} is not an object`);
   }
-  const res: Partial<ServiceConfig> = {};
+  const res: Partial<ServiceSpec> = {};
 
   if (!('cmd' in config)) {
     throw new InvalidConfig(`${stackName}.${name}.cmd missing`);
@@ -59,29 +59,33 @@ export const parseService = (
     res.env = config.env;
   }
 
-  return res as ServiceConfig;
+  return res as ServiceSpec;
 };
 
-export const parseStack = (name: string, config: any): StackConfig => {
+export const parseStack = (name: string, config: any): StackSpec => {
   if (typeof config !== 'object') {
     throw new InvalidConfig(`stack '${name}' is not an object`);
   }
 
-  const res: StackConfig = {
+  const res: StackSpec = {
     services: {},
   };
-  forEach(config, (serviceConfig, serviceName) => {
-    res.services[name] = parseService(serviceName, name, serviceConfig);
+  forEach(config, (serviceSpecServiceSpec, serviceName) => {
+    res.services[name] = parseService(
+      serviceName,
+      name,
+      serviceSpecServiceSpec
+    );
   });
 
   return res;
 };
 
-export const parseConfig = (config: any): MetroConfig => {
+export const parseConfig = (config: any): MetroSpec => {
   if (typeof config !== 'object') {
     throw new InvalidConfig('config is not an object');
   }
-  const res: MetroConfig = {
+  const res: MetroSpec = {
     stacks: {},
   };
   if ('stacks' in config) {
