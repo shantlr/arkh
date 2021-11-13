@@ -1,6 +1,6 @@
 import Knex from 'knex';
 import { config } from 'src/config';
-import { createLogger } from 'src/lib/logger';
+import { createLogger } from '@shantr/metro-logger';
 
 export const knex = Knex({
   client: 'sqlite3',

@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { config } from 'src/config';
 import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
-import { createLogger } from 'src/lib/logger';
+import { createLogger } from '@shantr/metro-logger';
 import { RunnerType } from './class';
 
 export const startRunnerWs = async ({

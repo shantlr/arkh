@@ -1,6 +1,6 @@
 import { filter, some } from 'lodash';
 import { Socket } from 'socket.io';
-import { createLogger } from 'src/lib/logger';
+import { createLogger } from '@shantr/metro-logger';
 import { Runner, RunnerType } from 'src/runnerWs/class';
 
 export type ServiceStateEnum =

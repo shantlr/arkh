@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": ["packages/*"]
+    "packages": ["libs/*", "core/*"]
   },
   "scripts": {
     "start": "concurrently -n back,app \"cd server && yarn start\" \"cd webapp && yarn start\""

@@ -1,4 +1,4 @@
-import { EventQueue } from '../lib/queue';
+import { EventQueue } from '@shantr/metro-queue';
 import { loadQueue } from './consumers/load';
 import { runnerQueue } from './consumers/runner';
 import { serviceQueue } from './consumers/service';

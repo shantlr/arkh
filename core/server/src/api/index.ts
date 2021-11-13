@@ -1,5 +1,5 @@
 import express from 'express';
-import { createLogger } from 'src/lib/logger';
+import { createLogger } from '@shantr/metro-logger';
 import { expressLogger } from './middlewares/logger';
 import { stackRouter } from './routes/stack';
 

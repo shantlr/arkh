@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createLogger, Logger } from 'src/lib/logger';
+import { createLogger, Logger } from '@shantr/metro-logger';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

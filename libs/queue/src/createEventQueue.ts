@@ -1,4 +1,5 @@
-import { Event, HandlerContext, QueueDef, QUEUE_DEF } from './base';
+import { HandlerContext, QueueDef, QUEUE_DEF } from './queue';
+import { Event } from './event';
 
 type EventHandlers<T> = {
   [eventName in keyof T]: T[eventName] extends (
@@ -63,6 +64,9 @@ type PossibleEvents<
     : never
   : never;
 
+/**
+ * Helper to create single queue with multiple event handlers
+ */
 export const createEventQueue = <
   T extends EventHandlers<T>,
   QueueName extends string

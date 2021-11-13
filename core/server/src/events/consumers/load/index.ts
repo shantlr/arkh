@@ -3,8 +3,7 @@ import path from 'path';
 import YAML from 'yaml';
 import { forEach, isEqual } from 'lodash';
 
-import { createEventQueue } from 'src/lib/queue/createEvents';
-import { HandlerContext } from 'src/lib/queue/base';
+import { createEventQueue, HandlerContext } from '@shantr/metro-queue';
 import { Config } from 'src/data';
 import { MetroSpec } from '@shantr/metro-common-types';
 import { EVENTS } from '../..';

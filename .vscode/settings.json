@@ -1,7 +1,10 @@
 {
   "eslint.workingDirectories": [
-    "./packages/webapp",
-    "./packages/server",
-    "./packages/runner"
+    "./core/webapp",
+    "./core/server",
+    "./core/runner",
+    "./libs/queue",
+    "./libs/types",
+    "./libs/logger"
   ]
 }

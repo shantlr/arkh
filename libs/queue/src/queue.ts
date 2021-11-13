@@ -1,13 +1,7 @@
 import { EventEmitter } from 'events';
-import { createLogger, Logger } from '../logger';
+import { Logger, createLogger } from '@shantr/metro-logger';
+import { Event } from './event';
 
-export type EventPayload<T> = T extends { payload: infer U } ? U : never;
-
-export type Event<Payload, EventType extends string = string> = {
-  type: EventType;
-  queue?: string;
-  payload: Payload;
-};
 export type AnyEvent = Event<any>;
 
 type Handler<T extends AnyEvent> = (
@@ -136,9 +130,8 @@ export class QueueConsumer<T extends AnyEvent> {
   }
 }
 
-type AnyQueue = Queue<any>;
 export class EventQueue {
-  queues: Map<string, AnyQueue> = new Map();
+  queues: Map<string, Queue<any>> = new Map();
   started = false;
   logger = createLogger('eventmanager');
 
