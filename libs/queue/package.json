@@ -8,15 +8,17 @@
     "prepare": "tsc --build"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
+    "jest": "^27.3.1",
     "prettier": "^2.2.1",
+    "ts-jest": "^27.0.7",
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@shantr/metro-logger": "0.1.0",
-    "debug": "^4.3.2"
+    "@shantr/metro-logger": "0.1.0"
   }
 }

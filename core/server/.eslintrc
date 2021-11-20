@@ -8,6 +8,8 @@
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-floating-promises": ["error"]
+    "@typescript-eslint/no-floating-promises": ["error"],
+    "no-duplicate-imports": "off",
+    "@typescript-eslint/no-duplicate-imports": ["error"]
   }
 }

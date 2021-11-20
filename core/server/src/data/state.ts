@@ -5,13 +5,20 @@ import { Runner, RunnerType } from 'src/runnerWs/class';
 
 export type ServiceStateEnum =
   | 'off'
-  | 'running'
+  | 'pending-assignment'
   | 'assigned'
-  | 'pending-assignment';
+  | 'running';
 export type ServiceState = {
   name: string;
   state: ServiceStateEnum;
   assignedRunnerId?: string;
+  current_task_state?:
+    | 'noop'
+    | 'creating'
+    | 'running'
+    | 'stopping'
+    | 'stopped'
+    | 'exited';
 };
 
 const IN_MEMORY_STATE: {
@@ -87,6 +94,32 @@ export const State = {
       const state = State.service.get(name);
       state.state = 'assigned';
       state.assignedRunnerId = runnerId;
+    },
+
+    toTaskCreating(name: string) {
+      const state = State.service.get(name);
+      state.state = 'running';
+      state.current_task_state = 'creating';
+    },
+    toTaskRunning(name: string) {
+      const state = State.service.get(name);
+      state.state = 'running';
+      state.current_task_state = 'running';
+    },
+    toTaskStopping(name: string) {
+      const state = State.service.get(name);
+      state.state = 'running';
+      state.current_task_state = 'stopping';
+    },
+    toTaskStopped(name: string) {
+      const state = State.service.get(name);
+      state.state = 'off';
+      state.current_task_state = 'stopped';
+    },
+    toTaskExited(name: string) {
+      const state = State.service.get(name);
+      state.state = 'off';
+      state.current_task_state = 'exited';
     },
 
     findState(state: ServiceStateEnum) {

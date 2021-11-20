@@ -12,7 +12,7 @@ type EventHandlers<T> = {
       ) => void | Promise<void>
     : T[eventName] extends Record<
         string,
-        (eventPaylad: infer U, context: HandlerContext) => void
+        (eventPayload: infer U, context: HandlerContext) => void
       >
     ? Record<
         string,
@@ -21,6 +21,9 @@ type EventHandlers<T> = {
     : never;
 };
 
+/**
+ * Map EventHandler into event creator object
+ */
 type EventCreators<T, QueueName> = {
   [eventName in keyof T]: T[eventName] extends (
     eventPayload: infer U,
@@ -43,6 +46,9 @@ type EventCreators<T, QueueName> = {
     : never;
 };
 
+/**
+ * Extract all possible events from EventHandlers
+ */
 type PossibleEvents<
   T extends Record<string, unknown>,
   U = keyof T
@@ -89,46 +95,61 @@ export const createEventQueue = <
     [QUEUE_DEF]: QueueDef<PossibleEvents<T>>;
   };
 
-  for (const key in queueEvents) {
+  const handlerByType: Record<
+    string,
+    (event: PossibleEvents<T>, context: HandlerContext) => void | Promise<void>
+  > = {};
+
+  for (const eventType in queueEvents) {
+    // Add event creator
     // @ts-ignore
-    eventCreator[key] = (eventPayload: Parameters<T[typeof key]>[0]) => {
+    eventCreator[eventType] = (
+      // @ts-ignore
+      eventPayload: Parameters<T[typeof eventType]>[0]
+    ) => {
       return {
-        type: key,
+        type: eventType,
         queue: name,
         payload: eventPayload,
       };
     };
 
-    const handler = queueEvents[key];
+    const handler = queueEvents[eventType];
+    // add event type handler
     if (typeof handler === 'function') {
-      queue.consumers.push({
-        name: key,
-        handler: (event, context) => {
-          if (event.type === key) {
-            return handler(event.payload, context);
-          }
-        },
-      });
+      handlerByType[eventType] = (
+        event: PossibleEvents<T>,
+        context: HandlerContext
+      ) => handler(event.payload, context);
     } else {
-      for (const subHandlerKey in handler) {
-        const subHandler = handler[subHandlerKey];
-        if (typeof subHandler === 'function') {
-          queue.consumers.push({
-            name: `${key}.${subHandlerKey}`,
-            handler: (event, context) => {
-              if (event.type === key) {
-                return subHandler(event.payload, context);
-              }
-            },
-          });
-        } else {
-          throw new Error(
-            `Unexpected sub handler of type: ${typeof subHandler} at '${key}.${subHandlerKey}'`
-          );
+      // record of multiple sub handler
+      const subHandlers = Object.keys(handler).map((subHandlerKey) => {
+        if (typeof handler[subHandlerKey] === 'function') {
+          return handler[subHandlerKey];
         }
-      }
+        throw new Error(
+          `unexpected sub handler '${subHandlerKey}' for event '${eventType}' in queue '${name}'`
+        );
+      });
+      handlerByType[eventType] = async (event, context) => {
+        await Promise.all(
+          subHandlers.map((subHandler) => subHandler(event.payload, context))
+        );
+      };
     }
   }
+
+  queue.consumers.push({
+    name,
+    handler: (event, context) => {
+      if (event.type in handlerByType) {
+        return handlerByType[event.type](event, context);
+      }
+      throw new Error(
+        `unexpected event type: '${event.type}' in queue '${name}'`
+      );
+    },
+  });
 
   return eventCreator;
 };

@@ -8,6 +8,12 @@ export const config = convict({
       default: 'metro-runner',
     },
   },
+  config: {
+    path: {
+      env: 'CONFIG_PATH',
+      default: '~/.config/metro-runner/config.json',
+    },
+  },
   server: {
     url: {
       env: 'SERVER_URL',

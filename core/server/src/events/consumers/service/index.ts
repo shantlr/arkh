@@ -1,10 +1,10 @@
 import { isEqual, keyBy } from 'lodash';
+import { ServiceSpec } from '@shantr/metro-common-types';
+import { handler, handlers, createEventQueue } from '@shantr/metro-queue';
+
 import { Service, Stack } from 'src/data';
 import { State } from 'src/data/state';
 import { EVENTS } from 'src/events';
-import { ServiceSpec } from '@shantr/metro-common-types';
-import { handler, handlers } from 'src/lib/queue/base';
-import { createEventQueue } from 'src/lib/queue/createEvents';
 
 export const serviceQueue = createEventQueue('service', {
   save: handler(
@@ -24,9 +24,9 @@ export const serviceQueue = createEventQueue('service', {
           await Service.updateOne(serviceName, {
             spec,
           });
-          logger.info(`${serviceName} updated`);
+          logger.info(`'${serviceName}' updated`);
         } else {
-          logger.info(`${serviceName} unchanged`);
+          logger.info(`'${serviceName}' unchanged`);
         }
       } else {
         await Service.insertOne({

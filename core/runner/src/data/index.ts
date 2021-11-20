@@ -1,144 +1,61 @@
-export type Service = {
+import { createLogger } from '@shantr/metro-logger';
+import { Task } from 'src/lib/task';
+
+export type ServiceState = {
   name: string;
-  spec: any;
+  task: Task;
 };
 
 const IN_MEMORY_STATE: {
+  runner: {
+    id: string;
+  };
   service: {
-    list: Record<string, Service>;
+    list: Record<string, ServiceState>;
   };
 } = {
+  runner: {
+    id: null,
+  },
   service: {
     list: {},
   },
 };
 
+const logger = createLogger('state');
+
 export const State = {
+  runner: {
+    getId() {
+      return IN_MEMORY_STATE.runner.id;
+    },
+    init(id: string) {
+      if (IN_MEMORY_STATE.runner.id) {
+        throw new Error(`Runner already inited`);
+      }
+
+      IN_MEMORY_STATE.runner.id = id;
+      logger.info(`runner inited`);
+    },
+  },
   service: {
-    //
+    get(name: string) {
+      return IN_MEMORY_STATE.service.list[name];
+    },
+    add(state: ServiceState) {
+      if (IN_MEMORY_STATE.service) {
+        throw new Error(`service '${state.name}' already exists`);
+      }
+      IN_MEMORY_STATE.service.list[state.name] = state;
+      logger.info(`service '${name}' added`);
+    },
+    remove(name: string) {
+      const existing = State.service.get(name);
+      if (existing && existing.task.isRunning()) {
+        throw new Error(`cannot remove running task`);
+      }
+      delete IN_MEMORY_STATE.service.list[name];
+      logger.info(`service '${name}' removed`);
+    },
   },
 };
-// import { nanoid } from 'nanoid';
-// import { spawn } from 'child_process';
-// import path from 'path';
-// import { debug } from '../debug';
-// import { getSocket } from '..';
-
-// const COMMANDS = {};
-
-// export const getCommand = (id) => {
-//   return COMMANDS[id] || null;
-// };
-// export const setCommand = (cmd) => {
-//   COMMANDS[cmd.id] = cmd;
-//   return cmd;
-// };
-// export const deleteCommand = (cmdId) => {
-//   delete COMMANDS[cmdId];
-// };
-
-// const TASKS = {};
-// export const getTask = (taskId) => {
-//   return TASKS[taskId];
-// };
-// export const startTask = (task) => {
-//   if (TASKS[task.id]) {
-//     debug(`task already started '${task.id}'`);
-//     return;
-//   }
-
-//   const cmd = getCommand(task.command_id);
-
-//   const bin = cmd.template.bin;
-//   const args = cmd.template.args.map((arg) => {
-//     if (arg.type === 'static') {
-//       return arg.value;
-//     }
-//     if (arg.type === 'variable') {
-//       return cmd.params[arg.name];
-//     }
-//     return null;
-//   });
-
-//   const taskState = {
-//     id: task.id,
-//     process: spawn(bin, args, {
-//       cwd: cmd.path && cmd.path.length > 0 ? path.resolve(cmd.path) : null,
-//     }),
-//     started_at: new Date(),
-//   };
-
-//   const socket = getSocket();
-
-//   socket.emit('task-started', {
-//     id: task.id,
-//     started_at: taskState.started_at,
-//   });
-//   debug(`start task '${task.id}' of command '${cmd.name}' (${cmd.id})`);
-
-//   taskState.process.stdout.on('data', (l) => {
-//     const log = {
-//       id: nanoid(),
-//       task_id: task.id,
-//       level: 30,
-//       date: new Date(),
-//       msg: l.toString(),
-//     };
-//     socket.emit('task-log', {
-//       id: task.id,
-//       log,
-//     });
-//   });
-//   taskState.process.stderr.on('data', (l) => {
-//     const log = {
-//       id: nanoid(),
-//       task_id: task.id,
-//       level: 50,
-//       date: new Date(),
-//       msg: l.toString(),
-//     };
-//     socket.emit('task-log', {
-//       id: task.id,
-//       log,
-//     });
-//   });
-
-//   taskState.process.on('error', (err) => {
-//     debug(
-//       `task '${task.id}' of command '${cmd.name}' (${cmd.id}) failed: ${err.message}`
-//     );
-//   });
-//   taskState.process.on('close', (code, signal) => {
-//     debug(
-//       `end of task '${task.id}' of command '${cmd.name}' (${cmd.id}): ${code} (${signal})`
-//     );
-//     socket.emit(
-//       'task-stopped',
-//       {
-//         id: task.id,
-//         result: {
-//           code,
-//           signal,
-//         },
-//         ended_at: new Date(),
-//       },
-//       () => {
-//         // Clean when
-//         delete TASKS[task.id];
-//         debug(`task '${task.id}' cleaned`);
-//       }
-//     );
-//   });
-
-//   TASKS[task.id] = taskState;
-// };
-
-// export const stopTask = (task) => {
-//   const taskState = getTask(task.id);
-//   if (!taskState) {
-//     debug(`task '${task.id}' not started or already cleaned`);
-//     return;
-//   }
-
-//   taskState.process.kill('SIGTERM');
-// };

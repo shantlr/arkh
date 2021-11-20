@@ -1,7 +1,7 @@
 import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 import { ServiceSpec } from '@shantr/metro-common-types';
-import { createEventQueue, handler } from 'src/lib/queue';
+import { createEventQueue, handler } from '@shantr/metro-queue';
 
 export const runnerQueue = createEventQueue('runner', {
   joined: handler(({ runnerId }: { runnerId: string }, { logger }) => {

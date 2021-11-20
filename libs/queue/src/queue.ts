@@ -14,6 +14,9 @@ export type HandlerContext = {
   logger: Logger;
 };
 
+/**
+ *
+ */
 export class Queue<T extends AnyEvent> {
   name: string;
   events: T[] = [];
@@ -130,10 +133,17 @@ export class QueueConsumer<T extends AnyEvent> {
   }
 }
 
-export class EventQueue {
+export class EventQueue<T = any> {
   queues: Map<string, Queue<any>> = new Map();
   started = false;
   logger = createLogger('eventmanager');
+
+  events = new EventEmitter();
+
+  push<T>(event: Event<T>) {
+    const queue = this.getQueue(event.queue || event.type);
+    queue.push(event);
+  }
 
   getQueue<T extends AnyEvent>(queueName: string): Queue<T> {
     if (!this.queues.has(queueName)) {
@@ -146,12 +156,12 @@ export class EventQueue {
     }
     return this.queues.get(queueName) as Queue<T>;
   }
-  push<T>(event: Event<T>) {
-    const queue = this.getQueue(event.queue || event.type);
-    queue.push(event);
-  }
 
   addQueue<T extends AnyEvent>(queueDef: QueueDef<T>) {
+    if (this.queues.has(queueDef.name)) {
+      throw new Error(`queue '${queueDef.name}' already exists`);
+    }
+
     const queue = new Queue<T>({
       name: queueDef.name,
     });

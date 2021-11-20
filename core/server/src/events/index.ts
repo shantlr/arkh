@@ -12,4 +12,4 @@ export const EVENTS = {
 };
 
 export const EventManager = new EventQueue();
-EventManager.addQueues(loadQueue, stackQueue, serviceQueue);
+EventManager.addQueues(loadQueue, stackQueue, serviceQueue, runnerQueue);

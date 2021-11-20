@@ -2,8 +2,7 @@ import { forEach, isEqual } from 'lodash';
 import { Service, Stack } from 'src/data';
 import { EVENTS } from 'src/events';
 import { StackSpec } from '@shantr/metro-common-types';
-import { handler } from 'src/lib/queue/base';
-import { createEventQueue } from 'src/lib/queue/createEvents';
+import { handler, createEventQueue } from '@shantr/metro-queue';
 
 export const stackQueue = createEventQueue('stack', {
   save: handler(
