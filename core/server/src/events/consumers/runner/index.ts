@@ -21,6 +21,7 @@ export const runnerQueue = createEventQueue('runner', {
       },
       { dispatcher, logger }
     ) => {
+      console.log('assign service to runner', serviceName);
       const state = State.service.get(serviceName);
       if (!state) {
         logger.warn(`service '${serviceName}' state not found`);
@@ -61,12 +62,16 @@ export const runnerQueue = createEventQueue('runner', {
       }
 
       try {
+        logger.info('1111');
+        console.log('111');
         await runner.assignService({
           name: serviceName,
           spec,
         });
+        console.log('oeuaoeu');
         logger.info(`service '${serviceName}' pushed to '${runner.id}'`);
       } catch (err) {
+        console.error(err);
         reassignService();
       }
     }

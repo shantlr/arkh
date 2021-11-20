@@ -45,8 +45,10 @@ const main = async () => {
 
   socket.on(
     'run-service',
-    ({ name, spec }: { name: string; spec: ServiceSpec }) => {
+    ({ name, spec }: { name: string; spec: ServiceSpec }, callback) => {
+      logger.info(`assigned '${name}'`);
       EventManager.push(EVENTS.tasks.run({ name, spec }));
+      callback({ success: true });
     }
   );
   socket.on('remove-service', ({ name }: { name: string }) => {
@@ -55,13 +57,13 @@ const main = async () => {
 
   // Side effects
   SideEffects.on('taskStateUpdate', (data) => {
-    socket.send('task-state', data);
+    socket.emit('task-state', data);
   });
   SideEffects.on('taskStdout', (data) => {
-    socket.send('task-stdout', data);
+    socket.emit('task-stdout', data);
   });
   SideEffects.on('taskStderr', (data) => {
-    socket.send('task-stderr', data);
+    socket.emit('task-stderr', data);
   });
 };
 

@@ -101,26 +101,32 @@ export const State = {
       const state = State.service.get(name);
       state.state = 'running';
       state.current_task_state = 'creating';
+      logger.info(`'${name}' task creating`);
     },
     toTaskRunning(name: string) {
       const state = State.service.get(name);
       state.state = 'running';
       state.current_task_state = 'running';
+      logger.info(`'${name}' task running`);
     },
     toTaskStopping(name: string) {
       const state = State.service.get(name);
       state.state = 'running';
       state.current_task_state = 'stopping';
+      logger.info(`'${name}' task stopping`);
     },
     toTaskStopped(name: string) {
       const state = State.service.get(name);
       state.state = 'off';
       state.current_task_state = 'stopped';
+      logger.info(`'${name}' task stopped`);
     },
     toTaskExited(name: string) {
       const state = State.service.get(name);
       state.state = 'off';
       state.current_task_state = 'exited';
+      logger.info(`'${name}' task exited`);
+      state.assignedRunnerId = null;
     },
 
     findState(state: ServiceStateEnum) {

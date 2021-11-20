@@ -43,11 +43,12 @@ export const State = {
       return IN_MEMORY_STATE.service.list[name];
     },
     add(state: ServiceState) {
-      if (IN_MEMORY_STATE.service) {
+      if (state.name in IN_MEMORY_STATE.service.list) {
         throw new Error(`service '${state.name}' already exists`);
       }
+
       IN_MEMORY_STATE.service.list[state.name] = state;
-      logger.info(`service '${name}' added`);
+      logger.info(`service '${state.name}' added`);
     },
     remove(name: string) {
       const existing = State.service.get(name);

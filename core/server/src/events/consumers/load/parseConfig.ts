@@ -22,7 +22,10 @@ export const parseService = (
     throw new InvalidConfig(`${stackName}.${name}.cmd missing`);
   }
   if (typeof config.cmd === 'string') {
-    res.cmd = config.cmd.slice(' ');
+    res.cmd = config.cmd
+      .split(' ')
+      .map((c: string) => c.trim())
+      .filter((c: string) => c);
   } else if (Array.isArray(config.cmd)) {
     config.cmd.forEach((elem) => {
       if (!['number', 'string', 'boolean'].includes(typeof elem)) {

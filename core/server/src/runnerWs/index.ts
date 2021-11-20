@@ -74,14 +74,14 @@ export const startRunnerWs = async ({
     );
     socket.on(
       'task-stdout',
-      ({ serviceName, log }: { serviceName: string; log: string }) => {
-        console.log('log', serviceName, log);
+      ({ serviceName, log }: { serviceName: string; log: Buffer }) => {
+        console.log('log', serviceName, log.toString());
       }
     );
     socket.on(
       'task-stderr',
-      ({ serviceName, log }: { serviceName: string; log: string }) => {
-        console.log('err', serviceName, log);
+      ({ serviceName, log }: { serviceName: string; log: Buffer }) => {
+        console.log('err', serviceName, log.toString());
       }
     );
   });

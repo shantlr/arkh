@@ -1,4 +1,5 @@
 import { ServiceSpec } from '@shantr/metro-common-types';
+import { createLogger, Logger } from '@shantr/metro-logger';
 import {
   spawn,
   SpawnOptionsWithoutStdio,
@@ -13,6 +14,8 @@ export type TaskState =
   | 'stopping'
   | 'stopped'
   | 'exited';
+
+const logger = createLogger(`task`);
 
 export class Task {
   serviceName: string;
@@ -38,11 +41,12 @@ export class Task {
   }
 
   async exec() {
-    if (!['noop', 'stopped'].includes(this.state)) {
+    if (!['noop', 'stopped', 'exited'].includes(this.state)) {
       throw new Error(`cannot exec in current state: ${this.state}`);
     }
     try {
       this.state = 'creating';
+      logger.info(`creating '${this.serviceName}'`);
       void SideEffects.emit('taskStateUpdate', {
         serviceName: this.serviceName,
         state: this.state,
@@ -57,6 +61,7 @@ export class Task {
         options.env = this.spec.env;
       }
       this.process = spawn(cmd, args, options);
+      logger.info(`running '${this.serviceName}'`);
 
       this.state = 'running';
       void SideEffects.emit('taskStateUpdate', {
@@ -77,6 +82,7 @@ export class Task {
         });
       });
       this.process.on('close', (code) => {
+        logger.info(`'${this.serviceName}' exited`);
         this.state = 'exited';
         void SideEffects.emit('taskStateUpdate', {
           serviceName: this.serviceName,
