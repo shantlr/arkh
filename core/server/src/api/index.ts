@@ -2,6 +2,7 @@ import express from 'express';
 import { createLogger } from '@shantr/metro-logger';
 import { expressLogger } from './middlewares/logger';
 import { stackRouter } from './routes/stack';
+import { serviceRouter } from './routes/service';
 
 export const startApi = async (port: number, logger = createLogger('api')) => {
   const app = express();
@@ -10,6 +11,7 @@ export const startApi = async (port: number, logger = createLogger('api')) => {
 
   return new Promise<void>((resolve) => {
     app.use('/api/stack', stackRouter());
+    app.use('/api/service', serviceRouter());
 
     app.listen(port, () => {
       logger.info(`listening on http://localhost:${port}`);

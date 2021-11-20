@@ -140,10 +140,13 @@ export const createEventQueue = <
   }
 
   queue.consumers.push({
-    name,
+    name: 'consumer',
     handler: (event, context) => {
       if (event.type in handlerByType) {
-        return handlerByType[event.type](event, context);
+        return handlerByType[event.type](event, {
+          ...context,
+          logger: context.logger.extend(event.type),
+        });
       }
       throw new Error(
         `unexpected event type: '${event.type}' in queue '${name}'`

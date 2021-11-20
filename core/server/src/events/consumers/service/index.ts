@@ -37,6 +37,13 @@ export const serviceQueue = createEventQueue('service', {
         });
         logger.info(`${serviceName} created`);
       }
+
+      if (!State.service.get(serviceName)) {
+        State.service.init({
+          name: serviceName,
+          state: 'off',
+        });
+      }
     }
   ),
   remove: handler(
@@ -78,7 +85,7 @@ export const serviceQueue = createEventQueue('service', {
     ) => {
       const serviceName = `${stackName}.${name}`;
       const service = await Service.getOne(serviceName);
-      if (service) {
+      if (!service) {
         logger.error(`'${serviceName}' not found`);
         return;
       }
@@ -87,6 +94,7 @@ export const serviceQueue = createEventQueue('service', {
         return;
       }
 
+      State.service.toPendingAssignment(serviceName);
       dispatcher.push(
         EVENTS.service.assignRunner({
           name: serviceName,
@@ -132,13 +140,14 @@ export const serviceQueue = createEventQueue('service', {
     ) => {
       const state = State.service.get(name);
       if (state.state !== 'pending-assignment') {
-        logger.info(`runner not pending assignment: ${state.state}`);
+        logger.info(`service not in pending assignment: ${state.state}`);
         return null;
       }
 
       const runnerId = State.runner.getRoundRobinNext('run-process');
       if (!runnerId) {
         logger.info(`no available runner found`);
+        logger.info(`service '${name}' will be waiting for runner to join`);
         return;
       }
 

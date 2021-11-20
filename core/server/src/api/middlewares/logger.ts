@@ -13,7 +13,7 @@ declare global {
 export const expressLogger = (loggerName = 'api') => {
   const logger = createLogger(loggerName);
   return (req: Request, res: Response, next: () => void) => {
-    req.logger = logger.prefix(req.originalUrl);
+    req.logger = logger.prefix(`${req.method} ${req.originalUrl}`);
     req.logger.info('started');
 
     res.on('close', () => {

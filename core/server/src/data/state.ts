@@ -67,6 +67,7 @@ export const State = {
         IN_MEMORY_STATE.service.list[state.name] = state;
       }
       IN_MEMORY_STATE.service.list[state.name] = state;
+      logger.info(`service '${state.name}' state inited`);
     },
     remove(name: string) {
       if (name in IN_MEMORY_STATE.service.list) {
@@ -178,12 +179,22 @@ export const State = {
         });
         logger.info(`runner '${id}' joined`);
       }
+
+      if (!IN_MEMORY_STATE.runner.roundRobins[type].ids.includes(id)) {
+        IN_MEMORY_STATE.runner.roundRobins[type].ids.push(id);
+      }
     },
     disconnected(runnerId: string) {
       const runner = State.runner.get(runnerId);
 
       if (runner) {
         runner.state = 'disconnected';
+        const idx = IN_MEMORY_STATE.runner.roundRobins[runner.type].ids.indexOf(
+          runner.id
+        );
+        if (idx !== -1) {
+          IN_MEMORY_STATE.runner.roundRobins[runner.type].ids.splice(idx, 1);
+        }
         logger.info(`runner '${runnerId}' disconnected`);
       } else {
         logger.warn(`runner '${runnerId}' disconnected: not found`);
