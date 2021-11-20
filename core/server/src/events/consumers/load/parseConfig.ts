@@ -71,7 +71,7 @@ export const parseStack = (name: string, config: any): StackSpec => {
     services: {},
   };
   forEach(config, (serviceSpecServiceSpec, serviceName) => {
-    res.services[name] = parseService(
+    res.services[serviceName] = parseService(
       serviceName,
       name,
       serviceSpecServiceSpec
