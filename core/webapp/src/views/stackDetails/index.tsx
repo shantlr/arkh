@@ -1,14 +1,14 @@
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { Outlet, useParams } from 'react-router';
 import styled from 'styled-components';
 import { API } from 'configs';
 import { Text } from 'components/text';
 import { map } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { faPlay, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
+import { NoStyleLink } from 'components/noStyleLink';
 
 const Container = styled.div`
   background-color: white;
@@ -16,6 +16,21 @@ const Container = styled.div`
   box-sizing: border-box;
   min-width: 200px;
   height: 100%;
+`;
+
+const ServiceList = styled.div`
+  display: flex;
+`;
+const ServiceItem = styled.div`
+  margin-right: ${(props) => props.theme.space.md};
+  background-color: ${(props) => props.theme.color.mainBg};
+  padding: ${(props) => props.theme.space.sm};
+  border-radius: ${(props) => props.theme.borderRadius.md};
+  transition: all 0.3s;
+  :hover {
+    background-color: ${(props) => props.theme.color.mainHighlightBg};
+    box-shadow: ${(props) => props.theme.shadow.md};
+  }
 `;
 
 export const StackDetails = () => {
@@ -27,6 +42,10 @@ export const StackDetails = () => {
       enabled: Boolean(name),
     }
   );
+  const { mutate: runService } = useMutation(
+    ({ serviceName }: { serviceName: string }) =>
+      API.service.run({ name: serviceName })
+  );
   console.log('stack', name, data);
 
   return (
@@ -34,11 +53,11 @@ export const StackDetails = () => {
       <BaseCard>
         <Container>
           <div>
-            <Link to="/stack">
+            <NoStyleLink to="/stack">
               <Button>
                 <FontAwesomeIcon icon={faTimes} />
               </Button>
-            </Link>
+            </NoStyleLink>
             {Boolean(data) && (
               <Text style={{ marginLeft: 5 }}>{data.name}</Text>
             )}
@@ -48,11 +67,32 @@ export const StackDetails = () => {
               <Text style={{ marginTop: 5 }} as="div">
                 Services:
               </Text>
-              {map(data.spec.services, (service, name) => (
-                <Link to={`service/${name}`} key={name}>
-                  <Text as="div">{name}</Text>
-                </Link>
-              ))}
+              <ServiceList>
+                {map(data.spec.services, (service, serviceKey) => (
+                  <NoStyleLink to={`service/${serviceKey}`} key={serviceKey}>
+                    <ServiceItem
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: 4,
+                      }}
+                    >
+                      <Text style={{ marginRight: 5 }}>{serviceKey}</Text>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          runService({
+                            serviceName: `${name}.${serviceKey}`,
+                          });
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faPlay} />
+                      </Button>
+                    </ServiceItem>
+                  </NoStyleLink>
+                ))}
+              </ServiceList>
             </div>
           )}
         </Container>

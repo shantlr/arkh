@@ -8,6 +8,7 @@ export const theme = {
     // mainBg: '#E0E5EB',
     // mainBg: '#F5F8FD',
     mainBg: '#F2F1F7',
+    mainHighlightBg: '#F7F7FC',
 
     // actionBg: `#7f5af0`,
     actionBg: `#7452D4`,
