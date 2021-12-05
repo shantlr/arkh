@@ -26,6 +26,12 @@ const Card = styled(BaseCard)`
   font-size: ${(props) => props.theme.fontSize.sm};
 `;
 
+const Timestamp = styled.span`
+  /* color: #3dd684; */
+  color: #8d8e8d;
+  font-size: 11px;
+`;
+
 const TextBatch = ({
   showTimestamp,
   date,
@@ -39,12 +45,13 @@ const TextBatch = ({
     return text.split('\n');
   }, [text]);
 
-  const d = dayjs(date).format('DD-MM-YYYY HH:mm');
+  const d = dayjs(date).format('DD-MM-YYYY HH:mm ');
   return (
     <>
       {lines.map((l, idx) => (
         <div key={idx}>
-          {showTimestamp ? d : ''} {l}
+          <Timestamp>{showTimestamp ? d : ''}</Timestamp>
+          {l}
         </div>
       ))}
     </>
@@ -71,7 +78,7 @@ const Option = styled.div<{ active?: boolean }>`
   opacity: 0.7;
   ${(props) => (props.active ? optionActive : null)};
   :hover {
-    ${optionActive}
+    ${optionActive};
   }
 `;
 
@@ -85,6 +92,7 @@ export const TaskLogs = ({ taskId }: { taskId: string }) => {
     <Container>
       <OptionList>
         <Option
+          active={showTimestamp}
           onClick={() => {
             setShowTimetstamp(!showTimestamp);
           }}
