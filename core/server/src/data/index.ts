@@ -133,6 +133,11 @@ export const Task = {
     },
   },
 
+  get(taskId: string) {
+    return getTask().select().first().where({
+      id: taskId,
+    });
+  },
   list(serviceName: string) {
     return getTask()
       .select()
@@ -143,7 +148,13 @@ export const Task = {
   },
 };
 
-const getTaskLog = () => knex('task_logs');
+const getTaskLog = () =>
+  knex<{
+    out: 0 | 1;
+    task_id: string;
+    text: string;
+    date: Date;
+  }>('task_logs');
 export const TaskLog = {
   async add({
     id,
@@ -152,7 +163,7 @@ export const TaskLog = {
     date,
   }: {
     id: string;
-    out: number;
+    out: 0 | 1;
     text: string;
     date: Date;
   }) {
@@ -163,5 +174,14 @@ export const TaskLog = {
       text,
       date,
     });
+  },
+
+  get(taskId: string) {
+    return getTaskLog()
+      .select()
+      .where({
+        task_id: taskId,
+      })
+      .orderBy('date');
   },
 };

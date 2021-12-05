@@ -2,7 +2,7 @@ import { BaseCard } from 'components/card';
 import { Text } from 'components/text';
 import { API } from 'configs';
 import { useQuery } from 'react-query';
-import { useParams } from 'react-router';
+import { Outlet, useNavigate, useParams } from 'react-router';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import relative from 'dayjs/plugin/relativeTime';
@@ -12,8 +12,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'components/button';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const DetailsContainer = styled.div`
   min-width: 400px;
   height: 100%;
   padding: ${(props) => props.theme.space.lg};
@@ -46,7 +53,7 @@ const getTaskState = (task: ServiceTask) => {
 };
 
 export const ServiceDetails = () => {
-  const { name: stackName, serviceName: serviceKey } = useParams();
+  const { name: stackName, serviceKey, taskId } = useParams();
 
   const serviceName = `${stackName}.${serviceKey}`;
   const { data } = useQuery(['service', serviceName], () =>
@@ -56,32 +63,43 @@ export const ServiceDetails = () => {
   const { data: tasks } = useQuery(['service', serviceName, 'tasks'], () =>
     API.service.task.list(serviceName)
   );
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!taskId && tasks && tasks.length > 0) {
+      navigate(`t/${tasks[0].id}`);
+    }
+  }, [tasks, taskId, navigate]);
 
-  console.log('service', serviceName, data, tasks);
   return (
     <Container>
-      <Card t="main">
-        <div>
-          <Link to={`/stack/${stackName}`}>
-            <Button>
-              <FontAwesomeIcon icon={faTimes} />
-            </Button>
-          </Link>
-          <Text style={{ marginLeft: 5 }}>{serviceName}</Text>
-        </div>
-        {tasks && (
+      <DetailsContainer>
+        <Card t="main">
           <div>
-            {tasks.map((task) => (
-              <div key={task.id}>
-                <DateFromNow date={task.creating_at} /> - {getTaskState(task)}{' '}
-                {typeof task.exit_code === 'number'
-                  ? `(${task.exit_code})`
-                  : ''}
-              </div>
-            ))}
+            <Link to={`/stack/${stackName}`}>
+              <Button>
+                <FontAwesomeIcon icon={faTimes} />
+              </Button>
+            </Link>
+            <Text style={{ marginLeft: 5 }}>{serviceName}</Text>
           </div>
-        )}
-      </Card>
+          {tasks && (
+            <div>
+              {tasks.map((task) => (
+                <Link key={task.id} to={`t/${task.id}`}>
+                  <div key={task.id}>
+                    <DateFromNow date={task.creating_at} /> -{' '}
+                    {getTaskState(task)}{' '}
+                    {typeof task.exit_code === 'number'
+                      ? `(${task.exit_code})`
+                      : ''}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Card>
+      </DetailsContainer>
+      <Outlet />
     </Container>
   );
 };

@@ -22,6 +22,10 @@ const active = {
   active: css``,
 };
 
+export type BaseCardProps = {
+  t?: keyof typeof base;
+  active?: boolean;
+};
 export const BaseCard = styled.div<{
   t?: keyof typeof base;
   active?: boolean;

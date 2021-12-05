@@ -44,12 +44,13 @@ const MenuItem = styled.div<{ active?: boolean }>`
   transition: all 0.5s;
   font-size: 22px;
   :hover {
-    background-color: ${(props) => props.theme.color.actionBg};
+    /* background-color: ${(props) => props.theme.color.actionBg};
     color: ${(props) => props.theme.color.actionColor};
+    box-shadow: ${(props) => props.theme.shadow.md}; */
     box-shadow: ${(props) => props.theme.shadow.md};
   }
   :active {
-    filter: brightness(1.1);
+    filter: brightness(1.3);
   }
 `;
 

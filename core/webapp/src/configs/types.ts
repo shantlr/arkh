@@ -24,3 +24,9 @@ export type ServiceTask = {
   stopped_at: number;
   stopping_at: number;
 };
+
+export type ServiceTaskLog = {
+  out: 0 | 1;
+  text: string;
+  date: number;
+};
