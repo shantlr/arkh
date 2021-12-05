@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Service } from 'src/data';
+import { Service, Task } from 'src/data';
 import { EventManager, EVENTS } from 'src/events';
 
 export const serviceRouter = () => {
@@ -14,6 +14,16 @@ export const serviceRouter = () => {
       return res.status(500).send();
     }
   });
+  router.get('/:name', async (req, res) => {
+    const { name } = req.params;
+    try {
+      const service = await Service.getOne(name);
+      return res.status(200).send(service);
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send(err.message);
+    }
+  });
   router.post('/:name/run', async (req, res) => {
     try {
       const service = await Service.getOne(req.params.name);
@@ -26,7 +36,22 @@ export const serviceRouter = () => {
       return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);
-      return res.status(500).send();
+      return res.status(500).send(err.message);
+    }
+  });
+
+  router.get('/:name/tasks', async (req, res) => {
+    const { name } = req.params;
+    try {
+      const service = await Service.getOne(name);
+      if (!service) {
+        return res.status(404).send();
+      }
+      const tasks = await Task.list(name);
+      return res.status(200).send(tasks);
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send(err.message);
     }
   });
 

@@ -28,7 +28,7 @@ export const stackRouter = () => {
     }
   });
 
-  router.get('/:name/run', async (req, res) => {
+  router.post('/:name/run', async (req, res) => {
     try {
       const stack = await Stack.getOne(req.params.name);
       if (!stack) {

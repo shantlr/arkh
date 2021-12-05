@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "start": "DEBUG=metro:* nodemon --exec ts-node -r tsconfig-paths/register ./src/index.ts",
-    "migrate:make": "ts-node -r tsconfig-paths/register ./src/scripts/makeMigration.ts"
+    "migrate:make": "ts-node -r tsconfig-paths/register ./src/scripts/makeMigration.ts",
+    "migrate:down": "ts-node -r tsconfig-paths/register ./src/scripts/migrateDown.ts"
   },
   "devDependencies": {
     "@shantr/metro-common-types": "0.1.0",
@@ -29,6 +30,7 @@
     "@shantr/metro-logger": "0.1.0",
     "@shantr/metro-queue": "0.1.0",
     "convict": "^6.2.1",
+    "cors": "^2.8.5",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",

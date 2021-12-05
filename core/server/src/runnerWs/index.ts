@@ -5,6 +5,8 @@ import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 import { createLogger } from '@shantr/metro-logger';
 import { RunnerType } from './class';
+import { Task, TaskLog } from 'src/data';
+import { ServiceSpec } from '@shantr/metro-common-types';
 
 export const startRunnerWs = async ({
   logger = createLogger('runner'),
@@ -38,7 +40,20 @@ export const startRunnerWs = async ({
 
     socket.on(
       'task-state',
-      ({ serviceName, state }: { serviceName: string; state: string }) => {
+      async ({
+        id: taskId,
+        serviceName,
+        state,
+        spec,
+
+        exitCode,
+      }: {
+        id: string;
+        serviceName: string;
+        state: string;
+        spec?: ServiceSpec;
+        exitCode?: number;
+      }) => {
         const service = State.service.get(serviceName);
         if (!service) {
           logger.info(
@@ -47,25 +62,41 @@ export const startRunnerWs = async ({
           return;
         }
 
+        if (service.assignedRunnerId !== runnerId) {
+          logger.error(
+            `WARNING: task started by runner '${runnerId}' but is assigned to '${service.assignedRunnerId}'`
+          );
+        }
+
         switch (state) {
           case 'creating': {
-            State.service.toTaskCreating(serviceName);
+            State.service.toTaskCreating(taskId, serviceName);
+            await Task.create({
+              id: taskId,
+              serviceName,
+              serviceSpec: spec,
+              runnerId,
+            });
             break;
           }
           case 'running': {
-            State.service.toTaskRunning(serviceName);
+            State.service.toTaskRunning(taskId, serviceName);
+            await Task.update.runningAt(taskId);
             break;
           }
           case 'stopping': {
-            State.service.toTaskStopping(serviceName);
+            State.service.toTaskStopping(taskId, serviceName);
+            await Task.update.stoppingAt(taskId);
             break;
           }
           case 'stopped': {
-            State.service.toTaskStopped(serviceName);
+            State.service.toTaskStopped(taskId, serviceName);
+            await Task.update.stoppedAt(taskId);
             break;
           }
           case 'exited': {
-            State.service.toTaskExited(serviceName);
+            State.service.toTaskExited(taskId, serviceName);
+            await Task.update.exited(taskId, exitCode);
             break;
           }
           default:
@@ -74,14 +105,38 @@ export const startRunnerWs = async ({
     );
     socket.on(
       'task-stdout',
-      ({ serviceName, log }: { serviceName: string; log: Buffer }) => {
-        console.log('log', serviceName, log.toString());
+      async ({
+        id: taskId,
+        log,
+      }: {
+        id: string;
+        serviceName: string;
+        log: Buffer;
+      }) => {
+        await TaskLog.add({
+          id: taskId,
+          out: 0,
+          text: log.toString(),
+          date: new Date(),
+        });
       }
     );
     socket.on(
       'task-stderr',
-      ({ serviceName, log }: { serviceName: string; log: Buffer }) => {
-        console.log('err', serviceName, log.toString());
+      async ({
+        id: taskId,
+        log,
+      }: {
+        id: string;
+        serviceName: string;
+        log: Buffer;
+      }) => {
+        await TaskLog.add({
+          id: taskId,
+          out: 1,
+          text: log.toString(),
+          date: new Date(),
+        });
       }
     );
   });

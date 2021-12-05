@@ -1,10 +1,11 @@
 import { ServiceSpec } from '@shantr/metro-common-types';
-import { createLogger, Logger } from '@shantr/metro-logger';
+import { createLogger } from '@shantr/metro-logger';
 import {
   spawn,
   SpawnOptionsWithoutStdio,
   ChildProcessWithoutNullStreams,
 } from 'child_process';
+import { nanoid } from 'nanoid';
 import { SideEffects } from 'src/events/sideEffects';
 
 export type TaskState =
@@ -18,6 +19,7 @@ export type TaskState =
 const logger = createLogger(`task`);
 
 export class Task {
+  id: string;
   serviceName: string;
   state: TaskState = 'noop';
 
@@ -45,11 +47,14 @@ export class Task {
       throw new Error(`cannot exec in current state: ${this.state}`);
     }
     try {
+      this.id = nanoid();
       this.state = 'creating';
       logger.info(`creating '${this.serviceName}'`);
       void SideEffects.emit('taskStateUpdate', {
+        id: this.id,
         serviceName: this.serviceName,
         state: this.state,
+        spec: this.spec,
       });
       const cmd = this.spec.cmd[0];
       const args = this.spec.cmd.slice(1);
@@ -65,18 +70,21 @@ export class Task {
 
       this.state = 'running';
       void SideEffects.emit('taskStateUpdate', {
+        id: this.id,
         serviceName: this.serviceName,
         state: this.state,
       });
 
       this.process.stdout.on('data', (chunk) => {
         void SideEffects.emit('taskStdout', {
+          id: this.id,
           serviceName: this.serviceName,
           log: chunk,
         });
       });
       this.process.stderr.on('data', (chunk) => {
         void SideEffects.emit('taskStderr', {
+          id: this.id,
           serviceName: this.serviceName,
           log: chunk,
         });
@@ -85,8 +93,10 @@ export class Task {
         logger.info(`'${this.serviceName}' exited`);
         this.state = 'exited';
         void SideEffects.emit('taskStateUpdate', {
+          id: this.id,
           serviceName: this.serviceName,
           state: this.state,
+          exitCode: code,
         });
         if (code !== 0) {
           //

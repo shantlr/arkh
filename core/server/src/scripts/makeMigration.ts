@@ -9,10 +9,13 @@ const main = async (): Promise<void> => {
     process.exit(1);
   }
 
-  knex.migrate.make(migrationName, {
+  await knex.migrate.make(migrationName, {
     stub: path.resolve(__dirname, 'migrationStub.ts'),
     extension: 'ts',
   });
 };
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

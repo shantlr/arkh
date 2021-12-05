@@ -7,6 +7,12 @@ export const config = convict({
       env: 'API_PORT',
       default: 4077,
     },
+    cors: {
+      origin: {
+        env: 'CORS_ORIGIN',
+        default: 'http://localhost:3000',
+      },
+    },
   },
   runner: {
     port: {

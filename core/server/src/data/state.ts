@@ -12,6 +12,8 @@ export type ServiceState = {
   name: string;
   state: ServiceStateEnum;
   assignedRunnerId?: string;
+
+  current_task_id?: string;
   current_task_state?:
     | 'noop'
     | 'creating'
@@ -97,33 +99,38 @@ export const State = {
       state.assignedRunnerId = runnerId;
     },
 
-    toTaskCreating(name: string) {
+    toTaskCreating(taskId: string, name: string) {
       const state = State.service.get(name);
       state.state = 'running';
+      state.current_task_id = taskId;
       state.current_task_state = 'creating';
       logger.info(`'${name}' task creating`);
     },
-    toTaskRunning(name: string) {
+    toTaskRunning(taskId: string, name: string) {
       const state = State.service.get(name);
       state.state = 'running';
+      state.current_task_id = taskId;
       state.current_task_state = 'running';
       logger.info(`'${name}' task running`);
     },
-    toTaskStopping(name: string) {
+    toTaskStopping(taskId: string, name: string) {
       const state = State.service.get(name);
       state.state = 'running';
+      state.current_task_id = taskId;
       state.current_task_state = 'stopping';
       logger.info(`'${name}' task stopping`);
     },
-    toTaskStopped(name: string) {
+    toTaskStopped(taskId: string, name: string) {
       const state = State.service.get(name);
       state.state = 'off';
+      state.current_task_id = taskId;
       state.current_task_state = 'stopped';
       logger.info(`'${name}' task stopped`);
     },
-    toTaskExited(name: string) {
+    toTaskExited(taskId: string, name: string) {
       const state = State.service.get(name);
       state.state = 'off';
+      state.current_task_id = taskId;
       state.current_task_state = 'exited';
       logger.info(`'${name}' task exited`);
       state.assignedRunnerId = null;

@@ -1,8 +1,15 @@
+import { ServiceSpec } from '@shantr/metro-common-types';
 import Emittery from 'emittery';
 import { TaskState } from 'src/lib/task';
 
 export const SideEffects = new Emittery<{
-  taskStateUpdate: { serviceName: string; state: TaskState };
-  taskStdout: { serviceName: string; log: string };
-  taskStderr: { serviceName: string; log: string };
+  taskStateUpdate: {
+    id: string;
+    serviceName: string;
+    state: TaskState;
+    spec?: ServiceSpec;
+    exitCode?: number;
+  };
+  taskStdout: { id: string; serviceName: string; log: string };
+  taskStderr: { id: string; serviceName: string; log: string };
 }>({});
