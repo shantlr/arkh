@@ -20,6 +20,7 @@ const Container = styled.div`
 
 const ServiceList = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 const ServiceItem = styled.div`
   margin-right: ${(props) => props.theme.space.md};
@@ -27,6 +28,7 @@ const ServiceItem = styled.div`
   padding: ${(props) => props.theme.space.sm};
   border-radius: ${(props) => props.theme.borderRadius.md};
   transition: all 0.3s;
+  min-width: 65px;
   :hover {
     background-color: ${(props) => props.theme.color.mainHighlightBg};
     box-shadow: ${(props) => props.theme.shadow.md};
@@ -34,7 +36,7 @@ const ServiceItem = styled.div`
 `;
 
 export const StackDetails = () => {
-  const { name } = useParams();
+  const { name, serviceKey: routeServiceKey } = useParams();
   const { data, isLoading } = useQuery(
     ['stack', name],
     () => API.stack.get(name as string),
@@ -46,7 +48,6 @@ export const StackDetails = () => {
     ({ serviceName }: { serviceName: string }) =>
       API.service.run({ name: serviceName })
   );
-  console.log('stack', name, data);
 
   return (
     <>
@@ -69,7 +70,15 @@ export const StackDetails = () => {
               </Text>
               <ServiceList>
                 {map(data.spec.services, (service, serviceKey) => (
-                  <NoStyleLink to={`service/${serviceKey}`} key={serviceKey}>
+                  <NoStyleLink
+                    to={`service/${serviceKey}`}
+                    key={serviceKey}
+                    onClick={(e) => {
+                      if (serviceKey === routeServiceKey) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
                     <ServiceItem
                       style={{
                         display: 'flex',

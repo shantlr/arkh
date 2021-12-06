@@ -41,6 +41,11 @@ export const StackListView = ({
                 key={stack.name}
                 style={{ textDecoration: 'none' }}
                 to={`/stack/${stack.name}`}
+                onClick={(e) => {
+                  if (stackMatch && stack.name === stackMatch.params.name) {
+                    e.preventDefault();
+                  }
+                }}
               >
                 <StackCard
                   active={Boolean(
