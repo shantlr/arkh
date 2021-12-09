@@ -3,6 +3,7 @@ import { Service, Stack } from 'src/data';
 import { EVENTS } from 'src/events';
 import { StackSpec } from '@shantr/metro-common-types';
 import { handler, createEventQueue } from '@shantr/metro-queue';
+import { SideEffects } from 'src/events/sideEffects';
 
 export const stackQueue = createEventQueue('stack', {
   save: handler(
@@ -17,12 +18,14 @@ export const stackQueue = createEventQueue('stack', {
           spec,
         });
         logger.info(`'${name}' created`);
+        void SideEffects.emit('addStack', { name });
       } else {
         if (!isEqual(existingStack.spec, spec) || existingStack.to_remove) {
           await Stack.updateOne(name, {
             spec,
           });
           logger.info(`'${name}' updated`);
+          void SideEffects.emit('updateStack', { name });
         } else {
           logger.info(`'${name}' unchanged`);
         }
@@ -75,6 +78,11 @@ export const stackQueue = createEventQueue('stack', {
   removeIfAllServiceRemoved: handler(
     async ({ name }: { name: string }, { logger }) => {
       const stack = await Stack.getOne(name);
+      if (!stack) {
+        logger.error(`stack '${name}' not found`);
+        return;
+      }
+
       if (!stack.to_remove) {
         logger.info(`'${name}' is not expected to be removed (ignored)`);
         return;
@@ -85,6 +93,7 @@ export const stackQueue = createEventQueue('stack', {
       if (!services.length) {
         await Stack.removeOne(name);
         logger.info(`'${name}' removed`);
+        void SideEffects.emit('removeStack', { name });
       }
     }
   ),

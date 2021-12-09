@@ -1,4 +1,6 @@
-import { queryClient } from 'configs';
+import { createSocket, queryClient } from 'configs';
+import { SocketProvider } from 'lib/context/socket';
+import { useState } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
@@ -22,31 +24,35 @@ const Container = styled.div`
 `;
 
 export const RootApp = () => {
+  const [socket] = useState(() => createSocket());
+
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
-          <Container>
-            <SideBar />
-            <Routes>
-              <Route path="stack" element={<StackListView />}>
-                <Route path=":name" element={<StackDetails />}>
+          <SocketProvider socket={socket}>
+            <Container>
+              <SideBar />
+              <Routes>
+                <Route path="stack" element={<StackListView />}>
+                  <Route path=":name" element={<StackDetails />}>
+                    <Route
+                      path="service/:serviceKey"
+                      element={<ServiceDetails />}
+                    >
+                      <Route path="t/:taskId" element={<TaskDetails />} />
+                    </Route>
+                  </Route>
                   <Route
-                    path="service/:serviceKey"
+                    path="service/:serviceName/*"
                     element={<ServiceDetails />}
                   >
                     <Route path="t/:taskId" element={<TaskDetails />} />
                   </Route>
                 </Route>
-                <Route
-                  path="service/:serviceName/*"
-                  element={<ServiceDetails />}
-                >
-                  <Route path="t/:taskId" element={<TaskDetails />} />
-                </Route>
-              </Route>
-            </Routes>
-          </Container>
+              </Routes>
+            </Container>
+          </SocketProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>

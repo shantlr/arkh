@@ -1,11 +1,12 @@
 import { API } from 'configs';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled, { css } from 'styled-components';
 import dayjs from 'dayjs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
 import { BaseCard } from 'components/card';
+import { useSocket, useSocketEmit, useSocketListen } from 'lib/context/socket';
 
 const Container = styled.div`
   padding: ${(props) => props.theme.space.lg};
@@ -27,7 +28,6 @@ const Card = styled(BaseCard)`
 `;
 
 const Timestamp = styled.span`
-  /* color: #3dd684; */
   color: #8d8e8d;
   font-size: 11px;
 `;
@@ -87,6 +87,14 @@ export const TaskLogs = ({ taskId }: { taskId: string }) => {
     API.service.task.logs(taskId)
   );
   const [showTimestamp, setShowTimetstamp] = useState(true);
+
+  // useSocketEmit('subscribe-task-logs', taskId);
+  // useSocketListen(
+  //   `task-log:${taskId}`,
+  //   useCallback((log: string) => {
+  //     console.log('log', log);
+  //   }, [])
+  // );
 
   return (
     <Container>

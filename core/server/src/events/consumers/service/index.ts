@@ -5,6 +5,7 @@ import { handler, handlers, createEventQueue } from '@shantr/metro-queue';
 import { Service, Stack } from 'src/data';
 import { State } from 'src/data/state';
 import { EVENTS } from 'src/events';
+import { SideEffects } from 'src/events/sideEffects';
 
 export const serviceQueue = createEventQueue('service', {
   save: handler(
@@ -25,6 +26,7 @@ export const serviceQueue = createEventQueue('service', {
             spec,
           });
           logger.info(`'${serviceName}' updated`);
+          void SideEffects.emit('updateService', { name: serviceName });
         } else {
           logger.info(`'${serviceName}' unchanged`);
         }
@@ -36,6 +38,7 @@ export const serviceQueue = createEventQueue('service', {
           key: name,
         });
         logger.info(`${serviceName} created`);
+        void SideEffects.emit('addService', { name: serviceName });
       }
 
       if (!State.service.get(serviceName)) {
@@ -61,6 +64,7 @@ export const serviceQueue = createEventQueue('service', {
             stackName,
           })
         );
+        void SideEffects.emit('removeService', { name: key });
       } else {
         logger.info(`'${key}' not found`);
       }

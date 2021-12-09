@@ -21,6 +21,10 @@ export const config = convict({
     },
   },
   configs: {
+    watch: {
+      env: 'CONFIGS_WATCH',
+      default: 'true',
+    },
     path: {
       env: 'CONFIGS_PATH',
       default: './configs/',

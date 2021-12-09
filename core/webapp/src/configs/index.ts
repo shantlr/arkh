@@ -1,5 +1,6 @@
 import ky from 'ky';
 import { QueryClient } from 'react-query';
+import io from 'socket.io-client';
 import { ServiceTask, ServiceTaskLog, Stack } from './types';
 
 export const API_URL = process.env.REACT_APP_API_URL;
@@ -50,4 +51,11 @@ export const API = {
       },
     },
   },
+};
+
+const WS_URL = process.env.REACT_APP_API_WS as string;
+export const createSocket = () => {
+  return io(WS_URL, {
+    transports: ['websocket'],
+  });
 };

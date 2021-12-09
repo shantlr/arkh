@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { Outlet, useParams } from 'react-router';
 import styled from 'styled-components';
 import { API } from 'configs';
@@ -9,6 +9,8 @@ import { faPlay, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
 import { NoStyleLink } from 'components/noStyleLink';
+import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
+import { useCallback } from 'react';
 
 const Container = styled.div`
   background-color: white;
@@ -35,6 +37,18 @@ const ServiceItem = styled.div`
   }
 `;
 
+const useSubscribeStack = createUseSubscribe({
+  key: 'subscribe-stacks',
+  subscribe(socket) {
+    console.log('sub');
+    socket.emit('subscribe-stacks');
+  },
+  unsubscribe(socket) {
+    console.log('unsub');
+    socket.emit('unsubscribe-stacks');
+  },
+});
+
 export const StackDetails = () => {
   const { name, serviceKey: routeServiceKey } = useParams();
   const { data, isLoading } = useQuery(
@@ -47,6 +61,21 @@ export const StackDetails = () => {
   const { mutate: runService } = useMutation(
     ({ serviceName }: { serviceName: string }) =>
       API.service.run({ name: serviceName })
+  );
+
+  const queryClient = useQueryClient();
+
+  useSubscribeStack();
+  useSocketListen(
+    'stack-event',
+    useCallback(
+      (event) => {
+        console.log(event);
+        queryClient.invalidateQueries('stacks');
+        queryClient.invalidateQueries('stack');
+      },
+      [queryClient]
+    )
   );
 
   return (
