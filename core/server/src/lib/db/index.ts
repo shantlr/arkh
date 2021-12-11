@@ -29,7 +29,8 @@ export interface EntityAccessor<Deserialized> {
 }
 
 export const createCollectionAccessor = <
-  DeserializedExtraData extends Record<string, any> = Record<string, never>,
+  DeserializedExtraData extends Record<string, any>,
+  // StaticMethods extends Record<string, (...args: any[]) => any>,
   SerializedExtraData extends Record<
     string,
     string | boolean | number
@@ -107,7 +108,20 @@ export const createCollectionAccessor = <
       return existing;
     },
   };
+
   return accessor;
+};
+export const addStaticMethods = <
+  T,
+  StaticMethods extends Record<string, (...args: any[]) => any>
+>(
+  entityAccessor: EntityAccessor<T>,
+  statics: StaticMethods
+): EntityAccessor<T> & StaticMethods => {
+  return {
+    ...statics,
+    ...entityAccessor,
+  };
 };
 
 type NonScalarFields<T, K = keyof T> = K extends keyof T

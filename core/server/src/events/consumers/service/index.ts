@@ -26,7 +26,10 @@ export const serviceQueue = createEventQueue('service', {
             spec,
           });
           logger.info(`'${serviceName}' updated`);
-          void SideEffects.emit('updateService', { name: serviceName });
+          void SideEffects.emit('updateService', {
+            stackName,
+            fullName: serviceName,
+          });
         } else {
           logger.info(`'${serviceName}' unchanged`);
         }
@@ -38,7 +41,10 @@ export const serviceQueue = createEventQueue('service', {
           key: name,
         });
         logger.info(`${serviceName} created`);
-        void SideEffects.emit('addService', { name: serviceName });
+        void SideEffects.emit('addService', {
+          stackName,
+          fullName: serviceName,
+        });
       }
 
       if (!State.service.get(serviceName)) {
@@ -64,7 +70,7 @@ export const serviceQueue = createEventQueue('service', {
             stackName,
           })
         );
-        void SideEffects.emit('removeService', { name: key });
+        void SideEffects.emit('removeService', { stackName, fullName: key });
       } else {
         logger.info(`'${key}' not found`);
       }

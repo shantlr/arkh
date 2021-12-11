@@ -24,6 +24,11 @@ export const API = {
       const res = await base.post(`stack/${name}/run`);
       return res.json();
     },
+
+    async serviceStates({ name }: { name: string }) {
+      const res = await base.get(`stack/${name}/services/state`);
+      return res.json();
+    },
   },
   service: {
     async list() {

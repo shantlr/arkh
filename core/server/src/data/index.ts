@@ -1,6 +1,12 @@
-import { createCollectionAccessor, deserializer, serializer } from 'src/lib/db';
+import {
+  addStaticMethods,
+  createCollectionAccessor,
+  deserializer,
+  serializer,
+} from 'src/lib/db';
 import { knex } from './knex';
 import { MetroSpec, StackSpec, ServiceSpec } from '@shantr/metro-common-types';
+import { SideEffects } from 'src/events/sideEffects';
 
 export { doMigrations } from './knex';
 
@@ -33,22 +39,36 @@ export const Stack = createCollectionAccessor<{
     spec: (v) => JSON.stringify(v),
   }),
 });
-export const Service = createCollectionAccessor<{
-  spec: ServiceSpec;
-  key: string;
-  stack: string;
-}>({
-  name: 'services',
-  knex,
-  mapDoc: deserializer({
-    spec(value) {
-      return JSON.parse(value);
+export const Service = addStaticMethods(
+  createCollectionAccessor<{
+    spec: ServiceSpec;
+    key: string;
+    stack: string;
+  }>({
+    name: 'services',
+    knex,
+    mapDoc: deserializer({
+      spec(value) {
+        return JSON.parse(value);
+      },
+    }),
+    serializeDoc: serializer({
+      spec: (v) => JSON.stringify(v),
+    }),
+  }),
+  {
+    getStackNameFromFullName(fullName: string): string {
+      return fullName.split('.')[0];
     },
-  }),
-  serializeDoc: serializer({
-    spec: (v) => JSON.stringify(v),
-  }),
-});
+    splitFullName(fullName: string) {
+      const [stackName, serviceName] = fullName.split('.');
+      return {
+        stackName,
+        serviceName,
+      };
+    },
+  }
+);
 
 const getTask = () =>
   knex<{

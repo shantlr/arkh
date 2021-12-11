@@ -6,11 +6,11 @@ export const SideEffects = new Emittery<{
   removeStack: { name: string };
   updateStackState: any;
 
-  addService: { name: string };
-  updateService: { name: string };
-  updateServiceState: any;
-  removeService: { name: string };
+  addService: { stackName: string; fullName: string };
+  updateService: { stackName: string; fullName: string };
+  updateServiceState: { fullName: string };
+  removeService: { stackName: string; fullName: string };
 
   addTask: any;
-  taskLogs: any;
+  taskLogs: { taskId: string };
 }>();

@@ -27,8 +27,12 @@ export const theme = {
 
     title: '#fffffe',
 
-    text: '#94a1b2',
+    // text: '#94a1b2',
+    text: '#46454B',
     textLight: '#E0E5EB',
+
+    success: '#3ED383',
+    successColor: 'white',
   },
   borderRadius: {
     md: `4px`,
