@@ -8,8 +8,8 @@ import { Stack } from 'configs/types';
 import { useStackServiceStates, useSubscribeServiceStates } from 'hooks/query';
 import { map } from 'lodash';
 import { useMutation } from 'react-query';
-import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
+import { StackStatusIndicator } from './indicator';
 
 const StackCardContainer = styled(BaseCard)<{ active?: boolean }>`
   padding: ${(props) => props.theme.space.lg};
@@ -41,24 +41,6 @@ const StackTitle = styled.div`
 const ServiceList = styled.div`
   display: flex;
 `;
-
-// const ServiceContainer = styled.div`
-//   background-color: white;
-//   color: ${(props) => props.theme.color.text};
-//   margin-right: ${(props) => props.theme.space.md};
-//   border-radius: ${(props) => props.theme.borderRadius.lg};
-//   padding: ${(props) => props.theme.space.md};
-//   cursor: pointer;
-
-//   transition: all 0.5s;
-//   :hover {
-//     filter: brightness(1.1);
-//     box-shadow: ${(props) => props.theme.shadow.md};
-//   }
-//   :active {
-//     opacity: 0.8;
-//   }
-// `;
 
 const stateCss = {
   running: css`
@@ -112,6 +94,7 @@ export const StackCard = ({
   return (
     <StackCardContainer active={active}>
       <StackHeader>
+        <StackStatusIndicator serviceStates={serviceStates} />
         <StackTitle>{stack.name}</StackTitle>
         <StackHeaderActions>
           <Button

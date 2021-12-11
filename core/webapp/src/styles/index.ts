@@ -33,6 +33,9 @@ export const theme = {
 
     success: '#3ED383',
     successColor: 'white',
+    warning: '#fbbf24',
+
+    danger: '#ef4444',
   },
   borderRadius: {
     md: `4px`,
