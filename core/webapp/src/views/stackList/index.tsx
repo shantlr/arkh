@@ -8,6 +8,10 @@ import { StackCard } from './stackCard';
 const Container = styled.div`
   width: 100%;
   height: 100%;
+  min-width: 250px;
+  flex-grow: 1;
+  flex-shrink: 2;
+
   padding: ${(props) => props.theme.space.lg};
   padding-left: 0;
   box-sizing: border-box;

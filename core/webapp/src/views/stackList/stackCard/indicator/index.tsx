@@ -75,11 +75,9 @@ export const StackStatusIndicator = ({
     return 'all-off';
   }, [serviceStates]);
 
-  console.log(state, serviceStates);
-
   return (
     <Container>
-      <Indicator state={state} />
+      <Indicator state={state}></Indicator>
     </Container>
   );
 };

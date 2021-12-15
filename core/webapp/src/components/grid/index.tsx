@@ -23,7 +23,7 @@ const Container = styled.div`
 `;
 
 type GridProps = {
-  children?: JSX.Element | JSX.Element[];
+  children?: JSX.Element | boolean | (JSX.Element | boolean)[];
   dropAcceptType: string;
 };
 
@@ -42,24 +42,25 @@ const GridContainer = ({
     width,
   });
 
-  console.log('grid state', state);
+  // console.log('grid state', state);
 
   let childKeys: Record<string, true> = {};
   const childrenByKey: Record<string, JSX.Element> = {};
 
   if (Array.isArray(children)) {
     children.forEach((child) => {
-      if (child.key) {
+      if (typeof child === 'object' && child.key) {
         childKeys[child.key] = true;
         childrenByKey[child.key] = child;
       }
     });
-  } else if (children && children.key) {
+  } else if (typeof children === 'object' && children.key) {
     childKeys[children.key] = true;
     childrenByKey[children.key] = children;
   }
 
   const memoChildKeys = useEqualMemo(childKeys);
+
   useEffect(() => {
     dispatch({ type: 'sync-keys', childKeys: memoChildKeys });
   }, [memoChildKeys]);
@@ -97,6 +98,12 @@ const GridContainer = ({
           <GridRowContent key="row-content">
             {row.cells.map((cell, cellIdx) => {
               const c = childrenByKey[cell.key];
+              if (!c) {
+                // This may happen when a child is removed
+                // as sync will happen in next frame
+                return null;
+              }
+
               return (
                 <GridCell
                   key={cell.key}

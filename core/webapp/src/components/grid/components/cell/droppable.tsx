@@ -22,7 +22,7 @@ export const GridCellHorizDroppable = ({
 
   onDrop?: (item: { rowIndex: number; cellIndex: number }) => void;
 }) => {
-  const [p, drop] = useDrop(
+  const [, drop] = useDrop(
     () => ({
       drop(item: { rowIndex: number; cellIndex: number }) {
         if (onDrop) {

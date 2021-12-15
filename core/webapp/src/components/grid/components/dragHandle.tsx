@@ -52,6 +52,7 @@ export const GridVertResizeDragHandle = ({
       removeMouseUp();
       removeMouseMove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clicked]);
 
   return (
@@ -114,6 +115,7 @@ export const GridHorizResizeDragHandle = ({
       removeMouseUp();
       removeMouseMove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clicked]);
 
   return (

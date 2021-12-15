@@ -37,7 +37,6 @@ export const GridRow = ({
     dstRowIndex: number;
   }) => void;
 }) => {
-  console.log(rowIndex, isCellAlone);
   const [{ hasTop, hasBottom }, drop] = useDrop(
     () => ({
       accept: dropAcceptType,
@@ -56,7 +55,6 @@ export const GridRow = ({
             hasBottom: false,
           };
         }
-        console.log(item);
 
         return {
           hasTop: !(item.rowIndex === rowIndex - 1 && item.isAloneInRow),

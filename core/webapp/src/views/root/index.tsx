@@ -1,6 +1,8 @@
 import { createSocket, queryClient } from 'configs';
 import { SocketProvider } from 'lib/context/socket';
 import { useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClientProvider } from 'react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
@@ -20,7 +22,6 @@ const Container = styled.div`
   flex-direction: row;
 
   background-color: white;
-  /* background-color: ${(props) => props.theme.color.mainBg}; */
 `;
 
 export const RootApp = () => {
@@ -29,31 +30,33 @@ export const RootApp = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <SocketProvider socket={socket}>
-            <Container>
-              <SideBar />
-              <Routes>
-                <Route path="stack" element={<StackListView />}>
-                  <Route path=":name" element={<StackDetails />}>
+        <DndProvider backend={HTML5Backend}>
+          <ThemeProvider theme={theme}>
+            <SocketProvider socket={socket}>
+              <Container>
+                <SideBar />
+                <Routes>
+                  <Route path="stack" element={<StackListView />}>
+                    <Route path=":name" element={<StackDetails />}>
+                      <Route
+                        path="service/:serviceKey"
+                        element={<ServiceDetails />}
+                      >
+                        <Route path="t/:taskId" element={<TaskDetails />} />
+                      </Route>
+                    </Route>
                     <Route
-                      path="service/:serviceKey"
+                      path="service/:serviceName/*"
                       element={<ServiceDetails />}
                     >
                       <Route path="t/:taskId" element={<TaskDetails />} />
                     </Route>
                   </Route>
-                  <Route
-                    path="service/:serviceName/*"
-                    element={<ServiceDetails />}
-                  >
-                    <Route path="t/:taskId" element={<TaskDetails />} />
-                  </Route>
-                </Route>
-              </Routes>
-            </Container>
-          </SocketProvider>
-        </ThemeProvider>
+                </Routes>
+              </Container>
+            </SocketProvider>
+          </ThemeProvider>
+        </DndProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );

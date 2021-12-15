@@ -49,3 +49,19 @@ export const useSubscribeServiceStates = (stackName: string) => {
     }
   );
 };
+
+export const useService = (fullName: string) => {
+  return useQuery(['service', fullName], () => API.service.get(fullName));
+};
+export const useServiceTasks = (fullName: string) =>
+  useQuery(['service', fullName, 'tasks'], () =>
+    API.service.task.list(fullName)
+  );
+export const useServiceTaskLogs = (taskId: string | null | undefined) =>
+  useQuery(
+    ['task', taskId, 'logs'],
+    () => (taskId ? API.service.task.logs(taskId) : null),
+    {
+      enabled: Boolean(taskId),
+    }
+  );

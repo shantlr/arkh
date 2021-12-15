@@ -40,6 +40,7 @@ const StackTitle = styled.div`
 `;
 const ServiceList = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const stateCss = {
@@ -58,6 +59,7 @@ const stateCss = {
 const ServiceItem = styled.div<{ state?: keyof typeof stateCss }>`
   margin-right: ${(props) => props.theme.space.md};
   padding: ${(props) => props.theme.space.sm};
+  margin-bottom: 2px;
   border-radius: ${(props) => props.theme.borderRadius.md};
   transition: all 0.3s;
   min-width: 65px;
@@ -88,6 +90,11 @@ export const StackCard = ({
       name: stack.name,
     })
   );
+  const { mutate: runService } = useMutation(
+    ({ serviceName }: { serviceName: string }) =>
+      API.service.run({ name: serviceName })
+  );
+
   const { data: serviceStates } = useStackServiceStates(stack.name);
   useSubscribeServiceStates(stack.name);
 
@@ -123,17 +130,14 @@ export const StackCard = ({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                runService({
+                  serviceName: `${stack.name}.${serviceKey}`,
+                });
               }}
             >
               <FontAwesomeIcon icon={faPlay} />
             </Button>
           </ServiceItem>
-          // <Link
-          //   key={serviceKey}
-          //   to={`/stack/${stack.name}/service/${serviceKey}`}
-          // >
-          // <ServiceContainer kLinkey={serviceKey}>{serviceKey}</ServiceContainer>
-          // </Link>
         ))}
       </ServiceList>
     </StackCardContainer>

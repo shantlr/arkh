@@ -1,67 +1,94 @@
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { Outlet, useParams } from 'react-router';
 import styled from 'styled-components';
 import { API } from 'configs';
 import { Text } from 'components/text';
-import { map } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
 import { NoStyleLink } from 'components/noStyleLink';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useCallback } from 'react';
+import { Grid } from 'components/grid';
+import { map } from 'lodash';
+import { ServiceLogs } from './serviceLog';
 
 const Container = styled.div`
   background-color: white;
   padding-top: ${(props) => props.theme.space.lg};
   box-sizing: border-box;
-  min-width: 200px;
+  min-width: 500px;
   height: 100%;
-`;
 
-const ServiceList = styled.div`
   display: flex;
-  flex-wrap: wrap;
-`;
-const ServiceItem = styled.div`
-  margin-right: ${(props) => props.theme.space.md};
-  background-color: ${(props) => props.theme.color.mainBg};
-  padding: ${(props) => props.theme.space.sm};
-  border-radius: ${(props) => props.theme.borderRadius.md};
-  transition: all 0.3s;
-  min-width: 65px;
-  :hover {
-    background-color: ${(props) => props.theme.color.mainHighlightBg};
-    box-shadow: ${(props) => props.theme.shadow.md};
-  }
+  flex-direction: column;
 `;
 
 const useSubscribeStack = createUseSubscribe({
   key: 'subscribe-stacks',
   subscribe(socket) {
-    console.log('sub');
     socket.emit('subscribe-stacks');
   },
   unsubscribe(socket) {
-    console.log('unsub');
     socket.emit('unsubscribe-stacks');
   },
 });
 
+// const ExampleItem = ({
+//   children,
+//   rowIndex,
+//   cellIndex,
+//   isAloneInRow,
+// }: {
+//   children: string;
+//   rowIndex?: number;
+//   cellIndex?: number;
+//   isAloneInRow?: boolean;
+// }) => {
+//   const [p, drag, preview] = useDrag(
+//     () => ({
+//       type: 'cell',
+//       item: {
+//         rowIndex,
+//         cellIndex,
+//         isAloneInRow,
+//       },
+//     }),
+//     [rowIndex, cellIndex, isAloneInRow]
+//   );
+//   return (
+//     <div
+//       ref={preview}
+//       key="s-1"
+//       style={{
+//         display: 'flex',
+//         alignItems: 'center',
+//         justifyContent: 'center',
+//         height: '100%',
+//       }}
+//     >
+//       <div style={{ cursor: 'grab' }} ref={drag}>
+//         :::
+//       </div>
+//       {children}
+//     </div>
+//   );
+// };
+
 export const StackDetails = () => {
   const { name, serviceKey: routeServiceKey } = useParams();
-  const { data, isLoading } = useQuery(
+  const { data } = useQuery(
     ['stack', name],
     () => API.stack.get(name as string),
     {
       enabled: Boolean(name),
     }
   );
-  const { mutate: runService } = useMutation(
-    ({ serviceName }: { serviceName: string }) =>
-      API.service.run({ name: serviceName })
-  );
+  // const { mutate: runService } = useMutation(
+  //   ({ serviceName }: { serviceName: string }) =>
+  //     API.service.run({ name: serviceName })
+  // );
 
   const queryClient = useQueryClient();
 
@@ -70,7 +97,6 @@ export const StackDetails = () => {
     'stack-event',
     useCallback(
       (event) => {
-        console.log(event);
         queryClient.invalidateQueries('stacks');
         queryClient.invalidateQueries('stack');
       },
@@ -80,9 +106,9 @@ export const StackDetails = () => {
 
   return (
     <>
-      <BaseCard>
+      <BaseCard style={{ width: '100%', flexGrow: 3, paddingLeft: 0 }}>
         <Container>
-          <div>
+          <div style={{ marginBottom: 5 }}>
             <NoStyleLink to="/stack">
               <Button>
                 <FontAwesomeIcon icon={faTimes} />
@@ -92,47 +118,38 @@ export const StackDetails = () => {
               <Text style={{ marginLeft: 5 }}>{data.name}</Text>
             )}
           </div>
-          {Boolean(data) && (
-            <div>
-              <Text style={{ marginTop: 5 }} as="div">
-                Services:
-              </Text>
-              <ServiceList>
-                {map(data.spec.services, (service, serviceKey) => (
-                  <NoStyleLink
-                    to={`service/${serviceKey}`}
-                    key={serviceKey}
-                    onClick={(e) => {
-                      if (serviceKey === routeServiceKey) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <ServiceItem
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: 4,
-                      }}
-                    >
-                      <Text style={{ marginRight: 5 }}>{serviceKey}</Text>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          runService({
-                            serviceName: `${name}.${serviceKey}`,
-                          });
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faPlay} />
-                      </Button>
-                    </ServiceItem>
-                  </NoStyleLink>
-                ))}
-              </ServiceList>
+          <Grid dropAcceptType="cell">
+            {Boolean(data) &&
+              map(data.spec.services, (service, key) => (
+                <ServiceLogs
+                  key={`${name}.${key}`}
+                  fullName={`${name}.${key}`}
+                />
+              ))}
+            {/* <ExampleItem key="s-1">S-1</ExampleItem>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+              }}
+              key="s-2"
+            >
+              S-2
             </div>
-          )}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+              }}
+              key="s-3"
+            >
+              S-3
+            </div> */}
+          </Grid>
         </Container>
       </BaseCard>
       <Outlet />

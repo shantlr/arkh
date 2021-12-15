@@ -169,7 +169,6 @@ export const reducer = (
             // child already in rows
             return;
           }
-          s.keys[key] = true;
           const cell = {
             key,
             width: 0,
@@ -187,6 +186,7 @@ export const reducer = (
             });
           }
         });
+        s.keys = action.childKeys;
 
         redistributeRowSizes(s.rows);
         redistributeRowCells(s.rows);

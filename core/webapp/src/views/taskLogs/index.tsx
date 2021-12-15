@@ -1,12 +1,11 @@
 import { API } from 'configs';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled, { css } from 'styled-components';
 import dayjs from 'dayjs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
 import { BaseCard } from 'components/card';
-import { useSocket, useSocketEmit, useSocketListen } from 'lib/context/socket';
 
 const Container = styled.div`
   padding: ${(props) => props.theme.space.lg};
