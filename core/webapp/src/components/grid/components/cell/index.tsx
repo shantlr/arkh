@@ -7,8 +7,6 @@ const GridCellContainer = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: red;
-  border-radius: 35px;
   box-sizing: border-box;
 `;
 export const GridCell = ({

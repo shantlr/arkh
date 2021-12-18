@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { CSSProperties, useEffect, useReducer } from 'react';
 import styled from 'styled-components';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -17,20 +17,21 @@ const Container = styled.div`
 
   display: flex;
   flex-direction: column;
-
-  background-color: gray;
-  border-radius: 5px;
 `;
 
 type GridProps = {
   children?: JSX.Element | boolean | (JSX.Element | boolean)[];
   dropAcceptType: string;
+  className?: string;
+  style?: CSSProperties;
 };
 
 const GridContainer = ({
   width,
   height,
   children,
+  className,
+  style,
   dropAcceptType,
 }: {
   height: number;
@@ -74,7 +75,9 @@ const GridContainer = ({
 
   return (
     <Container
+      className={className}
       style={{
+        ...(style || null),
         height,
         width,
       }}

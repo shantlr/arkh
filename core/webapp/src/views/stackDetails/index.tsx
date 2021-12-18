@@ -124,31 +124,9 @@ export const StackDetails = () => {
                 <ServiceLogs
                   key={`${name}.${key}`}
                   fullName={`${name}.${key}`}
+                  dragType="cell"
                 />
               ))}
-            {/* <ExampleItem key="s-1">S-1</ExampleItem>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-              }}
-              key="s-2"
-            >
-              S-2
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-              }}
-              key="s-3"
-            >
-              S-3
-            </div> */}
           </Grid>
         </Container>
       </BaseCard>

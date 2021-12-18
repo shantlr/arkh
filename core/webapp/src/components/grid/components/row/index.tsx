@@ -4,12 +4,9 @@ import styled from 'styled-components';
 import { GridRowVertDroppable } from './droppable';
 
 export const GridRowContainer = styled.div`
-  background: cyan;
   width: 100%;
   box-sizing: border-box;
   position: relative;
-
-  border-radius: 15px;
 `;
 
 export const GridRowContent = styled.div`

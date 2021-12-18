@@ -1,4 +1,3 @@
-import { BaseCard } from 'components/card';
 import dayjs from 'dayjs';
 import { useMemo } from 'react';
 import styled from 'styled-components';
@@ -6,6 +5,7 @@ import styled from 'styled-components';
 const Timestamp = styled.span`
   color: #8d8e8d;
   font-size: 11px;
+  user-select: none;
 `;
 
 export const TextBatch = ({
@@ -33,13 +33,16 @@ export const TextBatch = ({
     </>
   );
 };
-const Container = styled(BaseCard)`
+const Container = styled.div`
   background-color: black;
   padding: ${(props) => props.theme.space.md};
   height: 100%;
   color: white;
   overflow: auto;
   font-size: ${(props) => props.theme.fontSize.sm};
+  border-bottom-left-radius: ${(props) => props.theme.space.md};
+  border-bottom-right-radius: ${(props) => props.theme.space.md};
+  border-top-right-radius: ${(props) => props.theme.space.md};
 `;
 
 export const Logs = ({
