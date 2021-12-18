@@ -51,6 +51,12 @@ const redistributeSizes =
       }
     });
 
+    // In case of very small space left due to inacurracy
+    // => consider space left as none
+    if (spaceLeft <= 0.01) {
+      spaceLeft = 0;
+    }
+
     const elemWithSizeCount = elems.length - elemWithoutSizeCount;
 
     if (spaceLeft) {
@@ -325,6 +331,7 @@ export const reducer = (
       });
     }
     case 'move-cell-to-new-row': {
+      console.log('NEW - ROW');
       return produce(state, (s) => {
         const srcRow = s.rows[action.srcRowIndex];
         const cell = srcRow.cells[action.srcCellIndex];

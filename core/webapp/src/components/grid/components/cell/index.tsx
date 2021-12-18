@@ -72,7 +72,7 @@ export const GridCell = ({
           rowIndex={rowIndex}
           dropAcceptType={dropAcceptType}
           style={{
-            top: '33%',
+            top: 0,
             left: 0,
           }}
           onDrop={(item) => {
@@ -91,7 +91,7 @@ export const GridCell = ({
           rowIndex={rowIndex}
           dropAcceptType={dropAcceptType}
           style={{
-            top: '33%',
+            top: 0,
             right: 0,
           }}
           onDrop={(item) => {

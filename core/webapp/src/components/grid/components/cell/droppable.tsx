@@ -4,15 +4,15 @@ import styled from 'styled-components';
 
 const GridCellHorizContainer = styled.div`
   position: absolute;
-  height: 33%;
+  height: 100%;
   width: 40%;
+  max-width: 80px;
   background-color: gray;
+  opacity: 0.5;
 `;
 export const GridCellHorizDroppable = ({
   style,
   dropAcceptType,
-  rowIndex,
-  cellIndex,
   onDrop,
 }: {
   style: CSSProperties;

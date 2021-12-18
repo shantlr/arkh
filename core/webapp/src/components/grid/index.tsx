@@ -43,7 +43,7 @@ const GridContainer = ({
     width,
   });
 
-  console.log('grid state', state);
+  // console.log('grid state', state);
 
   let childKeys: Record<string, true> = {};
   const childrenByKey: Record<string, JSX.Element> = {};

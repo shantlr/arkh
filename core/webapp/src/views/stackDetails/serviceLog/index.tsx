@@ -3,7 +3,7 @@ import { useService, useServiceTaskLogs, useServiceTasks } from 'hooks/query';
 import { useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import styled from 'styled-components';
-import { Logs } from '../logs';
+import { LogContainer, Logs } from '../logs';
 
 const ContainerOuter = styled.div`
   height: 100%;

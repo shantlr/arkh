@@ -6,7 +6,9 @@ const GridCellVertContainer = styled.div`
   position: absolute;
   height: 33%;
   width: 100%;
+  max-height: 80px;
   background-color: gray;
+  opacity: 0.5;
 `;
 export const GridRowVertDroppable = ({
   style,

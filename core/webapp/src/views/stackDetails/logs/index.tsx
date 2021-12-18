@@ -33,7 +33,7 @@ export const TextBatch = ({
     </>
   );
 };
-const Container = styled.div`
+export const LogContainer = styled.div`
   background-color: black;
   padding: ${(props) => props.theme.space.md};
   height: 100%;
@@ -56,7 +56,7 @@ export const Logs = ({
   showTimestamp: boolean;
 }) => {
   return (
-    <Container>
+    <LogContainer>
       {logBatches.map((batch, idx) => (
         <TextBatch
           key={idx}
@@ -65,6 +65,6 @@ export const Logs = ({
           showTimestamp={showTimestamp}
         />
       ))}
-    </Container>
+    </LogContainer>
   );
 };
