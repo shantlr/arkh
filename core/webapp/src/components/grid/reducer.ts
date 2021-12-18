@@ -314,6 +314,10 @@ export const reducer = (
             // remove src row if empty
             s.rows.splice(action.srcRowIndex, 1);
           }
+          if (s.rows.length !== state.rows.length) {
+            // redistribute rows height in case some row has been deleted
+            redistributeRowSizes(s.rows);
+          }
           // resync cell widths
           redistributeRowCells(s.rows);
         }
