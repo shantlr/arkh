@@ -72,7 +72,7 @@ const HorizContainer = styled.div<{ active?: boolean }>`
   width: 100%;
   min-height: 4px;
   bottom: -2px;
-  z-index: 999;
+  z-index: ${(props) => props.theme.zIndex.dropdown};
   background-color: rgba(0, 0, 0, 0.3);
   transition: background-color 0.3s;
   cursor: n-resize;

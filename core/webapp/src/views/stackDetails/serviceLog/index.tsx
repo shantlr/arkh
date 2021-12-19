@@ -5,6 +5,7 @@ import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { Logs } from '../logs';
+import { ServiceName } from './serviceName';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -25,22 +26,7 @@ const Header = styled.div`
   display: flex;
   position: relative;
 `;
-const ServiceName = styled.div`
-  min-width: 50px;
-  border: 2px solid transparent;
-  border-bottom: none;
-  border-top-left-radius: ${(props) => props.theme.borderRadius.md};
-  border-top-right-radius: ${(props) => props.theme.borderRadius.md};
-  padding: 0 8px;
-  border-left-color: black;
-  border-top-color: black;
-  border-right-color: black;
-  z-index: 1;
-  background-color: white;
-
-  cursor: pointer;
-`;
-const Handle = styled.div`
+const DragHandle = styled.div`
   position: absolute;
   top: 0px;
   left: 0px;
@@ -108,14 +94,22 @@ export const ServiceLogs = ({
   // disable default preview
   useEffect(() => {
     dragPreview(getEmptyImage(), { captureDraggingState: true });
-  }, []);
+  }, [dragPreview]);
 
   return (
     <ContainerOuter style={style}>
       <ContainerInner>
         <Header>
-          {Boolean(service) && <ServiceName>{service.key}</ServiceName>}
-          <Handle ref={drag} />
+          {service && (
+            <ServiceName
+              service={service}
+              tasks={tasks}
+              onSelectTask={(taskId) => {
+                setTaskId(taskId);
+              }}
+            />
+          )}
+          <DragHandle ref={drag} />
         </Header>
         {Boolean(taskId) && Boolean(taskLogs) && (
           <Logs logBatches={taskLogs as ServiceTaskLog[]} showTimestamp />

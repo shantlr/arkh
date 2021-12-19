@@ -11,3 +11,18 @@ export type StackSpec = {
 export type MetroSpec = {
   stacks: Record<string, StackSpec>;
 };
+
+export type ServiceInfo = {
+  /**
+   * service key
+   */
+  key: string;
+  /**
+   * stack name
+   */
+  stack: string;
+  /**
+   * service spec
+   */
+  spec: ServiceSpec;
+}

@@ -1,3 +1,4 @@
+import { ServiceInfo } from '@shantr/metro-common-types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
 import io from 'socket.io-client';
@@ -35,7 +36,7 @@ export const API = {
       const res = await base.get('service/list');
       return res.json();
     },
-    async get(name: string) {
+    async get(name: string): Promise<ServiceInfo> {
       const res = await base.get(`service/${name}`);
 
       return res.json();

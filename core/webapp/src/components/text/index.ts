@@ -1,3 +1,13 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Text = styled.span``;
+const sizeCss = {
+  sm: css`
+    font-size: ${(props) => props.theme.fontSize.sm};
+  `,
+};
+
+export const Text = styled.span<{
+  size?: keyof typeof sizeCss;
+}>`
+  ${(props) => (props.size ? sizeCss[props.size] : null)};
+`;

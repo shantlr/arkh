@@ -45,6 +45,10 @@ export const LogContainer = styled.div`
   border-top-right-radius: ${(props) => props.theme.space.md};
 `;
 
+const NoLogs = styled.div`
+  color: #8d8e8d;
+`;
+
 export const Logs = ({
   logBatches,
   showTimestamp,
@@ -57,6 +61,7 @@ export const Logs = ({
 }) => {
   return (
     <LogContainer>
+      {logBatches && !logBatches.length && <NoLogs>-- no logs --</NoLogs>}
       {logBatches.map((batch, idx) => (
         <TextBatch
           key={idx}
