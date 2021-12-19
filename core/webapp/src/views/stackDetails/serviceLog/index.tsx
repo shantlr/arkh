@@ -1,9 +1,10 @@
 import { ServiceTaskLog } from 'configs/types';
 import { useService, useServiceTaskLogs, useServiceTasks } from 'hooks/query';
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
-import { LogContainer, Logs } from '../logs';
+import { Logs } from '../logs';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -15,7 +16,6 @@ const ContainerOuter = styled.div`
 `;
 
 const ContainerInner = styled.div`
-  background-color: white;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -26,6 +26,7 @@ const Header = styled.div`
   position: relative;
 `;
 const ServiceName = styled.div`
+  min-width: 50px;
   border: 2px solid transparent;
   border-bottom: none;
   border-top-left-radius: ${(props) => props.theme.borderRadius.md};
@@ -36,6 +37,8 @@ const ServiceName = styled.div`
   border-right-color: black;
   z-index: 1;
   background-color: white;
+
+  cursor: pointer;
 `;
 const Handle = styled.div`
   position: absolute;
@@ -55,12 +58,14 @@ const Handle = styled.div`
   }
 `;
 export const ServiceLogs = ({
+  style,
   dragType,
   fullName,
 
   rowIndex,
   cellIndex,
 }: {
+  style?: CSSProperties;
   dragType: string;
   fullName: string;
   rowIndex?: number;
@@ -68,7 +73,7 @@ export const ServiceLogs = ({
 }) => {
   const { data: service } = useService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
-  const [col, drag, dragPreview] = useDrag(
+  const [, drag, dragPreview] = useDrag(
     {
       type: dragType,
       item: {
@@ -86,9 +91,9 @@ export const ServiceLogs = ({
 
   const { data: taskLogs } = useServiceTaskLogs(taskId);
 
+  // auto select first task
   useEffect(() => {
     if (!taskId && tasks && tasks.length > 0) {
-      // auto select first task
       setTaskId(tasks[0].id);
     } else if (
       taskId &&
@@ -100,8 +105,13 @@ export const ServiceLogs = ({
     }
   }, [taskId, tasks]);
 
+  // disable default preview
+  useEffect(() => {
+    dragPreview(getEmptyImage(), { captureDraggingState: true });
+  }, []);
+
   return (
-    <ContainerOuter ref={dragPreview}>
+    <ContainerOuter style={style}>
       <ContainerInner>
         <Header>
           {Boolean(service) && <ServiceName>{service.key}</ServiceName>}

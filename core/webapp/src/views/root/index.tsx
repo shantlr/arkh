@@ -12,11 +12,13 @@ import { SideBar } from 'views/sideBar';
 import { StackDetails } from 'views/stackDetails';
 import { StackListView } from 'views/stackList';
 import { TaskDetails } from 'views/taskDetails';
+import { CustomDragLayer } from './customDragLayer';
 
 const Container = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  position: relative;
 
   display: flex;
   flex-direction: row;
@@ -53,6 +55,7 @@ export const RootApp = () => {
                     </Route>
                   </Route>
                 </Routes>
+                <CustomDragLayer />
               </Container>
             </SocketProvider>
           </ThemeProvider>
