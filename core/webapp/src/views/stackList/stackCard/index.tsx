@@ -10,6 +10,7 @@ import { map } from 'lodash';
 import { useMutation } from 'react-query';
 import styled, { css } from 'styled-components';
 import { StackStatusIndicator } from './indicator';
+import { RunStack } from './runStack';
 
 const StackCardContainer = styled(BaseCard)<{ active?: boolean }>`
   padding: ${(props) => props.theme.space.lg};
@@ -85,11 +86,6 @@ export const StackCard = ({
   active: boolean;
   stack: Stack;
 }) => {
-  const { mutate: runStack } = useMutation(() =>
-    API.stack.run({
-      name: stack.name,
-    })
-  );
   const { mutate: runService } = useMutation(
     ({ serviceName }: { serviceName: string }) =>
       API.service.run({ name: serviceName })
@@ -104,15 +100,7 @@ export const StackCard = ({
         <StackStatusIndicator serviceStates={serviceStates} />
         <StackTitle>{stack.name}</StackTitle>
         <StackHeaderActions>
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              runStack();
-            }}
-          >
-            <FontAwesomeIcon icon={faPlay} />
-          </Button>
+          <RunStack stackName={stack.name} />
         </StackHeaderActions>
       </StackHeader>
       <ServiceList>
