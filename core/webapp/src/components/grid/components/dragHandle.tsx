@@ -59,7 +59,6 @@ export const GridVertResizeDragHandle = ({
     <VertContainer
       ref={ref}
       onMouseDown={(e) => {
-        console.log('aoeu');
         setClicked(true);
         e.preventDefault();
       }}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { createTimeout } from 'lib/createTimeout';
 import { usePopper } from 'react-popper';
 import styled, { css } from 'styled-components';
+import { Placement } from '@popperjs/core';
 
 const Container = styled.div`
   display: inline-block;
@@ -15,6 +16,19 @@ const PopperContainer = styled.div`
   z-index: ${(props) => props.theme.zIndex.dropdown};
   box-shadow: ${(props) => props.theme.shadow.md};
   border-radius: ${(props) => props.theme.borderRadius.md};
+
+  @media screen and (max-height: 950px) {
+    max-height: 350px;
+  }
+  @media screen and (max-height: 850px) {
+    max-height: 300px;
+  }
+  @media screen and (max-height: 750px) {
+    max-height: 270px;
+  }
+  @media screen and (max-height: 550px) {
+    max-height: 230px;
+  }
 `;
 
 const activeCss = css`
@@ -41,6 +55,7 @@ export interface IOption<T = any> {
 
 export function Dropdown<T extends IOption>({
   className,
+  placement,
   children,
   selected,
   options,
@@ -49,6 +64,7 @@ export function Dropdown<T extends IOption>({
   className?: string;
   children: JSX.Element;
   selected?: string | number | undefined | null;
+  placement?: Placement;
   options?: T[];
   onSelect?: (opt: T) => void;
 }) {
@@ -69,7 +85,7 @@ export function Dropdown<T extends IOption>({
   }, [lastMoveOut]);
 
   const popper = usePopper(containerRef, popperRef, {
-    placement: 'bottom-start',
+    placement,
     modifiers: [
       {
         name: 'offset',

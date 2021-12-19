@@ -53,6 +53,7 @@ export const ServiceName = ({
   return (
     <StyledDropdown
       selected={selectedTaskId}
+      placement="bottom-start"
       options={options}
       onSelect={(task) => onSelectTask(task.value)}
     >
