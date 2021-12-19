@@ -104,6 +104,7 @@ export const ServiceLogs = ({
             <ServiceName
               service={service}
               tasks={tasks}
+              selectedTaskId={taskId}
               onSelectTask={(taskId) => {
                 setTaskId(taskId);
               }}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { createTimeout } from 'lib/createTimeout';
 import { usePopper } from 'react-popper';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Container = styled.div`
   display: inline-block;
@@ -17,10 +17,15 @@ const PopperContainer = styled.div`
   border-radius: ${(props) => props.theme.borderRadius.md};
 `;
 
-const OptionContainer = styled.div`
+const activeCss = css`
+  background-color: ${(props) => props.theme.color.actionBg};
+  color: ${(props) => props.theme.color.actionColor};
+`;
+const OptionContainer = styled.div<{ active?: boolean }>`
   padding: ${(props) => `${props.theme.space.sm} ${props.theme.space.md}`};
   cursor: pointer;
 
+  ${(props) => (props.active ? activeCss : null)};
   transition: 0.3s;
   :hover {
     background-color: ${(props) => props.theme.color.actionBg};
@@ -34,16 +39,18 @@ export interface IOption<T = any> {
   label: string | number | JSX.Element;
 }
 
-export function Dropdown<T>({
+export function Dropdown<T extends IOption>({
   className,
   children,
+  selected,
   options,
   onSelect,
 }: {
   className?: string;
   children: JSX.Element;
-  options?: IOption<T>[];
-  onSelect?: (opt: IOption<T>) => void;
+  selected?: string | number | undefined | null;
+  options?: T[];
+  onSelect?: (opt: T) => void;
 }) {
   const [showPopper, setShowPopper] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
@@ -97,6 +104,7 @@ export function Dropdown<T>({
             >
               {options?.map((opt) => (
                 <OptionContainer
+                  active={opt.key === selected}
                   key={opt.key}
                   onClick={() => {
                     if (onSelect) {

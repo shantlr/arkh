@@ -29,9 +29,12 @@ const Container = styled.div`
 export const ServiceName = ({
   service,
   tasks,
+  selectedTaskId,
+  onSelectTask,
 }: {
   service: ServiceInfo;
   tasks: ServiceTask[] | undefined;
+  selectedTaskId?: string | null;
   onSelectTask: (taskId: string) => void;
 }) => {
   const options = useMemo(() => {
@@ -46,10 +49,13 @@ export const ServiceName = ({
       ),
     }));
   }, [tasks]);
-  console.log(tasks);
 
   return (
-    <StyledDropdown options={options}>
+    <StyledDropdown
+      selected={selectedTaskId}
+      options={options}
+      onSelect={(task) => onSelectTask(task.value)}
+    >
       <Container>{service.key}</Container>
     </StyledDropdown>
   );
