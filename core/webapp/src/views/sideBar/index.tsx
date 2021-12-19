@@ -1,53 +1,88 @@
-import { faCog, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NoStyleLink } from 'components/noStyleLink';
 import { useMatch } from 'react-router';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-const WIDTH = `48px`;
+const WIDTH = '28px';
 
 const Container = styled.div`
-  min-width: ${WIDTH};
+  position: relative;
   height: 100%;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-`;
-
-const BarContainer = styled.div`
-  height: 100%;
+  overflow: visible;
+  box-sizing: border-box;
   width: ${WIDTH};
   min-width: ${WIDTH};
+  z-index: 9999;
   background-color: ${(props) => props.theme.color.sideBarBg};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: ${(props) => props.theme.shadow.md};
+
+  transition: 0.5s;
+`;
+
+const BarCard = styled.div`
+  background-color: ${(props) => props.theme.color.sideBarBg};
+  box-sizing: border-box;
+  height: 100%;
+  border-radius: ${(props) => props.theme.borderRadius.lg};
+  transition: 0.5s;
 `;
 
 const MenuItem = styled.div<{ active?: boolean }>`
   color: ${(props) =>
     props.active ? props.theme.color.actionBg : props.theme.color.textLight};
-  height: 28px;
-  width: 28px;
   margin-top: ${(props) => props.theme.space.lg};
   padding: ${(props) => props.theme.space.md};
   border-radius: ${(props) => props.theme.borderRadius.lg};
   background-color: transparent;
 
   display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
 
   transition: all 0.5s;
-  font-size: 22px;
+  font-size: 16px;
   :hover {
     box-shadow: ${(props) => props.theme.shadow.md};
   }
   :active {
     filter: brightness(1.3);
+  }
+`;
+const MenuTitle = styled.span`
+  overflow: hidden;
+  width: 0px;
+  transition: 1s;
+  text-decoration: none;
+  opacity: 0;
+  font-size: ${(props) => props.theme.fontSize.sm};
+`;
+const BarContainer = styled.div`
+  height: 100%;
+  box-sizing: border-box;
+  width: ${WIDTH};
+  transition: 0.5s;
+  :hover {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 130px;
+    z-index: 9999;
+    padding: ${(props) => props.theme.space.lg};
+    padding-left: 10px;
+
+    ${BarCard} {
+      padding: ${(props) => props.theme.space.lg};
+      box-shadow: ${(props) => props.theme.shadow.md};
+      ${MenuItem} {
+        font-size: 20px;
+        ${MenuTitle} {
+          margin-left: ${(props) => props.theme.space.md};
+          opacity: 1;
+          width: auto;
+        }
+      }
+    }
   }
 `;
 
@@ -57,17 +92,23 @@ export const SideBar = () => {
   return (
     <Container>
       <BarContainer>
-        <Link to="/stack">
-          <MenuItem active={Boolean(match && match.params.name === 'stack')}>
-            <FontAwesomeIcon icon={faHome} />
-          </MenuItem>
-        </Link>
+        <BarCard>
+          <NoStyleLink to="/stack">
+            <MenuItem active={Boolean(match && match.params.name === 'stack')}>
+              <FontAwesomeIcon icon={faLayerGroup} />
+              <MenuTitle>Stacks</MenuTitle>
+            </MenuItem>
+          </NoStyleLink>
 
-        <Link to="/settings">
-          <MenuItem active={Boolean(match && match.params.name === 'settings')}>
-            <FontAwesomeIcon icon={faCog} />
-          </MenuItem>
-        </Link>
+          <NoStyleLink to="/settings">
+            <MenuItem
+              active={Boolean(match && match.params.name === 'settings')}
+            >
+              <FontAwesomeIcon icon={faCog} />
+              <MenuTitle> Settings</MenuTitle>
+            </MenuItem>
+          </NoStyleLink>
+        </BarCard>
       </BarContainer>
     </Container>
   );
