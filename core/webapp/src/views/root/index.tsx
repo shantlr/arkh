@@ -7,11 +7,9 @@ import { QueryClientProvider } from 'react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { theme } from 'styles';
-import { ServiceDetails } from 'views/serviceDetails';
 import { SideBar } from 'views/sideBar';
 import { StackDetails } from 'views/stackDetails';
 import { StackListView } from 'views/stackList';
-import { TaskDetails } from 'views/taskDetails';
 import { CustomDragLayer } from './customDragLayer';
 
 const Container = styled.div`
@@ -39,20 +37,7 @@ export const RootApp = () => {
                 <SideBar />
                 <Routes>
                   <Route path="stack" element={<StackListView />}>
-                    <Route path=":name" element={<StackDetails />}>
-                      <Route
-                        path="service/:serviceKey"
-                        element={<ServiceDetails />}
-                      >
-                        <Route path="t/:taskId" element={<TaskDetails />} />
-                      </Route>
-                    </Route>
-                    <Route
-                      path="service/:serviceName/*"
-                      element={<ServiceDetails />}
-                    >
-                      <Route path="t/:taskId" element={<TaskDetails />} />
-                    </Route>
+                    <Route path=":name" element={<StackDetails />} />
                   </Route>
                 </Routes>
                 <CustomDragLayer />
