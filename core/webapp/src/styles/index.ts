@@ -58,6 +58,13 @@ export const theme = {
   zIndex: {
     dropdown: 999,
   },
+
+  logs: {
+    bg: 'black',
+    noLogColor: `#8d8e8d`,
+    timestampColor: '#8d8e8d',
+    color: `white`,
+  },
 };
 
 type Theme = typeof theme;

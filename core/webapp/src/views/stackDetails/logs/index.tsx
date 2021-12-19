@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import styled from 'styled-components';
 
 const Timestamp = styled.span`
-  color: #8d8e8d;
+  color: ${(props) => props.theme.logs.timestampColor};
   font-size: 11px;
   user-select: none;
 `;
@@ -34,10 +34,10 @@ export const TextBatch = ({
   );
 };
 export const LogContainer = styled.div`
-  background-color: black;
+  background-color: ${(props) => props.theme.logs.bg};
   padding: ${(props) => props.theme.space.md};
   height: 100%;
-  color: white;
+  color: ${(props) => props.theme.logs.color};
   overflow: auto;
   font-size: ${(props) => props.theme.fontSize.sm};
   border-bottom-left-radius: ${(props) => props.theme.space.md};
@@ -46,7 +46,7 @@ export const LogContainer = styled.div`
 `;
 
 const NoLogs = styled.div`
-  color: #8d8e8d;
+  color: ${(props) => props.theme.logs.noLogColor};
 `;
 
 export const Logs = ({
