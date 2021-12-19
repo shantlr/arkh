@@ -24,6 +24,7 @@ const Container = styled.div`
 const BarCard = styled.div`
   background-color: ${(props) => props.theme.color.sideBarBg};
   box-sizing: border-box;
+  padding-top: ${(props) => props.theme.space.lg};
   height: 100%;
   border-radius: ${(props) => props.theme.borderRadius.lg};
   transition: 0.5s;
@@ -68,7 +69,7 @@ const BarContainer = styled.div`
     top: 0px;
     width: 130px;
     z-index: 9999;
-    padding: ${(props) => props.theme.space.lg};
+    padding: 0 ${(props) => props.theme.space.lg};
     padding-left: 10px;
 
     ${BarCard} {
