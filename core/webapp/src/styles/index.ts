@@ -1,13 +1,21 @@
 // https://www.happyhues.co/palettes/4
 
+const darkTextColor = '#46454B';
+
 export const theme = {
   color: {
     bg: `#16161a`,
     bgColor: 'white',
 
-    // mainBg: '#E0E5EB',
-    // mainBg: '#F5F8FD',
-    mainBg: '#F2F1F7',
+    mainBg: 'white',
+    mainBgColor: darkTextColor,
+
+    // secondaryBg: '#72757e',
+    // secondaryMainBg: '#E0E5EB',
+    // secondaryMainBg: '#F5F8FD',
+    secondaryMainBg: '#F2F1F7',
+    secondaryMainColor: darkTextColor,
+
     mainHighlightBg: '#F7F7FC',
 
     // actionBg: `#7f5af0`,
@@ -15,7 +23,7 @@ export const theme = {
     actionColor: '#fffffe',
 
     sideBarBg: 'white',
-    sideBarColor: '#46454B',
+    sideBarColor: darkTextColor,
 
     actionSecondary: '#fec7d7',
     actionSecondaryColor: '#0e172c',
@@ -23,12 +31,10 @@ export const theme = {
     highlightBg: '#7f5af0',
     hightlightColor: 'white',
 
-    secondaryBg: '#72757e',
-
     title: '#fffffe',
 
     // text: '#94a1b2',
-    text: '#46454B',
+    text: darkTextColor,
     textLight: '#E0E5EB',
 
     success: '#3ED383',
@@ -49,6 +55,7 @@ export const theme = {
   },
 
   fontSize: {
+    xs: `10px`,
     sm: `12px`,
   },
   shadow: {
@@ -64,6 +71,9 @@ export const theme = {
     noLogColor: `#8d8e8d`,
     timestampColor: '#8d8e8d',
     color: `white`,
+  },
+  transition: {
+    default: `.3s`,
   },
 };
 
