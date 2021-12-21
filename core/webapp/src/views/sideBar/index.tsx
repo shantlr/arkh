@@ -33,7 +33,7 @@ const BarCard = styled.div`
 const MenuItem = styled.div<{ active?: boolean }>`
   color: ${(props) =>
     props.active ? props.theme.color.actionBg : props.theme.color.textLight};
-  margin-top: ${(props) => props.theme.space.lg};
+  margin-bottom: ${(props) => props.theme.space.lg};
   padding: ${(props) => props.theme.space.md};
   border-radius: ${(props) => props.theme.borderRadius.lg};
   background-color: transparent;
@@ -61,6 +61,7 @@ const MenuTitle = styled.span`
 const BarContainer = styled.div`
   height: 100%;
   box-sizing: border-box;
+  padding: ${(props) => `${props.theme.space.lg} 0`};
   width: ${WIDTH};
   transition: 0.5s;
   :hover {
@@ -69,7 +70,7 @@ const BarContainer = styled.div`
     top: 0px;
     width: 130px;
     z-index: 9999;
-    padding: 0 ${(props) => props.theme.space.lg};
+    padding: ${(props) => `${props.theme.space.lg} ${props.theme.space.lg}`};
     padding-left: 10px;
 
     ${BarCard} {

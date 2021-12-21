@@ -1,8 +1,9 @@
 import styled, { css } from 'styled-components';
 
 const base = {
-  main: css`
-    background-color: ${(props) => props.theme.color.mainBg};
+  secondary: css`
+    background-color: ${(props) => props.theme.color.secondaryMainBg};
+    color: ${(props) => props.theme.color.secondaryMainColor};
   `,
   default: css`
     background-color: white;
@@ -14,7 +15,7 @@ const base = {
 };
 
 const active = {
-  main: css``,
+  secondary: css``,
   default: css`
     border-color: ${(props) => props.theme.color.actionBg};
     box-shadow: ${(props) => props.theme.shadow.md};
@@ -36,4 +37,5 @@ export const BaseCard = styled.div<{
   padding: ${(props) => props.theme.space.lg};
   box-sizing: border-box;
   border-radius: ${(props) => props.theme.borderRadius.lg};
+  transition: ${(props) => props.theme.transition.default};
 `;

@@ -56,6 +56,14 @@ export const styles = {
       background-color: ${(props) => props.theme.color.mainBg};
       color: ${(props) => props.theme.color.mainBgColor};
     `,
+    secondaryBg: css`
+      background-color: ${(props) => props.theme.color.secondaryMainBg};
+      color: ${(props) => props.theme.color.secondaryMainColor};
+    `,
+    successBg: css`
+      background-color: ${(props) => props.theme.color.success};
+      color: ${(props) => props.theme.color.successColor};
+    `,
   },
 
   margin: createCssThemeKeyProxy('margin', 'space'),
@@ -80,6 +88,7 @@ export const styles = {
     `,
   },
   transition: createCssThemeKeyProxy('transition', 'transition'),
+  shadow: createCssThemeKeyProxy('box-shadow', 'shadow'),
 
   container: {
     noScroll: css`
@@ -88,6 +97,11 @@ export const styles = {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    `,
+    textEllipsis: css`
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     `,
   },
   hover: {

@@ -17,14 +17,14 @@ const stateCss = {
     border-color: ${(props) => props.theme.color.warning};
   `,
   'all-exited': css`
-    background-color: ${(props) => props.theme.color.mainBg};
+    background-color: ${(props) => props.theme.color.secondaryMainBg};
   `,
   'all-off': css``,
 };
 const Indicator = styled.div<{ state: keyof typeof stateCss }>`
   width: 10px;
   height: 10px;
-  border: 2px solid ${(props) => props.theme.color.mainBg};
+  border: 2px solid ${(props) => props.theme.color.secondaryMainBg};
   border-radius: 50%;
   background-color: transparent;
   ${(props) => stateCss[props.state]};
