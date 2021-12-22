@@ -7,6 +7,7 @@ import { loadConfig } from './data/loadConfig';
 import { State } from './data';
 import { ServiceSpec } from '@shantr/metro-common-types';
 import { SideEffects } from './events/sideEffects';
+import { map } from 'lodash';
 
 const logger = createLogger('runner');
 
@@ -43,6 +44,12 @@ const main = async () => {
     logger.info('reconnected');
   });
 
+  socket.on('force-runner-exit', ({ reason }: { reason: string }) => {
+    logger.error(`server is forcing runner to exit: ${reason}`);
+    socket.disconnect();
+    process.exit(1);
+  });
+
   socket.on(
     'run-service',
     ({ name, spec }: { name: string; spec: ServiceSpec }, callback) => {
@@ -65,6 +72,52 @@ const main = async () => {
   SideEffects.on('taskStderr', (data) => {
     socket.emit('task-stderr', data);
   });
+
+  const gracefulShutdown = async (signal: string) => {
+    console.log('signal', signal);
+    console.log('shutting down...');
+    try {
+      // First stop all running tasks
+      await Promise.all(
+        map(State.service.all(), async (service) => {
+          if (service.task.isRunning()) {
+            await service.task.stop('shutting-down');
+          }
+        })
+      );
+      console.log('all task stopped');
+
+      await new Promise((resolve) => setTimeout(resolve));
+
+      // tell server that we are leaving
+      let timeout = null;
+      await Promise.race([
+        new Promise<void>((resolve) => {
+          socket.emit('runner-leave', { reason: 'shutting-down' }, () => {
+            resolve();
+          });
+        }),
+        // timeout
+        new Promise<void>((resolve) => {
+          timeout = setTimeout(() => {
+            console.log(`sending runner-leave timeout`);
+            resolve();
+          }, 5 * 1000);
+        }),
+      ]);
+
+      clearTimeout(timeout);
+      socket.close();
+
+      console.log('socket gracefully closed');
+    } finally {
+      process.exit(1);
+    }
+  };
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+  process.on('SIGQUIT', gracefulShutdown);
+  process.on('SIGUSR2', gracefulShutdown);
 };
 
 main().catch((err) => {

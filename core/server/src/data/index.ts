@@ -119,8 +119,7 @@ export const Task = {
         .where({
           id: taskId,
           running_at: null,
-        })
-        .returning('*');
+        });
       void SideEffects.emit('updateTask', {
         id: taskId,
         running_at: date,

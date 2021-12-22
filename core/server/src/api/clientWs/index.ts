@@ -59,7 +59,6 @@ export const startClientWs = ({
         // @ts-ignore
         socket.on(subEventName, async (...params: Params) => {
           const roomName = ROOMS.subscription[subKey](...params);
-          console.log(roomName);
           if (!socket.rooms.has(roomName)) {
             logger.info(`${socket.id} subscribed to ${sub.key}`);
             await socket.join(roomName);

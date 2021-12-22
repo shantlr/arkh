@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "DEBUG=metro:* nodemon --exec ts-node -r tsconfig-paths/register ./src/index.ts",
+    "start": "DEBUG=metro:*,-metro:api:info nodemon --exec ts-node -r tsconfig-paths/register ./src/index.ts",
     "migrate:make": "ts-node -r tsconfig-paths/register ./src/scripts/makeMigration.ts",
     "migrate:down": "ts-node -r tsconfig-paths/register ./src/scripts/migrateDown.ts"
   },

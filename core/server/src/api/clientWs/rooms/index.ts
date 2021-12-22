@@ -45,9 +45,10 @@ const mapSubsToRoom = <
 
   forEach(subs, (sub, key) => {
     if (typeof sub === 'string') {
-      res[key] = `subscribed-${key}`;
+      res[key] = `subscribed-${sub}`;
     } else {
-      res[key] = (...args: any[]) => `subscribed-${key}:${sub.params(...args)}`;
+      res[key] = (...args: any[]) =>
+        `subscribed-${sub.key}:${sub.params(...args)}`;
     }
   });
 

@@ -200,11 +200,25 @@ export const State = {
         IN_MEMORY_STATE.runner.roundRobins[type].ids.push(id);
       }
     },
+    leave(runnerId: string) {
+      const runner = State.runner.get(runnerId);
+      if (runner) {
+        runner.state = 'leaving';
+        logger.info(`runner '${runnerId}' is leaving`);
+      } else {
+        logger.warn(`runner '${runnerId}' could not leave: not found`);
+      }
+    },
     disconnected(runnerId: string) {
       const runner = State.runner.get(runnerId);
 
       if (runner) {
-        runner.state = 'disconnected';
+        if (runner.state === 'leaving') {
+          runner.state = 'gracefully-disconnected';
+        } else {
+          runner.state = 'ungracefully-disconnected';
+        }
+        // remove from round robins list
         const idx = IN_MEMORY_STATE.runner.roundRobins[runner.type].ids.indexOf(
           runner.id
         );

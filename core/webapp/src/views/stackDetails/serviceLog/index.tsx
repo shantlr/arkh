@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import { ServiceTaskLog } from 'configs/types';
 import {
+  useScubscribeServiceTaskLogs,
   useService,
   useServiceTaskLogs,
   useServiceTasks,
@@ -50,6 +51,16 @@ const DragHandle = styled.div`
     background-color: gray;
   }
 `;
+
+const ServiceTaskLogs = ({ taskId }: { taskId: string }) => {
+  const { data: taskLogs } = useServiceTaskLogs(taskId);
+  useScubscribeServiceTaskLogs(taskId);
+
+  return (
+    <Logs logBatches={(taskLogs as ServiceTaskLog[]) || []} showTimestamp />
+  );
+};
+
 export const ServiceLogs = ({
   style,
   dragType,
@@ -97,8 +108,6 @@ export const ServiceLogs = ({
     },
   });
 
-  const { data: taskLogs } = useServiceTaskLogs(taskId);
-
   // auto select first task
   useEffect(() => {
     if (!taskId && tasks && tasks.length > 0) {
@@ -134,9 +143,7 @@ export const ServiceLogs = ({
           )}
           <DragHandle ref={drag} />
         </Header>
-        {Boolean(taskId) && Boolean(taskLogs) && (
-          <Logs logBatches={taskLogs as ServiceTaskLog[]} showTimestamp />
-        )}
+        {taskId && <ServiceTaskLogs taskId={taskId} />}
         {!taskId && <Logs logBatches={[]} showTimestamp />}
       </ContainerInner>
     </ContainerOuter>

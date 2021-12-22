@@ -45,8 +45,24 @@ const main = async (): Promise<void> => {
   }
   EventManager.startConsumeEvent();
 
-  await startRunnerWs();
-  await startApi(config.get('api.port'));
+  const shutRunnerWs = await startRunnerWs();
+  const shutApi = await startApi(config.get('api.port'));
+
+  const gracefulShutdown = async (signal: string) => {
+    console.log('signal', signal);
+    console.log('shutting down...');
+    try {
+      await shutRunnerWs();
+      await shutApi();
+    } finally {
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGUSR2', gracefulShutdown);
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGQUIT', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
 };
 main().catch((err) => {
   console.error(err);

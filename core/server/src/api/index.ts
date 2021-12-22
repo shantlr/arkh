@@ -28,11 +28,25 @@ export const startApi = async (port: number, logger = createLogger('api')) => {
     logger: logger.extend('ws'),
   });
 
-  return new Promise<void>((resolve) => {
+  return new Promise<() => Promise<void>>((resolve) => {
+    const gracefulShutdown = () => {
+      return new Promise<void>((resolve, reject) => {
+        httpServer.close((err) => {
+          if (!err) {
+            logger.info(`http-server closed`);
+            resolve();
+          } else {
+            reject(err);
+          }
+        });
+      });
+    };
+
     httpServer.listen(port, () => {
       logger.info(`listening on http://localhost:${port}`);
       logger.info(`listening on ws://localhost:${port}`);
-      resolve();
+      resolve(gracefulShutdown);
     });
+    return;
   });
 };

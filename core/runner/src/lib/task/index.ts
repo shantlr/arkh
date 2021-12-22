@@ -65,6 +65,7 @@ export class Task {
       if (this.spec.env) {
         options.env = this.spec.env;
       }
+
       this.process = spawn(cmd, args, options);
       logger.info(`running '${this.serviceName}'`);
 
@@ -90,7 +91,8 @@ export class Task {
         });
       });
       this.process.on('close', (code) => {
-        logger.info(`'${this.serviceName}' exited`);
+        logger.info(`'${this.serviceName}' exited (${code})`);
+        this.process = null;
         this.state = 'exited';
         void SideEffects.emit('taskStateUpdate', {
           id: this.id,
@@ -98,11 +100,6 @@ export class Task {
           state: this.state,
           exitCode: code,
         });
-        if (code !== 0) {
-          //
-        } else {
-          //
-        }
       });
     } catch (err) {
       this.process = null;
@@ -110,14 +107,46 @@ export class Task {
       throw err;
     }
   }
-  async stop() {
+  async stop(reason = 'reason-not-provided') {
     if (!['running'].includes(this.state)) {
       throw new Error(`cannot stop in current state: ${this.state}`);
     }
+    if (!this.process) {
+      logger.warn(
+        `task '${this.serviceName}' could not stop: no process. (did process exit inbeetween ?)`
+      );
+      return;
+    }
     try {
+      // kill process with timeout
       this.state = 'stopping';
+      let timeout = null;
+      await Promise.race([
+        new Promise<void>((resolve) => {
+          this.process.once('close', () => {
+            resolve();
+          });
+          this.process.kill();
+        }),
+        new Promise<void>((resolve) => {
+          timeout = setTimeout(() => {
+            logger.warn(
+              `kill '${this.serviceName}' timeout, fallback to sending SIGKILL`
+            );
+            // force kill after timeout
+            if (this.process) {
+              this.process.kill('SIGKILL');
+            }
+            resolve();
+          }, 5 * 1000);
+        }),
+      ]);
+      clearTimeout(timeout);
+      this.process = null;
+      logger.info(`'${this.serviceName}' stopped: ${reason}`);
     } catch (err) {
       this.state = 'noop';
+      this.process = null;
       throw err;
     }
   }

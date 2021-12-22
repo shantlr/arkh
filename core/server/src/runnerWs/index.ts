@@ -5,9 +5,8 @@ import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 import { createLogger } from '@shantr/metro-logger';
 import { RunnerType } from './class';
-import { Service, Task, TaskLog } from 'src/data';
+import { Task, TaskLog } from 'src/data';
 import { ServiceSpec } from '@shantr/metro-common-types';
-import { SideEffects } from 'src/events/sideEffects';
 
 export const startRunnerWs = async ({
   logger = createLogger('runner'),
@@ -19,6 +18,14 @@ export const startRunnerWs = async ({
     socket.on('runner-ready', (event: { id: string; type: RunnerType }) => {
       runnerId = event.id;
 
+      const existing = State.runner.get(runnerId);
+      if (existing && existing.state === 'ready') {
+        logger.warn(`runner '${runnerId}' already connected`);
+        socket.emit('force-runner-exit', {
+          reason: 'already-connected',
+        });
+        return;
+      }
       State.runner.ready({
         id: event.id,
         type: event.type,
@@ -33,10 +40,15 @@ export const startRunnerWs = async ({
     });
 
     socket.on('disconnect', () => {
-      logger.info('disconnected');
+      logger.info(`'${runnerId}' disconnected`);
       if (runnerId) {
         State.runner.disconnected(runnerId);
       }
+    });
+    socket.on('runner-leave', ({ reason }: { reason: string }, ack) => {
+      logger.info(`runner '${runnerId}' is leaving: ${reason}`);
+      State.runner.leave(runnerId);
+      ack(true);
     });
 
     socket.on(
@@ -144,4 +156,23 @@ export const startRunnerWs = async ({
 
   io.listen(config.get('runner.port'));
   logger.info(`Listening to ws://localhost:${config.get('runner.port')}`);
+
+  /**
+   * shutdown callback
+   */
+  return async () => {
+    io.disconnectSockets(true);
+    logger.info(`runner sockets all disconnected`);
+    return new Promise<void>((resolve, reject) => {
+      io.close((err) => {
+        if (!err) {
+          logger.info(`runner socket.io server closed`);
+          resolve();
+        } else {
+          logger.error(`runner socket.io server failed to closed`);
+          reject(err);
+        }
+      });
+    });
+  };
 };

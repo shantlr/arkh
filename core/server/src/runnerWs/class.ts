@@ -2,7 +2,11 @@ import { Socket } from 'socket.io';
 import { ServiceSpec } from '@shantr/metro-common-types';
 
 export type RunnerType = 'run-process';
-export type RunnerState = 'ready' | 'disconnected';
+export type RunnerState =
+  | 'ready'
+  | 'leaving'
+  | 'gracefully-disconnected'
+  | 'ungracefully-disconnected';
 export class Runner {
   id: string;
   socket: Socket;

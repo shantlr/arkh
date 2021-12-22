@@ -39,6 +39,9 @@ export const State = {
     },
   },
   service: {
+    all() {
+      return IN_MEMORY_STATE.service.list;
+    },
     get(name: string) {
       return IN_MEMORY_STATE.service.list[name];
     },
