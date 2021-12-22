@@ -115,6 +115,7 @@ export const ServiceLogs = ({
         {Boolean(taskId) && Boolean(taskLogs) && (
           <Logs logBatches={taskLogs as ServiceTaskLog[]} showTimestamp />
         )}
+        {!taskId && <Logs logBatches={[]} showTimestamp />}
       </ContainerInner>
     </ContainerOuter>
   );
