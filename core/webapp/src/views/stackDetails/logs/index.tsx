@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 const Timestamp = styled.span`
@@ -19,9 +19,9 @@ export const TextBatch = ({
 }) => {
   const lines = useMemo(() => {
     let t = text;
+    // remove trailing line break
     if (t.endsWith('\n')) {
       t = t.slice(0, t.length - 1);
-      console.log(t);
     }
     return t.split('\n');
   }, [text]);
@@ -55,27 +55,29 @@ const NoLogs = styled.div`
   color: ${(props) => props.theme.logs.noLogColor};
 `;
 
-export const Logs = ({
-  logBatches,
-  showTimestamp,
-}: {
-  logBatches: {
-    text: string;
-    date: number | Date;
-  }[];
-  showTimestamp: boolean;
-}) => {
-  return (
-    <LogContainer>
-      {logBatches && !logBatches.length && <NoLogs>-- no logs --</NoLogs>}
-      {logBatches.map((batch, idx) => (
-        <TextBatch
-          key={idx}
-          text={batch.text}
-          date={batch.date}
-          showTimestamp={showTimestamp}
-        />
-      ))}
-    </LogContainer>
-  );
-};
+export const Logs = React.memo(
+  ({
+    logBatches,
+    showTimestamp,
+  }: {
+    logBatches: {
+      text: string;
+      date: number | Date;
+    }[];
+    showTimestamp: boolean;
+  }) => {
+    return (
+      <LogContainer>
+        {logBatches && !logBatches.length && <NoLogs>-- no logs --</NoLogs>}
+        {logBatches.map((batch, idx) => (
+          <TextBatch
+            key={idx}
+            text={batch.text}
+            date={batch.date}
+            showTimestamp={showTimestamp}
+          />
+        ))}
+      </LogContainer>
+    );
+  }
+);

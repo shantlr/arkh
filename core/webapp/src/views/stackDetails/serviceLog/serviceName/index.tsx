@@ -90,7 +90,6 @@ export const ServiceName = ({
     return false;
   }, [tasks]);
 
-  console.log(service);
   return (
     <StyledDropdown
       selected={selectedTaskId}

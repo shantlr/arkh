@@ -35,49 +35,8 @@ const useSubscribeStack = createUseSubscribe({
   },
 });
 
-// const ExampleItem = ({
-//   children,
-//   rowIndex,
-//   cellIndex,
-//   isAloneInRow,
-// }: {
-//   children: string;
-//   rowIndex?: number;
-//   cellIndex?: number;
-//   isAloneInRow?: boolean;
-// }) => {
-//   const [p, drag, preview] = useDrag(
-//     () => ({
-//       type: 'cell',
-//       item: {
-//         rowIndex,
-//         cellIndex,
-//         isAloneInRow,
-//       },
-//     }),
-//     [rowIndex, cellIndex, isAloneInRow]
-//   );
-//   return (
-//     <div
-//       ref={preview}
-//       key="s-1"
-//       style={{
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         height: '100%',
-//       }}
-//     >
-//       <div style={{ cursor: 'grab' }} ref={drag}>
-//         :::
-//       </div>
-//       {children}
-//     </div>
-//   );
-// };
-
 export const StackDetails = () => {
-  const { name, serviceKey: routeServiceKey } = useParams();
+  const { name } = useParams();
   const { data } = useQuery(
     ['stack', name],
     () => API.stack.get(name as string),
@@ -85,10 +44,6 @@ export const StackDetails = () => {
       enabled: Boolean(name),
     }
   );
-  // const { mutate: runService } = useMutation(
-  //   ({ serviceName }: { serviceName: string }) =>
-  //     API.service.run({ name: serviceName })
-  // );
 
   const queryClient = useQueryClient();
 
