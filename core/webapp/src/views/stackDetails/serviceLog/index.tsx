@@ -14,6 +14,8 @@ import {
 import { Logs } from '../logs';
 import { ServiceName } from './serviceName';
 import { useMemo } from 'react';
+import { Duration } from 'components/duration';
+import { styles } from 'styles/css';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -33,6 +35,14 @@ const ContainerInner = styled.div`
 const Header = styled.div`
   display: flex;
   position: relative;
+`;
+const HeaderNote = styled.div`
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  ${styles.ml.md};
+  ${styles.text.sm};
+  pointer-events: none;
 `;
 const DragHandle = styled.div`
   position: absolute;
@@ -94,6 +104,12 @@ export const ServiceLogs = ({
     tasks && tasks.length > 0 ? tasks[0].id : null
   );
 
+  const currentTask = useMemo(() => {
+    if (taskId && tasks) {
+      return tasks.find((t) => t.id === taskId);
+    }
+    return null;
+  }, [taskId, tasks]);
   const isMostRecentSelected = useMemo(() => {
     if (!taskId || !tasks || !tasks.length) {
       return false;
@@ -132,15 +148,25 @@ export const ServiceLogs = ({
       <ContainerInner>
         <Header>
           {service && (
-            <ServiceName
-              name={fullName}
-              service={service}
-              tasks={tasks}
-              selectedTaskId={taskId}
-              onSelectTask={(taskId) => {
-                setTaskId(taskId);
-              }}
-            />
+            <>
+              <ServiceName
+                name={fullName}
+                service={service}
+                tasks={tasks}
+                selectedTaskId={taskId}
+                onSelectTask={(taskId) => {
+                  setTaskId(taskId);
+                }}
+              />
+            </>
+          )}
+          {currentTask && (
+            <HeaderNote>
+              <Duration
+                from={currentTask.creating_at}
+                to={currentTask.stopped_at || currentTask.exited_at}
+              />
+            </HeaderNote>
           )}
           <DragHandle ref={drag} />
         </Header>
