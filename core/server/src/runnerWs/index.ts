@@ -5,8 +5,9 @@ import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 import { createLogger } from '@shantr/metro-logger';
 import { RunnerType } from './class';
-import { Task, TaskLog } from 'src/data';
+import { Service, Task, TaskLog } from 'src/data';
 import { ServiceSpec } from '@shantr/metro-common-types';
+import { SideEffects } from 'src/events/sideEffects';
 
 export const startRunnerWs = async ({
   logger = createLogger('runner'),

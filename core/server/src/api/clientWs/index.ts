@@ -1,18 +1,20 @@
+import {
+  SocketIOClientToServerEvents,
+  SocketIOServerToClientEvents,
+} from '@shantr/metro-common-types';
 import { Logger } from '@shantr/metro-logger';
 import { Server as HttpServer } from 'http';
+import { forEach } from 'lodash';
 import { Server } from 'socket.io';
-import { Service } from 'src/data';
+import { Service, Task } from 'src/data';
 import { State } from 'src/data/state';
 import { SideEffects } from 'src/events/sideEffects';
-
-const ROOMS = {
-  subscription: {
-    stacks: 'subscribe-stacks',
-    stackServiceStates: (stackName: string) =>
-      `subscribe-stack-service-states:${stackName}`,
-    task: (id: string) => `subscribe-task:${id}`,
-  },
-};
+import {
+  ROOMS,
+  SUBCRIBE_PREFIX,
+  SUBSCRIPTIONS,
+  UNSUBSCRIBE_PREFIX,
+} from './rooms';
 
 export const startClientWs = ({
   httpServer,
@@ -21,59 +23,56 @@ export const startClientWs = ({
   httpServer: HttpServer;
   logger: Logger;
 }) => {
-  const io = new Server(httpServer, {});
+  const io = new Server<
+    SocketIOClientToServerEvents,
+    SocketIOServerToClientEvents
+  >(httpServer, {});
 
   io.on('connection', (socket) => {
     logger.info(`client connected`, socket.id);
 
-    socket.on('subscribe-stacks', async () => {
-      logger.info(`${socket.id} subscribed to stacks`);
-      await socket.join(ROOMS.subscription.stacks);
-    });
-    socket.on('unsubscribe-stacks', async () => {
-      if (socket.in(ROOMS.subscription.stacks)) {
-        logger.info(`${socket.id} unsubscribed to stacks`);
-        await socket.leave(ROOMS.subscription.stacks);
-      }
-    });
-
-    socket.on('subscribe-stacks', async () => {
-      logger.info(`${socket.id} subscribed to services`);
-      await socket.join(ROOMS.subscription.stacks);
-    });
-    socket.on('unsubscribe-stacks', async () => {
-      if (socket.in(ROOMS.subscription.stacks)) {
-        logger.info(`${socket.id} unsubscribed to services`);
-        await socket.leave(ROOMS.subscription.stacks);
-      }
-    });
-
-    socket.on('subscribe-stack-service-states', async (stackName: string) => {
-      logger.info(
-        `${socket.id} subscribed to stack '${stackName}' service states`
-      );
-      await socket.join(ROOMS.subscription.stackServiceStates(stackName));
-    });
-    socket.on('unsubscribe-stack-service-states', async (stackName: string) => {
-      const room = ROOMS.subscription.stackServiceStates(stackName);
-      if (socket.in(room)) {
-        logger.info(
-          `${socket.id} unsubscribed to stack '${stackName}' service states`
-        );
-        await socket.leave(room);
-      }
-    });
-
-    socket.on('subscribe-task', async (taskId: string) => {
-      const room = ROOMS.subscription.task(taskId);
-      logger.info(`${socket.id} subscribe to task '${taskId}'`);
-      await socket.join(room);
-    });
-    socket.on('unsubscribe-task', async (taskId: string) => {
-      const room = ROOMS.subscription.task(taskId);
-      if (socket.in(room)) {
-        logger.info(`${socket.id} unsubscribe to task '${taskId}'`);
-        await socket.leave(room);
+    // setup listener on subscription events
+    forEach(SUBSCRIPTIONS, (sub, subKey) => {
+      if (typeof sub === 'string') {
+        const subEventName = `${SUBCRIBE_PREFIX}-${sub}`;
+        const unsubEventName = `${UNSUBSCRIBE_PREFIX}-${sub}`;
+        // @ts-ignore
+        socket.on(subEventName, async () => {
+          const roomName = ROOMS.subscription[subKey];
+          if (!socket.rooms.has(roomName)) {
+            await socket.join(roomName);
+            logger.info(`${socket.id} subscribed to ${sub}`);
+          }
+        });
+        // @ts-ignore
+        socket.on(unsubEventName, async () => {
+          const roomName = ROOMS.subscription[subKey];
+          if (socket.rooms.has(roomName)) {
+            await socket.leave(roomName);
+            logger.info(`${socket.id} unsubscribed to ${sub}`);
+          }
+        });
+      } else {
+        const subEventName = `${SUBCRIBE_PREFIX}-${sub.key}`;
+        const unsubEventName = `${UNSUBSCRIBE_PREFIX}-${sub.key}`;
+        type Params = Parameters<typeof sub.params>;
+        // @ts-ignore
+        socket.on(subEventName, async (...params: Params) => {
+          const roomName = ROOMS.subscription[subKey](...params);
+          console.log(roomName);
+          if (!socket.rooms.has(roomName)) {
+            logger.info(`${socket.id} subscribed to ${sub.key}`);
+            await socket.join(roomName);
+          }
+        });
+        // @ts-ignore
+        socket.on(unsubEventName, async (...params: Params) => {
+          const roomName = ROOMS.subscription[subKey](...params);
+          if (socket.rooms.has(roomName)) {
+            logger.info(`${socket.id} unsubscribed to ${sub.key}`);
+            await socket.leave(roomName);
+          }
+        });
       }
     });
   });
@@ -83,7 +82,6 @@ export const startClientWs = ({
   });
 
   SideEffects.on('addStack', ({ name }) => {
-    console.log('ADD_STACKS');
     io.in(ROOMS.subscription.stacks).emit('stack-event', {
       type: 'add-stack',
       name,
@@ -102,39 +100,38 @@ export const startClientWs = ({
     });
   });
 
-  SideEffects.on('updateServiceState', ({ fullName }) => {
-    const { stackName, serviceName } = Service.splitFullName(fullName);
-    const state = State.service.get(fullName);
-    io.in(ROOMS.subscription.stackServiceStates(stackName)).emit(
-      `update-stack-service-state:${stackName}`,
+  SideEffects.on('updateServiceState', ({ serviceName }) => {
+    const { stackName, serviceKey } = Service.splitFullName(serviceName);
+    const state = State.service.get(serviceName);
+    io.in(ROOMS.subscription.serviceStates(stackName)).emit(
+      `update-service-state:${stackName}`,
       {
-        fullName,
-        stackName,
         serviceName,
+        stackName,
+        serviceKey,
         state,
       }
     );
   });
 
-  // SideEffects.on('addService', ({ stackName, fullName }) => {
-  //   io.in(ROOMS.subscription.services).emit('service-event', {
-  //     type: 'add-service',
-  //     stackName,
-  //     fullName,
-  //   });
-  // });
-  // SideEffects.on('removeService', ({ stackName, fullName }) => {
-  //   io.in(ROOMS.subscription.services).emit('service-event', {
-  //     type: 'remove-service',
-  //     stackName,
-  //     fullName,
-  //   });
-  // });
-  // SideEffects.on('updateService', ({ stackName, fullName }) => {
-  //   io.in(ROOMS.subscription.services).emit('service-event', {
-  //     type: 'update-service',
-  //     stackName,
-  //     fullName,
-  //   });
-  // });
+  SideEffects.on('addTask', async ({ id, serviceName }) => {
+    const task = await Task.get(id);
+    io.in(ROOMS.subscription.serviceTasks(serviceName)).emit(
+      `service-task:${serviceName}`,
+      {
+        type: 'add-task',
+        task,
+      }
+    );
+  });
+  SideEffects.on('updateTask', async (taskStateUpdate) => {
+    const task = await Task.get(taskStateUpdate.id);
+    io.in(ROOMS.subscription.serviceTasks(task.service_name)).emit(
+      `service-task:${task.service_name}`,
+      {
+        type: 'update-task',
+        taskStateUpdate,
+      }
+    );
+  });
 };

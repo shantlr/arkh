@@ -1,9 +1,15 @@
-import { ServiceTaskLog } from 'configs/types';
-import { useService, useServiceTaskLogs, useServiceTasks } from 'hooks/query';
 import { CSSProperties, useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
+
+import { ServiceTaskLog } from 'configs/types';
+import {
+  useService,
+  useServiceTaskLogs,
+  useServiceTasks,
+  useSubscribeServiceTasks,
+} from 'hooks/query';
 import { Logs } from '../logs';
 import { ServiceName } from './serviceName';
 
@@ -59,6 +65,8 @@ export const ServiceLogs = ({
 }) => {
   const { data: service } = useService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
+  useSubscribeServiceTasks(fullName);
+  console.log(tasks);
   const [, drag, dragPreview] = useDrag(
     {
       type: dragType,

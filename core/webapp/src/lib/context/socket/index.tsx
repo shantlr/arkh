@@ -1,8 +1,17 @@
+import {
+  SocketIOClientToServerEvents,
+  SocketIOServerToClientEvents,
+} from '@shantr/metro-common-types';
 import { useEqualMemo } from 'lib/hooks';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
-const Context = createContext<Socket | null>(null);
+type TypedSocket = Socket<
+  SocketIOServerToClientEvents,
+  SocketIOClientToServerEvents
+>;
+
+const Context = createContext<TypedSocket | null>(null);
 
 const SubscriptionContext = createContext<{
   incrementSubscribedCount(key: string): number;
@@ -82,31 +91,33 @@ export const SocketProvider = ({
 export const useSocket = () => useContext(Context);
 const useSubscriptionContext = () => useContext(SubscriptionContext);
 
-export const useSocketEmit = (name: string, args: any) => {
+// export const useSocketEmit = (name: string, args: any) => {
+//   const socket = useSocket();
+
+//   useEffect(() => {
+//     if (!socket) {
+//       return;
+//     }
+
+//     socket.emit(name, args);
+//   }, [socket, name, args]);
+// };
+export function useSocketListen<
+  EventName extends keyof SocketIOServerToClientEvents,
+  Callback extends SocketIOServerToClientEvents[EventName] = SocketIOServerToClientEvents[EventName]
+>(name: EventName, callback: Callback) {
   const socket = useSocket();
 
   useEffect(() => {
     if (!socket) {
       return;
     }
-
-    socket.emit(name, args);
-  }, [socket, name, args]);
-};
-export function useSocketListen(
-  name: string,
-  callback: (...args: any[]) => void
-) {
-  const socket = useSocket();
-
-  useEffect(() => {
-    if (!socket) {
-      return;
-    }
-    socket.on(name, callback as (...args: any[]) => void);
+    // @ts-ignore
+    socket.on(name, callback);
 
     return () => {
-      socket.removeListener(name, callback as (...args: any[]) => void);
+      // @ts-ignore
+      socket.removeListener(name, callback);
     };
   });
 }
@@ -117,8 +128,8 @@ export function createUseSubscribe<T = void>({
   unsubscribe,
 }: {
   key: string | ((param: T) => string);
-  subscribe: (socket: Socket, param: T) => void;
-  unsubscribe: (socket: Socket, param: T) => void;
+  subscribe: (socket: TypedSocket, param: T) => void;
+  unsubscribe: (socket: TypedSocket, param: T) => void;
 }) {
   return (param: T) => {
     const socket = useSocket();

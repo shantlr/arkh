@@ -8,6 +8,7 @@ import { Config } from 'src/data';
 import { MetroSpec } from '@shantr/metro-common-types';
 import { EVENTS } from '../..';
 import { InvalidConfig, parseConfig } from './parseConfig';
+import { YAMLError, YAMLSemanticError } from 'yaml/util';
 
 export const loadQueue = createEventQueue('load', {
   async dir(dirPath: string, { dispatcher, logger }: HandlerContext) {
@@ -31,7 +32,9 @@ export const loadQueue = createEventQueue('load', {
   async file(filePath: string, { logger, dispatcher }: HandlerContext) {
     try {
       const file = await fs.promises.readFile(filePath);
-      const yaml = YAML.parse(file.toString());
+      const yaml = YAML.parse(file.toString(), {
+        prettyErrors: true,
+      });
       logger.info(`${filePath} parsed`);
       dispatcher.push(
         loadQueue.config({
@@ -42,6 +45,11 @@ export const loadQueue = createEventQueue('load', {
     } catch (err) {
       if (err.code === 'ENOENT') {
         logger.warn(`'${filePath}' not found`);
+        return;
+      }
+      if (err instanceof YAMLError) {
+        logger.error(`${err.message}: %O`, err.source);
+        logger.warn(`could not parse '${filePath}', config not loaded`);
         return;
       }
       throw err;

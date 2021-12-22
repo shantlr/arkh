@@ -3,9 +3,15 @@ import {
   createCollectionAccessor,
   deserializer,
   serializer,
+  StringifyNonScalar,
 } from 'src/lib/db';
 import { knex } from './knex';
-import { MetroSpec, StackSpec, ServiceSpec } from '@shantr/metro-common-types';
+import {
+  MetroSpec,
+  StackSpec,
+  ServiceSpec,
+  Task as TaskType,
+} from '@shantr/metro-common-types';
 import { SideEffects } from 'src/events/sideEffects';
 
 export { doMigrations } from './knex';
@@ -57,35 +63,25 @@ export const Service = addStaticMethods(
     }),
   }),
   {
-    getStackNameFromFullName(fullName: string): string {
-      return fullName.split('.')[0];
+    getStackNameFromName(serviceName: string): string {
+      return serviceName.split('.')[0];
     },
-    splitFullName(fullName: string) {
-      const [stackName, serviceName] = fullName.split('.');
+    splitFullName(serviceName: string) {
+      const [stackName, serviceKey] = serviceName.split('.');
       return {
         stackName,
-        serviceName,
+        serviceKey,
       };
+    },
+    formatName(stackName: string, key: string) {
+      return `${stackName}.${key}`;
     },
   }
 );
 
-const getTask = () =>
-  knex<{
-    id: string;
-    service_name: string;
-    service_spec: any;
-    runner_id: string;
-    creating_at: Date;
-    updated_at: Date;
-    running_at: Date;
-    stopping_at: Date;
-    stopped_at: Date;
-    exited_at: Date;
-    exit_code: number;
-  }>(`tasks`);
+const getTask = () => knex<StringifyNonScalar<TaskType>>(`tasks`);
 export const Task = {
-  create({
+  async create({
     id,
     serviceName,
     serviceSpec,
@@ -96,67 +92,106 @@ export const Task = {
     serviceSpec: ServiceSpec;
     runnerId: string;
   }) {
-    return getTask().insert({
+    const date = new Date();
+    await getTask().insert({
       id,
       service_name: serviceName,
       service_spec: JSON.stringify(serviceSpec),
       runner_id: runnerId,
-      creating_at: new Date(),
-      updated_at: new Date(),
+      creating_at: date,
+      updated_at: date,
+    });
+    void SideEffects.emit('addTask', {
+      id,
+      created_at: date,
+      serviceName,
     });
   },
   update: {
-    runningAt(taskId: string) {
-      return getTask()
+    async runningAt(taskId: string) {
+      const date = new Date();
+      await getTask()
         .update({
-          running_at: new Date(),
-          updated_at: new Date(),
+          running_at: date,
+          updated_at: date,
         })
         .where({
           id: taskId,
           running_at: null,
-        });
+        })
+        .returning('*');
+      void SideEffects.emit('updateTask', {
+        id: taskId,
+        running_at: date,
+      });
     },
-    stoppingAt(taskId: string) {
-      return getTask()
+    async stoppingAt(taskId: string) {
+      const date = new Date();
+      await getTask()
         .update({
-          stopping_at: new Date(),
-          updated_at: new Date(),
+          stopping_at: date,
+          updated_at: date,
         })
         .where({
           id: taskId,
           stopping_at: null,
         });
+      void SideEffects.emit('updateTask', {
+        id: taskId,
+        stopping_at: date,
+      });
     },
-    stoppedAt(taskId: string) {
-      return getTask()
+    async stoppedAt(taskId: string) {
+      const date = new Date();
+      await getTask()
         .update({
-          stopped_at: new Date(),
-          updated_at: new Date(),
+          stopped_at: date,
+          updated_at: date,
         })
         .where({
           id: taskId,
           stopped_at: null,
         });
+      void SideEffects.emit('updateTask', {
+        id: taskId,
+        stopped_at: date,
+      });
     },
-    exited(taskId: string, exitCode: number) {
-      return getTask()
+    async exited(taskId: string, exitCode: number) {
+      const date = new Date();
+      await getTask()
         .update({
-          exited_at: new Date(),
+          exited_at: date,
           exit_code: exitCode,
-          updated_at: new Date(),
+          updated_at: date,
         })
         .where({
           id: taskId,
           exited_at: null,
         });
+      void SideEffects.emit('updateTask', {
+        id: taskId,
+        exited_at: date,
+        exit_code: exitCode,
+      });
     },
   },
 
   get(taskId: string) {
-    return getTask().select().first().where({
-      id: taskId,
-    });
+    return getTask()
+      .select()
+      .first()
+      .where({
+        id: taskId,
+      })
+      .then((r) => {
+        if (r) {
+          if (r.service_spec) {
+            r.service_spec = JSON.parse(r.service_spec);
+          }
+        }
+        return r as unknown as TaskType;
+      });
   },
   list(serviceName: string) {
     return getTask()
@@ -164,7 +199,16 @@ export const Task = {
       .where({
         service_name: serviceName,
       })
-      .orderBy('creating_at', 'desc');
+      .orderBy('creating_at', 'desc')
+      .then((r) => {
+        r.forEach((task) => {
+          if (task.service_spec) {
+            task.service_spec = JSON.parse(task.service_spec);
+          }
+        });
+
+        return r as unknown as TaskType[];
+      });
   },
 };
 
@@ -189,6 +233,12 @@ export const TaskLog = {
   }) {
     const col = getTaskLog();
     await col.insert({
+      task_id: id,
+      out,
+      text,
+      date,
+    });
+    await SideEffects.emit('taskLog', {
       task_id: id,
       out,
       text,

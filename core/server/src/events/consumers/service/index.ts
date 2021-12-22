@@ -11,73 +11,67 @@ export const serviceQueue = createEventQueue('service', {
   save: handler(
     async (
       {
-        name,
         stackName,
+        key,
         spec,
-      }: { name: string; stackName: string; spec: ServiceSpec },
+      }: { key: string; stackName: string; spec: ServiceSpec },
       { logger }
     ) => {
-      const serviceName = `${stackName}.${name}`;
-      const existing = await Service.getOne(serviceName);
+      const name = Service.formatName(stackName, key);
+      const existing = await Service.getOne(name);
 
       if (existing) {
         if (!isEqual(existing.spec, spec)) {
-          await Service.updateOne(serviceName, {
+          await Service.updateOne(name, {
             spec,
           });
-          logger.info(`'${serviceName}' updated`);
+          logger.info(`'${name}' updated`);
           void SideEffects.emit('updateService', {
-            stackName,
-            fullName: serviceName,
+            serviceName: name,
           });
         } else {
-          logger.info(`'${serviceName}' unchanged`);
+          logger.info(`'${name}' unchanged`);
         }
       } else {
         await Service.insertOne({
-          name: serviceName,
+          name: name,
           spec,
           stack: stackName,
-          key: name,
+          key,
         });
-        logger.info(`${serviceName} created`);
+        logger.info(`${name} created`);
         void SideEffects.emit('addService', {
-          stackName,
-          fullName: serviceName,
+          serviceName: name,
         });
       }
 
-      if (!State.service.get(serviceName)) {
+      if (!State.service.get(name)) {
         State.service.init({
-          name: serviceName,
+          name,
           state: 'off',
         });
       }
     }
   ),
   remove: handler(
-    async (
-      { name, stackName }: { name: string; stackName: string },
-      { dispatcher, logger }
-    ) => {
-      const key = `${stackName}.${name}`;
-      const removed = await Service.removeOne(key);
+    async ({ name }: { name: string }, { dispatcher, logger }) => {
+      const removed = await Service.removeOne(name);
       if (removed) {
-        logger.info(`'${key}' removed`);
+        logger.info(`'${name}' removed`);
         dispatcher.push(
           EVENTS.service.removed({
             name,
-            stackName,
           })
         );
-        void SideEffects.emit('removeService', { stackName, fullName: key });
+        void SideEffects.emit('removeService', { serviceName: name });
       } else {
-        logger.info(`'${key}' not found`);
+        logger.info(`'${name}' not found`);
       }
     }
   ),
-  removed: handlers<{ name: string; stackName: string }>({
-    async removeStack({ stackName }, { dispatcher }) {
+  removed: handlers<{ name: string }>({
+    async removeStack({ name }, { dispatcher }) {
+      const stackName = Service.getStackNameFromName(name);
       const stack = await Stack.getOne(stackName);
       if (stack && stack.to_remove) {
         dispatcher.push(

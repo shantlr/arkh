@@ -34,10 +34,10 @@ export const stackQueue = createEventQueue('stack', {
         stack: name,
       });
 
-      forEach(spec.services, (service, serviceName) => {
+      forEach(spec.services, (service, serviceKey) => {
         dispatcher.push(
           EVENTS.service.save({
-            name: serviceName,
+            key: serviceKey,
             stackName: name,
             spec: service,
           })
@@ -49,7 +49,6 @@ export const stackQueue = createEventQueue('stack', {
             dispatcher.push(
               EVENTS.service.remove({
                 name: service.name,
-                stackName: name,
               })
             );
           }
@@ -65,9 +64,11 @@ export const stackQueue = createEventQueue('stack', {
 
         const spec = stack.spec as StackSpec;
         logger.info(`start removing stack '${name}' services`);
-        forEach(spec.services, (service, serviceName) => {
+        forEach(spec.services, (service, serviceKey) => {
           dispatcher.push(
-            EVENTS.service.remove({ name: serviceName, stackName: name })
+            EVENTS.service.remove({
+              name: Service.formatName(name, serviceKey),
+            })
           );
         });
       } else {

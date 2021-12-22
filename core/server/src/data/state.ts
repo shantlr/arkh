@@ -1,28 +1,9 @@
 import { filter, some } from 'lodash';
 import { Socket } from 'socket.io';
+import { ServiceState, ServiceStateEnum } from '@shantr/metro-common-types';
 import { createLogger } from '@shantr/metro-logger';
 import { Runner, RunnerType } from 'src/runnerWs/class';
 import { SideEffects } from 'src/events/sideEffects';
-
-export type ServiceStateEnum =
-  | 'off'
-  | 'pending-assignment'
-  | 'assigned'
-  | 'running';
-export type ServiceState = {
-  name: string;
-  state: ServiceStateEnum;
-  assignedRunnerId?: string;
-
-  current_task_id?: string;
-  current_task_state?:
-    | 'noop'
-    | 'creating'
-    | 'running'
-    | 'stopping'
-    | 'stopped'
-    | 'exited';
-};
 
 const IN_MEMORY_STATE: {
   stack: {
@@ -94,7 +75,7 @@ export const State = {
       state.state = 'pending-assignment';
       state.assignedRunnerId = null;
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
     toAssigned(name: string, runnerId: string) {
@@ -102,7 +83,7 @@ export const State = {
       state.state = 'assigned';
       state.assignedRunnerId = runnerId;
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
 
@@ -113,7 +94,7 @@ export const State = {
       state.current_task_state = 'creating';
       logger.info(`'${name}' task creating`);
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
     toTaskRunning(taskId: string, name: string) {
@@ -123,7 +104,7 @@ export const State = {
       state.current_task_state = 'running';
       logger.info(`'${name}' task running`);
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
     toTaskStopping(taskId: string, name: string) {
@@ -133,7 +114,7 @@ export const State = {
       state.current_task_state = 'stopping';
       logger.info(`'${name}' task stopping`);
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
     toTaskStopped(taskId: string, name: string) {
@@ -143,7 +124,7 @@ export const State = {
       state.current_task_state = 'stopped';
       logger.info(`'${name}' task stopped`);
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
     toTaskExited(taskId: string, name: string) {
@@ -154,7 +135,7 @@ export const State = {
       logger.info(`'${name}' task exited`);
       state.assignedRunnerId = null;
       void SideEffects.emit('updateServiceState', {
-        fullName: name,
+        serviceName: name,
       });
     },
 

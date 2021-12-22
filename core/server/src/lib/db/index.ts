@@ -7,8 +7,10 @@ export interface IEntity {
   updated_at: Date;
 }
 
-type StringifyNonScalar<T extends Record<string, any>> = {
-  [key in keyof T]: T[key] extends string | number | boolean ? T[key] : string;
+export type StringifyNonScalar<T extends Record<string, any>> = {
+  [key in keyof T]: T[key] extends string | number | boolean | Date
+    ? T[key]
+    : string;
 };
 
 export interface EntityAccessor<Deserialized> {
