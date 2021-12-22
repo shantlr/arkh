@@ -18,7 +18,12 @@ export const TextBatch = ({
   text: string;
 }) => {
   const lines = useMemo(() => {
-    return text.split('\n');
+    let t = text;
+    if (t.endsWith('\n')) {
+      t = t.slice(0, t.length - 1);
+      console.log(t);
+    }
+    return t.split('\n');
   }, [text]);
 
   const d = dayjs(date).format('DD-MM-YYYY HH:mm ');
