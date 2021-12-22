@@ -139,4 +139,11 @@ export const startClientWs = ({
       log
     );
   });
+
+  return () => {
+    io.disconnectSockets();
+    logger.info('all client socket disconnected');
+    io.close();
+    logger.info('client socketio closed');
+  };
 };

@@ -1,10 +1,12 @@
 import { createSocket, queryClient } from 'configs';
-import { SocketProvider } from 'lib/context/socket';
+import { SocketProvider, useSocketListen } from 'lib/context/socket';
+import { useEffect } from 'react';
 import { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClientProvider } from 'react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Socket } from 'socket.io-client';
 import styled, { ThemeProvider } from 'styled-components';
 import { theme } from 'styles';
 import { SideBar } from 'views/sideBar';
@@ -26,6 +28,22 @@ const Container = styled.div`
 
 export const RootApp = () => {
   const [socket] = useState(() => createSocket());
+
+  useEffect(() => {
+    const listener = (reason: Socket.DisconnectReason) => {
+      if (reason === 'io server disconnect') {
+        console.log('server disconnect');
+        setTimeout(() => {
+          console.log('retrying connection');
+          socket.connect();
+        }, 500);
+      }
+    };
+    socket.on('disconnect', listener);
+    return () => {
+      socket.removeListener('disconnect', listener);
+    };
+  }, [socket]);
 
   return (
     <BrowserRouter>

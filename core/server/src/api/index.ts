@@ -23,14 +23,15 @@ export const startApi = async (port: number, logger = createLogger('api')) => {
   app.use('/api/service-task', serviceTaskRouter());
 
   const httpServer = createServer(app);
-  startClientWs({
+  const closeSocketIo = startClientWs({
     httpServer,
     logger: logger.extend('ws'),
   });
 
   return new Promise<() => Promise<void>>((resolve) => {
-    const gracefulShutdown = () => {
-      return new Promise<void>((resolve, reject) => {
+    const gracefulShutdown = async () => {
+      await closeSocketIo();
+      await new Promise<void>((resolve, reject) => {
         httpServer.close((err) => {
           if (!err) {
             logger.info(`http-server closed`);
