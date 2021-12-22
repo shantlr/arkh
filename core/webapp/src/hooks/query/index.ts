@@ -1,3 +1,4 @@
+import { Task } from '@shantr/metro-common-types';
 import { API } from 'configs';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useQuery, useQueryClient } from 'react-query';
@@ -9,6 +10,9 @@ const QUERY_KEY = {
   service: {
     state: (serviceName: string) => ['service', serviceName],
     tasks: (serviceName: string) => ['service', serviceName, 'tasks'],
+  },
+  task: {
+    logs: (taskId: string) => ['task', taskId, 'logs'],
   },
 };
 
@@ -55,25 +59,21 @@ export const useServiceTasks = (serviceName: string) =>
   useQuery(QUERY_KEY.service.tasks(serviceName), () =>
     API.service.task.list(serviceName)
   );
-export const useServiceTaskLogs = (taskId: string | null | undefined) =>
-  useQuery(
-    ['task', taskId, 'logs'],
-    () => (taskId ? API.service.task.logs(taskId) : null),
-    {
-      enabled: Boolean(taskId),
-    }
-  );
-
 const useSubServiceTasks = createUseSubscribe<string>({
-  key: (fullName: string) => `subscribe-stack-service-tasks:${fullName}`,
-  subscribe(socket, fullName) {
-    socket.emit(`subscribe-service-tasks`, fullName);
+  key: (serviceName: string) => `subscribe-stack-service-tasks:${serviceName}`,
+  subscribe(socket, serviceName) {
+    socket.emit(`subscribe-service-tasks`, serviceName);
   },
-  unsubscribe(socket, fullName) {
-    socket.emit(`unsubscribe-service-tasks`, fullName);
+  unsubscribe(socket, serviceName) {
+    socket.emit(`unsubscribe-service-tasks`, serviceName);
   },
 });
-export const useSubscribeServiceTasks = (serviceName: string) => {
+export const useSubscribeServiceTasks = (
+  serviceName: string,
+  opt?: {
+    onNewTask?: (task: Task) => void;
+  }
+) => {
   const queryClient = useQueryClient();
   useSubServiceTasks(serviceName);
   useSocketListen(`service-task:${serviceName}`, (event) => {
@@ -88,6 +88,9 @@ export const useSubscribeServiceTasks = (serviceName: string) => {
           return prev;
         }
       );
+      if (opt && opt.onNewTask) {
+        opt.onNewTask(event.task);
+      }
     } else if (event.type === 'update-task') {
       // Update cache task state
       queryClient.setQueryData(
@@ -111,6 +114,31 @@ export const useSubscribeServiceTasks = (serviceName: string) => {
   });
 };
 
-export const useScubscribeServiceTaskLogs = () => {
-  //
+export const useServiceTaskLogs = (taskId: string | null | undefined) =>
+  useQuery(
+    taskId ? QUERY_KEY.task.logs(taskId) : '',
+    // ['task', taskId, 'logs'],
+    () => (taskId ? API.service.task.logs(taskId) : null),
+    {
+      enabled: Boolean(taskId),
+    }
+  );
+
+const useSubTaskLogs = createUseSubscribe<string>({
+  key: (taskId: string) => `subscribe-task-logs:${taskId}`,
+  subscribe(socket, taskId) {
+    socket.emit(`subscribe-task-logs`, taskId);
+  },
+  unsubscribe(socket, taskId) {
+    socket.emit(`unsubscribe-task-logs`, taskId);
+  },
+});
+export const useScubscribeServiceTaskLogs = (taskId: string) => {
+  const queryClient = useQueryClient();
+  useSubTaskLogs(taskId);
+  useSocketListen(`task-log:${taskId}`, (log) => {
+    queryClient.setQueryData(QUERY_KEY.task.logs(taskId), (prev: any = []) => {
+      return [...prev, log];
+    });
+  });
 };

@@ -11,6 +11,7 @@ import {
   StackSpec,
   ServiceSpec,
   Task as TaskType,
+  TaskLog as TaskLogType,
 } from '@shantr/metro-common-types';
 import { SideEffects } from 'src/events/sideEffects';
 
@@ -212,13 +213,7 @@ export const Task = {
   },
 };
 
-const getTaskLog = () =>
-  knex<{
-    out: 0 | 1;
-    task_id: string;
-    text: string;
-    date: Date;
-  }>('task_logs');
+const getTaskLog = () => knex<TaskLogType>('task_logs');
 export const TaskLog = {
   async add({
     id,

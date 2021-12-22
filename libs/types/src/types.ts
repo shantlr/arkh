@@ -60,3 +60,10 @@ export type Task = {
   exited_at: Date;
   exit_code: number;
 };
+
+export type TaskLog = {
+  out: 0 | 1;
+  task_id: string;
+  text: string;
+  date: Date;
+};

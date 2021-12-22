@@ -1,4 +1,4 @@
-import { ServiceState, Task } from '../types';
+import { ServiceState, Task, TaskLog } from '../types';
 
 /**
  * Subscription that require parameters
@@ -131,4 +131,5 @@ export type SocketIOServerToClientEvents = {
             };
           }
     ) => void
-  >;
+  > &
+  PatternEvents<'task-log', (log: TaskLog) => void>;

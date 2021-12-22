@@ -12,6 +12,7 @@ import {
 } from 'hooks/query';
 import { Logs } from '../logs';
 import { ServiceName } from './serviceName';
+import { useMemo } from 'react';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -65,8 +66,7 @@ export const ServiceLogs = ({
 }) => {
   const { data: service } = useService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
-  useSubscribeServiceTasks(fullName);
-  console.log(tasks);
+
   const [, drag, dragPreview] = useDrag(
     {
       type: dragType,
@@ -82,6 +82,20 @@ export const ServiceLogs = ({
   const [taskId, setTaskId] = useState(() =>
     tasks && tasks.length > 0 ? tasks[0].id : null
   );
+
+  const isMostRecentSelected = useMemo(() => {
+    if (!taskId || !tasks || !tasks.length) {
+      return false;
+    }
+    return taskId === tasks[0].id;
+  }, [taskId, tasks]);
+  useSubscribeServiceTasks(fullName, {
+    onNewTask(task) {
+      if (isMostRecentSelected) {
+        setTaskId(task.id);
+      }
+    },
+  });
 
   const { data: taskLogs } = useServiceTaskLogs(taskId);
 

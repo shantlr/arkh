@@ -1,3 +1,4 @@
+import { TaskLog } from '@shantr/metro-common-types';
 import Emittery from 'emittery';
 
 export const SideEffects = new Emittery<{
@@ -20,5 +21,5 @@ export const SideEffects = new Emittery<{
     exited_at?: Date;
     exit_code?: number;
   };
-  taskLog: { task_id: string; out?: 0 | 1; text: string; date: Date };
+  taskLog: TaskLog;
 }>();

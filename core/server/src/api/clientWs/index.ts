@@ -134,4 +134,10 @@ export const startClientWs = ({
       }
     );
   });
+  SideEffects.on('taskLog', async (log) => {
+    io.in(ROOMS.subscription.taskLogs(log.task_id)).emit(
+      `task-log:${log.task_id}`,
+      log
+    );
+  });
 };
