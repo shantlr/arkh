@@ -1,14 +1,16 @@
 import { CSSProperties } from 'react';
 import { useDrop } from 'react-dnd';
 import styled from 'styled-components';
+import { styles } from 'styles/css';
 
-const GridCellHorizContainer = styled.div`
+const GridCellHorizContainer = styled.div<{ isOver?: boolean }>`
   position: absolute;
   height: 100%;
   width: 40%;
   max-width: 80px;
   background-color: gray;
-  opacity: 0.5;
+  opacity: ${(props) => (props.isOver ? '0.5' : '0.3')};
+  ${styles.transition.default};
 `;
 export const GridCellHorizDroppable = ({
   style,
@@ -22,7 +24,7 @@ export const GridCellHorizDroppable = ({
 
   onDrop?: (item: { rowIndex: number; cellIndex: number }) => void;
 }) => {
-  const [, drop] = useDrop(
+  const [{ isOver }, drop] = useDrop(
     () => ({
       drop(item: { rowIndex: number; cellIndex: number }) {
         if (onDrop) {
@@ -30,11 +32,20 @@ export const GridCellHorizDroppable = ({
         }
       },
       accept: dropAcceptType,
+      collect(monitor) {
+        return {
+          isOver: monitor.isOver(),
+        };
+      },
     }),
     [onDrop, dropAcceptType]
   );
 
   return (
-    <GridCellHorizContainer ref={drop} style={style}></GridCellHorizContainer>
+    <GridCellHorizContainer
+      ref={drop}
+      isOver={isOver}
+      style={style}
+    ></GridCellHorizContainer>
   );
 };
