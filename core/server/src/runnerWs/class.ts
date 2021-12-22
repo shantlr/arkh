@@ -44,4 +44,18 @@ export class Runner {
       );
     });
   }
+  async stopService({ name, reason }: { name: string; reason?: string }) {
+    return new Promise<void>((resolve) => {
+      this.socket.emit(
+        'stop-service',
+        {
+          name,
+          reason,
+        },
+        () => {
+          resolve();
+        }
+      );
+    });
+  }
 }

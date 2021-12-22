@@ -6,6 +6,11 @@ import { useMemo } from 'react';
 import styled from 'styled-components';
 import { DateFromNow } from 'components/dateFromNow';
 import { Text } from 'components/text';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlay, faStopCircle } from '@fortawesome/free-solid-svg-icons';
+import { styles } from 'styles/css';
+import { useMutation } from 'react-query';
+import { API } from 'configs';
 
 const StyledDropdown = styled(Dropdown)`
   z-index: 1;
@@ -23,15 +28,34 @@ const Container = styled.div`
   border-right-color: black;
   background-color: white;
 
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+`;
+const Name = styled.div``;
+
+const ActionContainer = styled.div`
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+
+  ${styles.text.sm};
+`;
+const ActionItem = styled.div`
+  ${styles.transition.default};
+  ${styles.hover.textAction};
   cursor: pointer;
 `;
 
 export const ServiceName = ({
+  name,
   service,
   tasks,
   selectedTaskId,
   onSelectTask,
 }: {
+  name: string;
   service: ServiceInfo;
   tasks: ServiceTask[] | undefined;
   selectedTaskId?: string | null;
@@ -50,14 +74,45 @@ export const ServiceName = ({
     }));
   }, [tasks]);
 
+  const { mutate: runService } = useMutation(() => API.service.run({ name }));
+  const { mutate: stopService } = useMutation(() => API.service.stop({ name }));
+
+  const isRunning = useMemo(() => {
+    if (!tasks) {
+      return null;
+    }
+    if (tasks.length) {
+      const task = tasks[0];
+      if (task.running_at && !task.exited_at && !task.stopped_at) {
+        return true;
+      }
+    }
+    return false;
+  }, [tasks]);
+
+  console.log(service);
   return (
     <StyledDropdown
       selected={selectedTaskId}
-      placement="bottom-start"
+      placement="left-start"
       options={options}
       onSelect={(task) => onSelectTask(task.value)}
     >
-      <Container>{service.key}</Container>
+      <Container>
+        <Name>{service.key}</Name>
+        <ActionContainer>
+          {isRunning === false && (
+            <ActionItem onClick={() => runService()}>
+              <FontAwesomeIcon icon={faPlay} />
+            </ActionItem>
+          )}
+          {isRunning === true && (
+            <ActionItem onClick={() => stopService()}>
+              <FontAwesomeIcon icon={faStopCircle} />
+            </ActionItem>
+          )}
+        </ActionContainer>
+      </Container>
     </StyledDropdown>
   );
 };

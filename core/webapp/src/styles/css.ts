@@ -105,6 +105,11 @@ export const styles = {
     `,
   },
   hover: {
+    textAction: css`
+      :hover {
+        color: ${(props) => props.theme.color.actionBg};
+      }
+    `,
     action: css`
       :hover {
         background-color: ${(props) => props.theme.color.actionBg};

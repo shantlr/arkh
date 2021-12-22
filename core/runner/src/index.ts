@@ -58,6 +58,13 @@ const main = async () => {
       callback({ success: true });
     }
   );
+  socket.on(
+    'stop-service',
+    ({ name, reason }: { name: string; reason?: string }, callback) => {
+      EventManager.push(EVENTS.tasks.stop({ name, reason }));
+      callback({ success: true });
+    }
+  );
   socket.on('remove-service', ({ name }: { name: string }) => {
     EventManager.push(EVENTS.tasks.remove({ name }));
   });

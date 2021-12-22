@@ -42,10 +42,29 @@ export const tasks = createEventQueue('tasks', {
       }
     }
   ),
+  stop: handler(
+    async ({ name, reason }: { name: string; reason?: string }, { logger }) => {
+      const existing = State.service.get(name);
+      if (!existing) {
+        logger.warn(`'${name}' could not be stopped: not found`);
+        return;
+      }
+      if (!existing.task.isRunning()) {
+        logger.warn(`'${name}' could not be stopped: not running`);
+        return;
+      }
+      try {
+        await existing.task.stop(reason);
+      } catch (err) {
+        logger.error(err);
+        logger.error(`'${name}' failed to stop`);
+      }
+    }
+  ),
   remove: handler(async ({ name }: { name: string }, { logger }) => {
     const existing = State.service.get(name);
     if (!existing) {
-      logger.info(`'${name}' not found`);
+      logger.info(`'${name}' could not be removed: not found`);
       return;
     }
     await existing.task.stop();

@@ -133,6 +133,7 @@ export const ServiceLogs = ({
         <Header>
           {service && (
             <ServiceName
+              name={fullName}
               service={service}
               tasks={tasks}
               selectedTaskId={taskId}

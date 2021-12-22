@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Service, Task } from 'src/data';
+import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 
 export const serviceRouter = () => {
@@ -34,6 +35,34 @@ export const serviceRouter = () => {
         EVENTS.service.run({ name: service.key, stackName: service.stack })
       );
       return res.status(200).send({ success: true });
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send(err.message);
+    }
+  });
+  router.post('/:name/stop', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const state = State.service.get(name);
+      if (!state) {
+        return res.status(200).send({ success: false, message: 'not-running' });
+      }
+
+      if (state.assignedRunnerId && state.current_task_state === 'running') {
+        const runner = State.runner.get(state.assignedRunnerId);
+        if (runner.state === 'ready') {
+          await runner.stopService({ name, reason: 'api-endpoint' });
+          return res.status(200).send({ success: true });
+        } else {
+          return res
+            .status(200)
+            .send({ success: false, message: 'runner-not-ready' });
+        }
+      }
+
+      return res
+        .status(200)
+        .send({ success: false, message: 'service-not-running' });
     } catch (err) {
       req.logger.error(err);
       return res.status(500).send(err.message);

@@ -139,6 +139,9 @@ export const State = {
       });
     },
 
+    /**
+     * Get all services with given state
+     */
     findState(state: ServiceStateEnum) {
       return filter(
         IN_MEMORY_STATE.service.list,
@@ -146,6 +149,9 @@ export const State = {
       );
     },
 
+    /**
+     * Has some service that is waiting for assignment
+     */
     hasPendingAssignments() {
       return some(
         IN_MEMORY_STATE.service.list,

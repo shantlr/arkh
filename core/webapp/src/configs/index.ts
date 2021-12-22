@@ -45,6 +45,10 @@ export const API = {
       const res = await base.post(`service/${name}/run`);
       return res.json();
     },
+    async stop({ name }: { name: string }) {
+      const res = await base.post(`service/${name}/stop`);
+      return res.json();
+    },
 
     task: {
       async list(serviceName: string): Promise<ServiceTask[]> {

@@ -4,6 +4,7 @@ import { createTimeout } from 'lib/createTimeout';
 import { usePopper } from 'react-popper';
 import styled, { css } from 'styled-components';
 import { Placement } from '@popperjs/core';
+import { CSSProperties } from 'react';
 
 const Container = styled.div`
   display: inline-block;
@@ -55,6 +56,7 @@ export interface IOption<T = any> {
 
 export function Dropdown<T extends IOption>({
   className,
+  style,
   placement,
   children,
   selected,
@@ -62,6 +64,7 @@ export function Dropdown<T extends IOption>({
   onSelect,
 }: {
   className?: string;
+  style?: CSSProperties;
   children: JSX.Element;
   selected?: string | number | undefined | null;
   placement?: Placement;
@@ -100,6 +103,7 @@ export function Dropdown<T extends IOption>({
     <>
       <Container
         className={className}
+        style={style}
         ref={setContainerRef}
         onMouseEnter={() => {
           setShowPopper(true);
