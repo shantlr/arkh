@@ -38,10 +38,11 @@ export const CustomDragLayer = () => {
         <ServiceLogs
           style={{
             maxWidth: 150,
-            maxHeight: 30,
+            maxHeight: 200,
           }}
           dragType={itemType}
           fullName={item.id}
+          defaultTaskId={item.taskId}
           rowIndex={item.rowIndex}
           cellIndex={item.cellIndex}
         />

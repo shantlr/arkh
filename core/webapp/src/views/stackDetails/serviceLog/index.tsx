@@ -24,6 +24,7 @@ const ContainerOuter = styled.div`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 const ContainerInner = styled.div`
@@ -78,30 +79,38 @@ export const ServiceLogs = ({
 
   rowIndex,
   cellIndex,
+
+  defaultTaskId,
 }: {
   style?: CSSProperties;
   dragType: string;
   fullName: string;
   rowIndex?: number;
   cellIndex?: number;
+
+  defaultTaskId?: string;
 }) => {
   const { data: service } = useService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
+
+  const [taskId, setTaskId] = useState(() => {
+    if (defaultTaskId) {
+      return defaultTaskId;
+    }
+    return tasks && tasks.length > 0 ? tasks[0].id : null;
+  });
 
   const [, drag, dragPreview] = useDrag(
     {
       type: dragType,
       item: {
         id: fullName,
+        taskId,
         rowIndex,
         cellIndex,
       },
     },
-    [rowIndex, cellIndex, fullName]
-  );
-
-  const [taskId, setTaskId] = useState(() =>
-    tasks && tasks.length > 0 ? tasks[0].id : null
+    [rowIndex, cellIndex, fullName, taskId]
   );
 
   const currentTask = useMemo(() => {
