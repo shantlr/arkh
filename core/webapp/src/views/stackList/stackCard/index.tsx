@@ -18,6 +18,7 @@ import { styles } from 'styles/css';
 import { useEffect } from 'react';
 import { CSSProperties } from 'react';
 import { ServiceDropdownList } from '../serviceDropdownList';
+import { createTimeout } from 'lib/createTimeout';
 
 const StackHeader = styled.div`
   width: 100%;
@@ -194,6 +195,7 @@ export const StackCard = ({
   );
 
   const [showPopper, setShowPopper] = useState(false);
+  const [hasEnteredPopper, setHasEnteredPopper] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [popperRef, setPopperRef] = useState<HTMLDivElement | null>(null);
   const popper = usePopper(containerRef, popperRef, {
@@ -213,10 +215,23 @@ export const StackCard = ({
     useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!showPopper) {
+      setHasEnteredPopper(false);
+    }
     if (!shrinked && showPopper) {
       setShowPopper(false);
     }
   }, [showPopper, shrinked]);
+
+  // Clean relicas
+  useEffect(() => {
+    if (showPopper && !hasEnteredPopper) {
+      return createTimeout(() => {
+        setShowPopper(false);
+        setHasEnteredPopper(false);
+      }, 600);
+    }
+  }, [showPopper, hasEnteredPopper]);
 
   return (
     <>
@@ -268,6 +283,9 @@ export const StackCard = ({
             ...popper.styles.popper,
             minWidth: containerRef ? containerRef.offsetWidth : undefined,
             zIndex: 999,
+          }}
+          onMouseEnter={() => {
+            setHasEnteredPopper(true);
           }}
           onMouseLeave={() => {
             setShowPopper(false);

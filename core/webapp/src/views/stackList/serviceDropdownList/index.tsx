@@ -46,7 +46,7 @@ export const ServiceDropdownList = ({
   const [show, setShow] = useState(false);
   const [popperRef, setPopperRef] = useState<HTMLElement | null>(null);
   const popper = usePopper(parentRef, popperRef, {
-    placement: 'right-start',
+    placement: 'right',
   });
 
   useEffect(() => {
