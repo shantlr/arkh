@@ -3,7 +3,7 @@ import { Dropdown } from 'components/dropdown';
 import { ServiceTask } from 'configs/types';
 import { map } from 'lodash';
 import { useMemo } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { DateFromNow } from 'components/dateFromNow';
 import { Text } from 'components/text';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -23,6 +23,7 @@ const Container = styled.div`
   border-top-left-radius: ${(props) => props.theme.borderRadius.md};
   border-top-right-radius: ${(props) => props.theme.borderRadius.md};
   padding: 0 ${(props) => props.theme.space.md};
+  ${styles.pl.sm};
   border-left-color: black;
   border-top-color: black;
   border-right-color: black;
@@ -46,6 +47,31 @@ const ActionItem = styled.div`
   ${styles.transition.default};
   ${styles.hover.textAction};
   cursor: pointer;
+`;
+
+const statusCss = {
+  stopped: css`
+    background-color: ${(p) => p.theme.color.secondaryMainBg};
+  `,
+  exited: css`
+    background-color: ${(p) => p.theme.color.secondaryMainBg};
+  `,
+  running: css`
+    background-color: ${(p) => p.theme.color.success};
+  `,
+  default: css`
+    background-color: transparent;
+  `,
+};
+const Status = styled.div<{
+  state?: keyof typeof statusCss | null;
+}>`
+  ${(props) => statusCss[props.state || 'default']};
+  min-width: 10px;
+  min-height: 10px;
+  ${styles.rounded.round};
+  ${styles.mr.sm};
+  ${styles.transition.default};
 `;
 
 export const ServiceName = ({
@@ -77,6 +103,26 @@ export const ServiceName = ({
   const { mutate: runService } = useMutation(() => API.service.run({ name }));
   const { mutate: stopService } = useMutation(() => API.service.stop({ name }));
 
+  const currentTask = useMemo(() => {
+    if (!selectedTaskId || !tasks) {
+      return null;
+    }
+    return tasks.find((t) => t.id === selectedTaskId);
+  }, [selectedTaskId, tasks]);
+
+  const currentTaskState = useMemo(() => {
+    if (!currentTask) {
+      return null;
+    }
+    if (currentTask.exited_at) {
+      return 'exited';
+    }
+    if (currentTask.stopped_at) {
+      return 'stopped';
+    }
+    return 'running';
+  }, [currentTask]);
+
   const isRunning = useMemo(() => {
     if (!tasks) {
       return null;
@@ -98,6 +144,7 @@ export const ServiceName = ({
       onSelect={(task) => onSelectTask(task.value)}
     >
       <Container>
+        <Status state={currentTaskState} />
         <Name>{service.key}</Name>
         <ActionContainer>
           {isRunning === false && (
