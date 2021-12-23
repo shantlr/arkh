@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
+import { useEffect } from 'react';
+import { useRef } from 'react';
 import styled from 'styled-components';
 
 const Timestamp = styled.span`
@@ -66,8 +68,46 @@ export const Logs = React.memo(
     }[];
     showTimestamp: boolean;
   }) => {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const refShouldAutoScoll = useRef(false);
+
+    useEffect(() => {
+      const observer = new MutationObserver((mutationList, observer) => {
+        if (ref.current) {
+          if (refShouldAutoScoll.current) {
+            // auto scroll to bottom
+            ref.current.scrollTop = ref.current.scrollHeight;
+          }
+        }
+      });
+      if (ref.current) {
+        observer.observe(ref.current, {
+          childList: true,
+        });
+      }
+
+      return () => {
+        observer.disconnect();
+      };
+    }, []);
+
     return (
-      <LogContainer>
+      <LogContainer
+        ref={ref}
+        onScroll={(e) => {
+          if (ref.current) {
+            // track if we should auto scroll in case of new logs
+            if (
+              ref.current.scrollTop + ref.current.clientHeight >=
+              ref.current.scrollHeight
+            ) {
+              refShouldAutoScoll.current = true;
+            } else {
+              refShouldAutoScoll.current = false;
+            }
+          }
+        }}
+      >
         {logBatches && !logBatches.length && <NoLogs>-- no logs --</NoLogs>}
         {logBatches.map((batch, idx) => (
           <TextBatch
