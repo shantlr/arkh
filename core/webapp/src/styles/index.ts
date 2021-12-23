@@ -55,6 +55,7 @@ export const theme = {
   },
 
   fontSize: {
+    xxs: `6px`,
     xs: `10px`,
     sm: `12px`,
   },

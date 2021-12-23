@@ -16,6 +16,7 @@ import { StackStatusIndicator } from './indicator';
 import { RunStack } from './runStack';
 import { styles } from 'styles/css';
 import { useEffect } from 'react';
+import { CSSProperties } from 'react';
 
 const StackHeader = styled.div`
   width: 100%;
@@ -122,6 +123,7 @@ const StackCardContainer = styled(BaseCard)<CardProps>`
 `;
 
 const StackCardBase = ({
+  style,
   active,
   stack,
   shrinked,
@@ -132,6 +134,7 @@ const StackCardBase = ({
 
   withHoverCss,
 }: {
+  style?: CSSProperties;
   active: boolean;
   stack: Stack;
   shrinked?: boolean;
@@ -152,6 +155,7 @@ const StackCardBase = ({
 
   return (
     <StackCardContainer
+      style={style}
       ref={setContainerRef}
       shrinked={shrinked}
       withHoverCss={hoverCss}
@@ -175,12 +179,10 @@ export const StackCard = ({
   active,
   stack,
   shrinked,
-  isPopper,
 }: {
   active: boolean;
   stack: Stack;
   shrinked?: boolean;
-  isPopper?: boolean;
 }) => {
   const { data: serviceStates } = useStackServiceStates(stack.name);
   useSubscribeServiceStates(stack.name);
@@ -200,7 +202,7 @@ export const StackCard = ({
       {
         name: 'offset',
         options: {
-          offset: [0, -33],
+          offset: [0, -32],
         },
       },
     ],

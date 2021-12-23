@@ -65,7 +65,7 @@ export const StackDetails = () => {
         <Container>
           <div style={{ marginBottom: 5 }}>
             <NoStyleLink to="/stack">
-              <Button>
+              <Button rounded>
                 <FontAwesomeIcon icon={faTimes} />
               </Button>
             </NoStyleLink>
