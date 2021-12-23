@@ -1,13 +1,19 @@
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
+import { useReducer } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import styled from 'styled-components';
+import { logDefaultState, LogPage, logReducer } from './reducer';
 
 const Timestamp = styled.span`
   color: ${(props) => props.theme.logs.timestampColor};
   font-size: 11px;
   user-select: none;
+`;
+const TimeDelta = styled.span`
+  color: ${(props) => props.theme.logs.timeDeltaColor};
+  font-size: 11px;
 `;
 
 export const TextBatch = ({
@@ -40,6 +46,30 @@ export const TextBatch = ({
     </>
   );
 };
+
+const Page = React.memo(
+  ({
+    showTimeDelta,
+    showTimestamp,
+    page,
+  }: {
+    showTimestamp?: boolean;
+    showTimeDelta?: boolean;
+    page: LogPage;
+  }) => {
+    return (
+      <>
+        {page.lines.map((line, idx) => (
+          <div key={idx}>
+            {showTimestamp && <Timestamp>{line.date} </Timestamp>}
+            {line.text} {showTimeDelta && <TimeDelta>{line.delta}</TimeDelta>}
+          </div>
+        ))}
+      </>
+    );
+  }
+);
+
 export const LogContainer = styled.div`
   background-color: ${(props) => props.theme.logs.bg};
   padding: ${(props) => props.theme.space.md};
@@ -60,16 +90,27 @@ const NoLogs = styled.div`
 export const Logs = React.memo(
   ({
     logBatches,
-    showTimestamp,
+    showTimestamp = false,
+    showTimeDelta = false,
   }: {
     logBatches: {
       text: string;
       date: number | Date;
     }[];
-    showTimestamp: boolean;
+    showTimestamp?: boolean;
+    showTimeDelta?: boolean;
   }) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const refShouldAutoScoll = useRef(false);
+
+    const [state, dispatch] = useReducer(logReducer, logDefaultState);
+
+    useEffect(() => {
+      dispatch({
+        type: 'sync',
+        logBatches,
+      });
+    }, [logBatches]);
 
     useEffect(() => {
       const observer = new MutationObserver((mutationList, observer) => {
@@ -108,13 +149,13 @@ export const Logs = React.memo(
           }
         }}
       >
-        {logBatches && !logBatches.length && <NoLogs>-- no logs --</NoLogs>}
-        {logBatches.map((batch, idx) => (
-          <TextBatch
+        {state && !state.pages.length && <NoLogs>-- no logs --</NoLogs>}
+        {state.pages.map((page, idx) => (
+          <Page
             key={idx}
-            text={batch.text}
-            date={batch.date}
+            page={page}
             showTimestamp={showTimestamp}
+            showTimeDelta={showTimeDelta}
           />
         ))}
       </LogContainer>

@@ -71,6 +71,7 @@ export const theme = {
     bg: 'black',
     noLogColor: `#8d8e8d`,
     timestampColor: '#8d8e8d',
+    timeDeltaColor: `#fed7aa`,
     color: `white`,
   },
   transition: {

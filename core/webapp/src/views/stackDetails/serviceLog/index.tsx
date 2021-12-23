@@ -17,7 +17,11 @@ import { useMemo } from 'react';
 import { Duration } from 'components/duration';
 import { styles } from 'styles/css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCalendar,
+  faCalendarAlt,
+  faClock,
+} from '@fortawesome/free-solid-svg-icons';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -60,6 +64,7 @@ const HeaderActionItem = styled.div<{ active?: boolean }>`
   ${styles.text.sm};
   ${styles.hover.textAction};
   ${styles.transition.default};
+  ${styles.ml.md};
 `;
 const DragHandle = styled.div`
   position: absolute;
@@ -82,17 +87,21 @@ const DragHandle = styled.div`
 const ServiceTaskLogs = ({
   taskId,
   showTimestamp = false,
+  showTimeDelta,
 }: {
   taskId: string;
   showTimestamp?: boolean;
+  showTimeDelta?: boolean;
 }) => {
   const { data: taskLogs } = useServiceTaskLogs(taskId);
   useScubscribeServiceTaskLogs(taskId);
 
   return (
     <Logs
+      key={taskId}
       logBatches={(taskLogs as ServiceTaskLog[]) || []}
       showTimestamp={showTimestamp}
+      showTimeDelta={showTimeDelta}
     />
   );
 };
@@ -180,6 +189,7 @@ export const ServiceLogs = ({
   }, [dragPreview]);
 
   const [showTimestamp, setShowTimestamp] = useState(true);
+  const [showTimeDelta, setTimeDelta] = useState(false);
 
   return (
     <ContainerOuter style={style}>
@@ -215,13 +225,25 @@ export const ServiceLogs = ({
             >
               <FontAwesomeIcon icon={faClock} />
             </HeaderActionItem>
+            <HeaderActionItem
+              active={showTimeDelta}
+              onClick={() => {
+                setTimeDelta(!showTimeDelta);
+              }}
+            >
+              <FontAwesomeIcon icon={faCalendarAlt} />
+            </HeaderActionItem>
           </HeaderActions>
           <DragHandle ref={drag} />
         </Header>
         {taskId && (
-          <ServiceTaskLogs taskId={taskId} showTimestamp={showTimestamp} />
+          <ServiceTaskLogs
+            taskId={taskId}
+            showTimestamp={showTimestamp}
+            showTimeDelta={showTimeDelta}
+          />
         )}
-        {!taskId && <Logs logBatches={[]} showTimestamp={showTimestamp} />}
+        {!taskId && <Logs logBatches={[]} />}
       </ContainerInner>
     </ContainerOuter>
   );
