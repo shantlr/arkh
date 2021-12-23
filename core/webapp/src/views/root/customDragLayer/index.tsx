@@ -13,19 +13,17 @@ const Container = styled.div`
 `;
 
 export const CustomDragLayer = () => {
-  const { isDragging, item, currentOffset, itemType } = useDragLayer(
-    (monitor) => {
-      const item = monitor.getItem();
-      return {
-        isDragging: monitor.isDragging(),
-        item,
-        currentOffset: monitor.getSourceClientOffset(),
-        itemType: monitor.getItemType() as string,
-      };
-    }
-  );
+  const { isDragging, item, itemType, off } = useDragLayer((monitor) => {
+    const item = monitor.getItem();
+    return {
+      isDragging: monitor.isDragging(),
+      item,
+      off: monitor.getClientOffset(),
+      itemType: monitor.getItemType() as string,
+    };
+  });
 
-  if (!isDragging || !item || !currentOffset) {
+  if (!isDragging || !item || !off) {
     return null;
   }
 
@@ -33,7 +31,7 @@ export const CustomDragLayer = () => {
     <Container>
       <div
         style={{
-          transform: `translate(${currentOffset.x}px, ${currentOffset.y}px)`,
+          transform: `translate(${off.x - 75}px, ${off.y}px)`,
           opacity: 0.7,
         }}
       >

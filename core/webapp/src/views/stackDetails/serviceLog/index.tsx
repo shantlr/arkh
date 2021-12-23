@@ -140,7 +140,7 @@ export const ServiceLogs = ({
 
   // disable default preview
   useEffect(() => {
-    dragPreview(getEmptyImage(), { captureDraggingState: true });
+    dragPreview(getEmptyImage());
   }, [dragPreview]);
 
   return (
