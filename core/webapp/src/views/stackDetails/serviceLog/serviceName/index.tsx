@@ -34,7 +34,9 @@ const Container = styled.div`
 
   cursor: pointer;
 `;
-const Name = styled.div``;
+const Name = styled.div`
+  ${styles.mr.md};
+`;
 
 const ActionContainer = styled.div`
   margin-left: auto;

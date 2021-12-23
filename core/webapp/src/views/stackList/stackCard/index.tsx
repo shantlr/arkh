@@ -17,6 +17,7 @@ import { RunStack } from './runStack';
 import { styles } from 'styles/css';
 import { useEffect } from 'react';
 import { CSSProperties } from 'react';
+import { ServiceDropdownList } from '../serviceDropdownList';
 
 const StackHeader = styled.div`
   width: 100%;
@@ -208,6 +209,9 @@ export const StackCard = ({
     ],
   });
 
+  const [servicesContainerRef, setServicesContainerRef] =
+    useState<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!shrinked && showPopper) {
       setShowPopper(false);
@@ -270,12 +274,14 @@ export const StackCard = ({
           }}
         >
           <StackCardBase
+            setContainerRef={setServicesContainerRef}
             active={active}
             stack={stack}
             shrinked
             serviceStates={serviceStates}
             withHoverCss
           />
+          <ServiceDropdownList parentRef={servicesContainerRef} stack={stack} />
         </div>
       )}
     </>

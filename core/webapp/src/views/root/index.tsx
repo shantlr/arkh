@@ -1,5 +1,5 @@
 import { createSocket, queryClient } from 'configs';
-import { SocketProvider, useSocketListen } from 'lib/context/socket';
+import { SocketProvider } from 'lib/context/socket';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { DndProvider } from 'react-dnd';

@@ -50,7 +50,7 @@ export const LogContainer = styled.div`
   border-bottom-left-radius: ${(props) => props.theme.space.md};
   border-bottom-right-radius: ${(props) => props.theme.space.md};
   border-top-right-radius: ${(props) => props.theme.space.md};
-  white-space: pre;
+  white-space: pre-wrap;
 `;
 
 const NoLogs = styled.div`

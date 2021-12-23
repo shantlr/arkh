@@ -69,6 +69,7 @@ export const Duration = ({
     return createTimeout(() => {
       setText(computeDuration(from, to));
     }, text.next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
 
   if (!text.duration) {

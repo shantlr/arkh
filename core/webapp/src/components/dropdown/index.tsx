@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
-import { createTimeout } from 'lib/createTimeout';
 import { usePopper } from 'react-popper';
 import styled, { css } from 'styled-components';
 import { Placement } from '@popperjs/core';
-import { CSSProperties } from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
+
+import { createTimeout } from 'lib/createTimeout';
 
 const Container = styled.div`
   display: inline-block;
 `;
 
-const PopperContainer = styled.div`
+const PopperContainer = styled(motion.ul)`
   background-color: white;
   max-height: 400px;
-  overflow: auto;
   z-index: ${(props) => props.theme.zIndex.dropdown};
   box-shadow: ${(props) => props.theme.shadow.md};
   border-radius: ${(props) => props.theme.borderRadius.md};
+  list-style: none;
+  padding: 0;
 
   @media screen and (max-height: 950px) {
     max-height: 350px;
@@ -36,7 +38,9 @@ const activeCss = css`
   background-color: ${(props) => props.theme.color.actionBg};
   color: ${(props) => props.theme.color.actionColor};
 `;
-const OptionContainer = styled.div<{ active?: boolean }>`
+const OptionContainer = styled(({ active, ...props }) => (
+  <motion.li {...props} />
+))<{ active?: boolean } & HTMLMotionProps<'div'>>`
   padding: ${(props) => `${props.theme.space.sm} ${props.theme.space.md}`};
   cursor: pointer;
 
@@ -54,6 +58,14 @@ export interface IOption<T = any> {
   label: string | number | JSX.Element;
 }
 
+const variants = {
+  hidden: { maxHeight: 10, overflow: 'hidden' },
+  visible: {
+    maxHeight: 300,
+    overflow: 'auto',
+  },
+};
+
 export function Dropdown<T extends IOption>({
   className,
   style,
@@ -62,6 +74,7 @@ export function Dropdown<T extends IOption>({
   selected,
   options,
   onSelect,
+  closeDelay = 150,
 }: {
   className?: string;
   style?: CSSProperties;
@@ -70,22 +83,24 @@ export function Dropdown<T extends IOption>({
   placement?: Placement;
   options?: T[];
   onSelect?: (opt: T) => void;
+  closeDelay?: number;
 }) {
   const [showPopper, setShowPopper] = useState(false);
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [popperRef, setPopperRef] = useState<HTMLElement | null>(null);
 
-  const [lastMoveOut, setLastMoveOut] = useState<number | null>(null);
+  const [lastMouseLeave, setLastMouseLeave] = useState<number | null>(null);
 
+  // close with a small delay on move leave
   useEffect(() => {
-    if (!lastMoveOut) {
+    if (!lastMouseLeave) {
       return;
     }
     return createTimeout(() => {
       setShowPopper(false);
-      setLastMoveOut(null);
-    }, 300);
-  }, [lastMoveOut]);
+      setLastMouseLeave(null);
+    }, closeDelay);
+  }, [closeDelay, lastMouseLeave]);
 
   const popper = usePopper(containerRef, popperRef, {
     placement,
@@ -107,22 +122,25 @@ export function Dropdown<T extends IOption>({
         ref={setContainerRef}
         onMouseEnter={() => {
           setShowPopper(true);
-          setLastMoveOut(null);
+          setLastMouseLeave(null);
         }}
         onMouseLeave={() => {
-          setLastMoveOut(Date.now());
+          setLastMouseLeave(Date.now());
         }}
       >
         {children}
         {showPopper &&
-          Boolean(options) &&
+          options &&
           ReactDOM.createPortal(
             <PopperContainer
               style={popper.styles.popper}
               {...popper.attributes.popper}
               ref={setPopperRef}
+              variants={variants}
+              initial="hidden"
+              animate="visible"
             >
-              {options?.map((opt) => (
+              {options.map((opt) => (
                 <OptionContainer
                   active={opt.key === selected}
                   key={opt.key}
