@@ -66,6 +66,8 @@ export const styles = {
     `,
   },
 
+  color: createCssThemeKeyProxy('color', 'color'),
+
   margin: createCssThemeKeyProxy('margin', 'space'),
   mt: createCssThemeKeyProxy('margin-top', 'space'),
   mr: createCssThemeKeyProxy('margin-right', 'space'),

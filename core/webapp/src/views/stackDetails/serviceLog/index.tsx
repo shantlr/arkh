@@ -16,6 +16,8 @@ import { ServiceName } from './serviceName';
 import { useMemo } from 'react';
 import { Duration } from 'components/duration';
 import { styles } from 'styles/css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -45,6 +47,20 @@ const HeaderNote = styled.div`
   ${styles.text.sm};
   pointer-events: none;
 `;
+
+const HeaderActions = styled.div`
+  margin-left: auto;
+  z-index: 1;
+  ${styles.flex.bothCenter};
+  ${styles.pr.sm};
+`;
+const HeaderActionItem = styled.div<{ active?: boolean }>`
+  cursor: pointer;
+  ${(props) => (props.active ? styles.color.actionBg : null)};
+  ${styles.text.sm};
+  ${styles.hover.textAction};
+  ${styles.transition.default};
+`;
 const DragHandle = styled.div`
   position: absolute;
   top: 0px;
@@ -63,12 +79,21 @@ const DragHandle = styled.div`
   }
 `;
 
-const ServiceTaskLogs = ({ taskId }: { taskId: string }) => {
+const ServiceTaskLogs = ({
+  taskId,
+  showTimestamp = false,
+}: {
+  taskId: string;
+  showTimestamp?: boolean;
+}) => {
   const { data: taskLogs } = useServiceTaskLogs(taskId);
   useScubscribeServiceTaskLogs(taskId);
 
   return (
-    <Logs logBatches={(taskLogs as ServiceTaskLog[]) || []} showTimestamp />
+    <Logs
+      logBatches={(taskLogs as ServiceTaskLog[]) || []}
+      showTimestamp={showTimestamp}
+    />
   );
 };
 
@@ -87,6 +112,8 @@ export const ServiceLogs = ({
   fullName: string;
   rowIndex?: number;
   cellIndex?: number;
+
+  showTimestamp?: boolean;
 
   defaultTaskId?: string;
 }) => {
@@ -152,6 +179,8 @@ export const ServiceLogs = ({
     dragPreview(getEmptyImage());
   }, [dragPreview]);
 
+  const [showTimestamp, setShowTimestamp] = useState(true);
+
   return (
     <ContainerOuter style={style}>
       <ContainerInner>
@@ -177,10 +206,22 @@ export const ServiceLogs = ({
               />
             </HeaderNote>
           )}
+          <HeaderActions>
+            <HeaderActionItem
+              active={showTimestamp}
+              onClick={() => {
+                setShowTimestamp(!showTimestamp);
+              }}
+            >
+              <FontAwesomeIcon icon={faClock} />
+            </HeaderActionItem>
+          </HeaderActions>
           <DragHandle ref={drag} />
         </Header>
-        {taskId && <ServiceTaskLogs taskId={taskId} />}
-        {!taskId && <Logs logBatches={[]} showTimestamp />}
+        {taskId && (
+          <ServiceTaskLogs taskId={taskId} showTimestamp={showTimestamp} />
+        )}
+        {!taskId && <Logs logBatches={[]} showTimestamp={showTimestamp} />}
       </ContainerInner>
     </ContainerOuter>
   );
