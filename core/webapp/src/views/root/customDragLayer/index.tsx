@@ -31,7 +31,7 @@ export const CustomDragLayer = () => {
     <Container>
       <div
         style={{
-          transform: `translate(${off.x - 75}px, ${off.y}px)`,
+          transform: `translate(${off.x - 85}px, ${off.y - 12}px)`,
           opacity: 0.7,
         }}
       >

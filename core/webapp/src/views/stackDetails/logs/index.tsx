@@ -4,6 +4,7 @@ import { useReducer } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import styled from 'styled-components';
+import { formatJsonLog } from './formatJsonLog';
 import { logDefaultState, LogPage, logReducer } from './reducer';
 
 const Timestamp = styled.span`
@@ -14,6 +15,7 @@ const Timestamp = styled.span`
 const TimeDelta = styled.span`
   color: ${(props) => props.theme.logs.timeDeltaColor};
   font-size: 11px;
+  user-select: none;
 `;
 
 export const TextBatch = ({
@@ -51,18 +53,38 @@ const Page = React.memo(
   ({
     showTimeDelta,
     showTimestamp,
+    formatJson = false,
     page,
   }: {
     showTimestamp?: boolean;
     showTimeDelta?: boolean;
+    formatJson?: boolean;
     page: LogPage;
   }) => {
+    const lines = useMemo(() => {
+      if (formatJson) {
+        return page.lines.map((line) => {
+          try {
+            const parsed = JSON.parse(line.text);
+            return {
+              ...line,
+              text: formatJsonLog(parsed),
+            };
+          } catch {
+            return line;
+          }
+        });
+      }
+      return page.lines;
+    }, [formatJson, page.lines]);
+
     return (
       <>
-        {page.lines.map((line, idx) => (
+        {lines.map((line, idx) => (
           <div key={idx}>
             {showTimestamp && <Timestamp>{line.date} </Timestamp>}
-            {line.text} {showTimeDelta && <TimeDelta>{line.delta}</TimeDelta>}
+            {line.text}
+            {showTimeDelta && <TimeDelta> {line.delta}</TimeDelta>}
           </div>
         ))}
       </>
@@ -92,6 +114,7 @@ export const Logs = React.memo(
     logBatches,
     showTimestamp = false,
     showTimeDelta = false,
+    formatJson = false,
   }: {
     logBatches: {
       text: string;
@@ -99,6 +122,7 @@ export const Logs = React.memo(
     }[];
     showTimestamp?: boolean;
     showTimeDelta?: boolean;
+    formatJson?: boolean;
   }) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const refShouldAutoScoll = useRef(false);
@@ -156,6 +180,7 @@ export const Logs = React.memo(
             page={page}
             showTimestamp={showTimestamp}
             showTimeDelta={showTimeDelta}
+            formatJson={formatJson}
           />
         ))}
       </LogContainer>

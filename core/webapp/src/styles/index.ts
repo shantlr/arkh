@@ -73,6 +73,13 @@ export const theme = {
     timestampColor: '#8d8e8d',
     timeDeltaColor: `#fed7aa`,
     color: `white`,
+
+    json: {
+      string: `lightgreen`,
+      number: `yellow`,
+      property: `lightblue`,
+      indent: 4,
+    },
   },
   transition: {
     default: `.3s`,

@@ -17,11 +17,7 @@ import { useMemo } from 'react';
 import { Duration } from 'components/duration';
 import { styles } from 'styles/css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCalendar,
-  faCalendarAlt,
-  faClock,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -87,11 +83,13 @@ const DragHandle = styled.div`
 const ServiceTaskLogs = ({
   taskId,
   showTimestamp = false,
-  showTimeDelta,
+  showTimeDelta = false,
+  formatJson = false,
 }: {
   taskId: string;
   showTimestamp?: boolean;
   showTimeDelta?: boolean;
+  formatJson?: boolean;
 }) => {
   const { data: taskLogs } = useServiceTaskLogs(taskId);
   useScubscribeServiceTaskLogs(taskId);
@@ -102,6 +100,7 @@ const ServiceTaskLogs = ({
       logBatches={(taskLogs as ServiceTaskLog[]) || []}
       showTimestamp={showTimestamp}
       showTimeDelta={showTimeDelta}
+      formatJson={formatJson}
     />
   );
 };
@@ -190,6 +189,7 @@ export const ServiceLogs = ({
 
   const [showTimestamp, setShowTimestamp] = useState(true);
   const [showTimeDelta, setTimeDelta] = useState(false);
+  const [formatJson, setFormatJson] = useState(false);
 
   return (
     <ContainerOuter style={style}>
@@ -218,6 +218,14 @@ export const ServiceLogs = ({
           )}
           <HeaderActions>
             <HeaderActionItem
+              active={formatJson}
+              onClick={() => {
+                setFormatJson(!formatJson);
+              }}
+            >
+              <span style={{ fontWeight: 'bold' }}>{'{ }'}</span>
+            </HeaderActionItem>
+            <HeaderActionItem
               active={showTimestamp}
               onClick={() => {
                 setShowTimestamp(!showTimestamp);
@@ -241,6 +249,7 @@ export const ServiceLogs = ({
             taskId={taskId}
             showTimestamp={showTimestamp}
             showTimeDelta={showTimeDelta}
+            formatJson={formatJson}
           />
         )}
         {!taskId && <Logs logBatches={[]} />}

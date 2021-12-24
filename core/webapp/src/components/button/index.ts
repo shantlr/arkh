@@ -23,7 +23,7 @@ export const Button = styled.button<{
   align-items: center;
   justify-content: center;
 
-  border-radius: ${(props) => props.theme.borderRadius.lg};
+  border-radius: ${(props) => props.theme.borderRadius.md};
   ${(props) => (props.rounded ? styles.rounded.round : null)};
 
   ${(props) => sizeCss[props.size || 'md']}

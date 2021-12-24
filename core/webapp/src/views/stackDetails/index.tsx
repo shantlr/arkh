@@ -16,7 +16,6 @@ import { ServiceLogs } from './serviceLog';
 
 const Container = styled.div`
   background-color: white;
-  padding-top: ${(props) => props.theme.space.lg};
   box-sizing: border-box;
   min-width: 500px;
   height: 100%;
