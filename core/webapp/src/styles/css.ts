@@ -82,6 +82,22 @@ export const styles = {
 
   text: createCssThemeKeyProxy('font-size', 'fontSize'),
   rounded: createCssThemeKeyProxy('border-radius', 'borderRadius'),
+  roundedTopRight: createCssThemeKeyProxy(
+    'border-top-right-radius',
+    'borderRadius'
+  ),
+  roundedBottomRight: createCssThemeKeyProxy(
+    'border-bottom-rightradius',
+    'borderRadius'
+  ),
+  roundedTopLeft: createCssThemeKeyProxy(
+    'border-top-left-radius',
+    'borderRadius'
+  ),
+  roundedBottomLeft: createCssThemeKeyProxy(
+    'border-bottom-left-radius',
+    'borderRadius'
+  ),
   flex: {
     bothCenter: css`
       display: flex;
@@ -91,6 +107,8 @@ export const styles = {
   },
   transition: createCssThemeKeyProxy('transition', 'transition'),
   shadow: createCssThemeKeyProxy('box-shadow', 'shadow'),
+
+  zIndex: createCssThemeKeyProxy('z-index', 'zIndex'),
 
   container: {
     noScroll: css`

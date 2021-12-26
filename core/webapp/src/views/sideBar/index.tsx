@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NoStyleLink } from 'components/noStyleLink';
 import { useMatch } from 'react-router';
 import styled from 'styled-components';
+import { styles } from 'styles/css';
 
 const WIDTH = '28px';
 
@@ -33,18 +34,19 @@ const BarCard = styled.div`
 const MenuItem = styled.div<{ active?: boolean }>`
   color: ${(props) =>
     props.active ? props.theme.color.actionBg : props.theme.color.textLight};
-  margin-bottom: ${(props) => props.theme.space.lg};
-  padding: ${(props) => props.theme.space.md};
-  border-radius: ${(props) => props.theme.borderRadius.lg};
   background-color: transparent;
-
   display: flex;
   cursor: pointer;
-
   transition: all 0.5s;
   font-size: 16px;
+
+  ${styles.mb.lg};
+  ${styles.padding.md};
+  ${styles.roundedTopRight.md};
+  ${styles.roundedBottomRight.md};
+
   :hover {
-    box-shadow: ${(props) => props.theme.shadow.md};
+    ${styles.shadow.md};
   }
   :active {
     filter: brightness(1.3);
@@ -56,7 +58,8 @@ const MenuTitle = styled.span`
   transition: 1s;
   text-decoration: none;
   opacity: 0;
-  font-size: ${(props) => props.theme.fontSize.sm};
+  ${styles.text.sm};
+  ${styles.transition.default};
 `;
 const BarContainer = styled.div`
   height: 100%;
@@ -69,19 +72,18 @@ const BarContainer = styled.div`
     left: 0px;
     top: 0px;
     width: 130px;
-    z-index: 9999;
-    padding: ${(props) => `${props.theme.space.lg} ${props.theme.space.lg}`};
-    padding-left: 10px;
+    z-index: ${styles.zIndex.dropdown};
 
     ${BarCard} {
-      padding: ${(props) => props.theme.space.lg};
-      box-shadow: ${(props) => props.theme.shadow.md};
+      ${styles.pl.md};
+      box-shadow: 2px 0px 15px 2px rgba(0, 0, 0, 0.06);
       ${MenuItem} {
-        font-size: 20px;
+        ${styles.text.lg};
         ${MenuTitle} {
-          margin-left: ${(props) => props.theme.space.md};
+          ${styles.ml.md};
           opacity: 1;
           width: auto;
+          font-weight: bold;
         }
       }
     }
