@@ -2,6 +2,11 @@ export type ServiceSpec = {
   path?: string;
   env?: Record<string, string>;
   cmd: string[];
+  logs: {
+    json?: boolean;
+    time?: boolean;
+    delta?: boolean;
+  };
 };
 
 export type StackSpec = {

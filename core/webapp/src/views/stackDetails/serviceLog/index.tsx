@@ -147,6 +147,10 @@ export const ServiceLogs = ({
     },
     [rowIndex, cellIndex, fullName, taskId]
   );
+  // disable default preview
+  useEffect(() => {
+    dragPreview(getEmptyImage());
+  }, [dragPreview]);
 
   const currentTask = useMemo(() => {
     if (taskId && tasks) {
@@ -182,14 +186,30 @@ export const ServiceLogs = ({
     }
   }, [taskId, tasks]);
 
-  // disable default preview
-  useEffect(() => {
-    dragPreview(getEmptyImage());
-  }, [dragPreview]);
+  const [showTimestamp, setShowTimestamp] = useState(() =>
+    service ? service.spec.logs.time === true : null
+  );
+  const [showTimeDelta, setTimeDelta] = useState(() =>
+    service ? service.spec.logs.delta === true : null
+  );
+  const [formatJson, setFormatJson] = useState(() =>
+    service ? service.spec.logs.json === true : null
+  );
 
-  const [showTimestamp, setShowTimestamp] = useState(true);
-  const [showTimeDelta, setTimeDelta] = useState(false);
-  const [formatJson, setFormatJson] = useState(false);
+  useEffect(() => {
+    if (service) {
+      console.log('naoetuhao', service);
+      if (showTimestamp === null) {
+        setShowTimestamp(service.spec.logs.time === true);
+      }
+      if (showTimeDelta === null) {
+        setTimeDelta(service.spec.logs.delta === true);
+      }
+      if (formatJson === null) {
+        setFormatJson(service.spec.logs.json === true);
+      }
+    }
+  }, [service]);
 
   return (
     <ContainerOuter style={style}>
@@ -218,7 +238,7 @@ export const ServiceLogs = ({
           )}
           <HeaderActions>
             <HeaderActionItem
-              active={formatJson}
+              active={formatJson || false}
               onClick={() => {
                 setFormatJson(!formatJson);
               }}
@@ -226,7 +246,7 @@ export const ServiceLogs = ({
               <span style={{ fontWeight: 'bold' }}>{'{ }'}</span>
             </HeaderActionItem>
             <HeaderActionItem
-              active={showTimestamp}
+              active={showTimestamp || false}
               onClick={() => {
                 setShowTimestamp(!showTimestamp);
               }}
@@ -234,7 +254,7 @@ export const ServiceLogs = ({
               <FontAwesomeIcon icon={faClock} />
             </HeaderActionItem>
             <HeaderActionItem
-              active={showTimeDelta}
+              active={showTimeDelta || false}
               onClick={() => {
                 setTimeDelta(!showTimeDelta);
               }}
@@ -247,9 +267,9 @@ export const ServiceLogs = ({
         {taskId && (
           <ServiceTaskLogs
             taskId={taskId}
-            showTimestamp={showTimestamp}
-            showTimeDelta={showTimeDelta}
-            formatJson={formatJson}
+            showTimestamp={showTimestamp || false}
+            showTimeDelta={showTimeDelta || false}
+            formatJson={formatJson || false}
           />
         )}
         {!taskId && <Logs logBatches={[]} />}

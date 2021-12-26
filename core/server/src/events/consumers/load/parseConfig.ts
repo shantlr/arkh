@@ -16,7 +16,9 @@ export const parseService = (
   if (typeof config !== 'object') {
     throw new InvalidConfig(`${stackName}.${name} is not an object`);
   }
-  const res: Partial<ServiceSpec> = {};
+  const res: Partial<ServiceSpec> = {
+    logs: {},
+  };
 
   if (!('cmd' in config)) {
     throw new InvalidConfig(`${stackName}.${name}.cmd missing`);
@@ -48,7 +50,9 @@ export const parseService = (
   if ('env' in config) {
     // Assert env
     if (typeof config.env !== 'object') {
-      throw new InvalidConfig(`service ${stackName}.${name} is not an object`);
+      throw new InvalidConfig(
+        `service ${stackName}.${name} config env is not an object`
+      );
     }
     for (const envName in config.env) {
       if (
@@ -60,6 +64,17 @@ export const parseService = (
       }
     }
     res.env = config.env;
+  }
+
+  if ('logs' in config) {
+    if (typeof config.logs !== 'object') {
+      throw new InvalidConfig(
+        `service ${stackName}.${name} config logs is not an object`
+      );
+    }
+    res.logs.json = Boolean(config.logs.json);
+    res.logs.time = Boolean(config.logs.time);
+    res.logs.delta = Boolean(config.logs.delta);
   }
 
   return res as ServiceSpec;
