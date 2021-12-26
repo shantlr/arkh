@@ -198,7 +198,6 @@ export const ServiceLogs = ({
 
   useEffect(() => {
     if (service) {
-      console.log('naoetuhao', service);
       if (showTimestamp === null) {
         setShowTimestamp(service.spec.logs.time === true);
       }

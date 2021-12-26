@@ -17,7 +17,11 @@ export const parseService = (
     throw new InvalidConfig(`${stackName}.${name} is not an object`);
   }
   const res: Partial<ServiceSpec> = {
-    logs: {},
+    logs: {
+      json: false,
+      delta: false,
+      time: true,
+    },
   };
 
   if (!('cmd' in config)) {
@@ -66,6 +70,7 @@ export const parseService = (
     res.env = config.env;
   }
 
+  // Parse logs options
   if ('logs' in config) {
     if (typeof config.logs !== 'object') {
       throw new InvalidConfig(
@@ -73,7 +78,7 @@ export const parseService = (
       );
     }
     res.logs.json = Boolean(config.logs.json);
-    res.logs.time = Boolean(config.logs.time);
+    res.logs.time = !('time' in config.logs) || Boolean(config.logs.time);
     res.logs.delta = Boolean(config.logs.delta);
   }
 
