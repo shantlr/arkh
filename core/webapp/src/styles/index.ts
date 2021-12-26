@@ -70,16 +70,17 @@ export const theme = {
   },
 
   logs: {
-    bg: 'black',
+    bg: `#1c242a`,
+    color: `#eff0fc`,
     noLogColor: `#8d8e8d`,
     timestampColor: '#8d8e8d',
     timeDeltaColor: `#fed7aa`,
-    color: `white`,
 
     json: {
       string: `lightgreen`,
       number: `yellow`,
       property: `lightblue`,
+      null: 'gray',
       indent: 4,
     },
   },

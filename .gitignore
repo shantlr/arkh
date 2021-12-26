@@ -8,3 +8,5 @@ dist/
 .ash_history
 
 yarn-error.log
+
+/core/webapp-bkp

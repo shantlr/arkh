@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClientProvider } from 'react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import styled, { ThemeProvider } from 'styled-components';
 import { theme } from 'styles';
@@ -57,6 +57,8 @@ export const RootApp = () => {
                   <Route path="stack" element={<StackListView />}>
                     <Route path=":name" element={<StackDetails />} />
                   </Route>
+
+                  <Route path="/" element={<Navigate to="/stack" />}></Route>
                 </Routes>
                 <CustomDragLayer />
               </Container>

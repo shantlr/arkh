@@ -4,6 +4,7 @@ import { useReducer } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import styled from 'styled-components';
+import { styles } from 'styles/css';
 import { formatJsonLog } from './formatJsonLog';
 import { logDefaultState, LogPage, logReducer } from './reducer';
 
@@ -92,17 +93,17 @@ const Page = React.memo(
   }
 );
 
-export const LogContainer = styled.div`
-  background-color: ${(props) => props.theme.logs.bg};
-  padding: ${(props) => props.theme.space.md};
+export const LogContainer = styled.div<{ shouldRoundTopRight?: boolean }>`
   height: 100%;
-  color: ${(props) => props.theme.logs.color};
   overflow: auto;
-  font-size: ${(props) => props.theme.fontSize.sm};
-  border-bottom-left-radius: ${(props) => props.theme.space.md};
-  border-bottom-right-radius: ${(props) => props.theme.space.md};
-  border-top-right-radius: ${(props) => props.theme.space.md};
   white-space: pre-wrap;
+  color: ${(props) => props.theme.logs.color};
+  background-color: ${(props) => props.theme.logs.bg};
+  ${styles.text.sm};
+  ${styles.padding.md};
+  ${styles.roundedBottomLeft.md};
+  ${styles.roundedBottomRight.md};
+  ${(props) => (props.shouldRoundTopRight ? styles.roundedTopRight.md : null)};
 `;
 
 const NoLogs = styled.div`
@@ -115,6 +116,7 @@ export const Logs = React.memo(
     showTimestamp = false,
     showTimeDelta = false,
     formatJson = false,
+    shouldRoundTopRight = false,
   }: {
     logBatches: {
       text: string;
@@ -123,6 +125,7 @@ export const Logs = React.memo(
     showTimestamp?: boolean;
     showTimeDelta?: boolean;
     formatJson?: boolean;
+    shouldRoundTopRight?: boolean;
   }) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const refShouldAutoScoll = useRef(false);
@@ -158,6 +161,7 @@ export const Logs = React.memo(
 
     return (
       <LogContainer
+        shouldRoundTopRight={shouldRoundTopRight}
         ref={ref}
         onScroll={(e) => {
           if (ref.current) {

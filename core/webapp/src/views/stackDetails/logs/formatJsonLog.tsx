@@ -10,6 +10,9 @@ const NumberSpan = styled.span`
 const PropertySpan = styled.span`
   color: ${(props) => props.theme.logs.json.property};
 `;
+const NullSpan = styled.span`
+  color: ${(props) => props.theme.logs.json.null};
+`;
 
 const Indent = styled.div<{ indent: number }>`
   margin-left: ${(props) => `${props.theme.logs.json.indent * props.indent}px`};
@@ -18,6 +21,12 @@ const Indent = styled.div<{ indent: number }>`
 export const formatBase = () => {};
 
 export const formatJsonLog = (json: any, indent = 1) => {
+  if (json === null) {
+    return <NullSpan>null</NullSpan>;
+  }
+  if (json === undefined) {
+    return <NullSpan>undefined</NullSpan>;
+  }
   if (typeof json === 'string') {
     return <StringSpan>'{json}'</StringSpan>;
   }

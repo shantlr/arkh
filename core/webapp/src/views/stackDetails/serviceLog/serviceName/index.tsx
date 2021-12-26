@@ -20,14 +20,14 @@ const Container = styled.div`
   min-width: 50px;
   border: 2px solid transparent;
   border-bottom: none;
-  border-top-left-radius: ${(props) => props.theme.borderRadius.md};
-  border-top-right-radius: ${(props) => props.theme.borderRadius.md};
   padding: 0 ${(props) => props.theme.space.md};
+  ${styles.roundedTopLeft.md};
+  ${styles.roundedTopRight.md};
   ${styles.pl.sm};
-  border-left-color: black;
-  border-top-color: black;
-  border-right-color: black;
-  background-color: white;
+  border-left-color: ${(props) => props.theme.logs.bg};
+  border-top-color: ${(props) => props.theme.logs.bg};
+  border-right-color: ${(props) => props.theme.logs.bg};
+  ${styles.bg.mainBg};
 
   display: flex;
   align-items: center;

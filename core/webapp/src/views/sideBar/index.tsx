@@ -1,6 +1,7 @@
 import { faCog, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NoStyleLink } from 'components/noStyleLink';
+import { useEffect } from 'react';
 import { useMatch } from 'react-router';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
@@ -23,12 +24,14 @@ const Container = styled.div`
 `;
 
 const BarCard = styled.div`
-  background-color: ${(props) => props.theme.color.sideBarBg};
   box-sizing: border-box;
-  padding-top: ${(props) => props.theme.space.lg};
   height: 100%;
-  border-radius: ${(props) => props.theme.borderRadius.lg};
-  transition: 0.5s;
+  ${styles.bg.sideBarBg};
+  ${styles.pt.lg};
+  ${styles.pr.md};
+  ${styles.transition.default};
+  ${styles.roundedTopRight.lg};
+  ${styles.roundedBottomRight.lg};
 `;
 
 const MenuItem = styled.div<{ active?: boolean }>`
@@ -42,8 +45,7 @@ const MenuItem = styled.div<{ active?: boolean }>`
 
   ${styles.mb.lg};
   ${styles.padding.md};
-  ${styles.roundedTopRight.md};
-  ${styles.roundedBottomRight.md};
+  ${styles.rounded.lg};
 
   :hover {
     ${styles.shadow.md};

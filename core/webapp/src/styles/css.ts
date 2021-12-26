@@ -67,6 +67,7 @@ export const styles = {
   },
 
   color: createCssThemeKeyProxy('color', 'color'),
+  bg: createCssThemeKeyProxy('background-color', 'color'),
 
   margin: createCssThemeKeyProxy('margin', 'space'),
   mt: createCssThemeKeyProxy('margin-top', 'space'),
@@ -87,7 +88,7 @@ export const styles = {
     'borderRadius'
   ),
   roundedBottomRight: createCssThemeKeyProxy(
-    'border-bottom-rightradius',
+    'border-bottom-right-radius',
     'borderRadius'
   ),
   roundedTopLeft: createCssThemeKeyProxy(

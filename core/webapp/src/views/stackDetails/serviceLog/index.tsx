@@ -85,11 +85,13 @@ const ServiceTaskLogs = ({
   showTimestamp = false,
   showTimeDelta = false,
   formatJson = false,
+  shouldRoundTopRight = false,
 }: {
   taskId: string;
   showTimestamp?: boolean;
   showTimeDelta?: boolean;
   formatJson?: boolean;
+  shouldRoundTopRight?: boolean;
 }) => {
   const { data: taskLogs } = useServiceTaskLogs(taskId);
   useScubscribeServiceTaskLogs(taskId);
@@ -97,6 +99,7 @@ const ServiceTaskLogs = ({
   return (
     <Logs
       key={taskId}
+      shouldRoundTopRight={shouldRoundTopRight}
       logBatches={(taskLogs as ServiceTaskLog[]) || []}
       showTimestamp={showTimestamp}
       showTimeDelta={showTimeDelta}
@@ -210,6 +213,9 @@ export const ServiceLogs = ({
     }
   }, [service]);
 
+  // round logs top right corner when hover handle
+  const [shouldRoundTopRight, setShouldRoundTopRight] = useState(false);
+
   return (
     <ContainerOuter style={style}>
       <ContainerInner>
@@ -261,11 +267,20 @@ export const ServiceLogs = ({
               <FontAwesomeIcon icon={faCalendarAlt} />
             </HeaderActionItem>
           </HeaderActions>
-          <DragHandle ref={drag} />
+          <DragHandle
+            ref={drag}
+            onMouseEnter={() => {
+              setShouldRoundTopRight(false);
+            }}
+            onMouseLeave={() => {
+              setShouldRoundTopRight(true);
+            }}
+          />
         </Header>
         {taskId && (
           <ServiceTaskLogs
             taskId={taskId}
+            shouldRoundTopRight={shouldRoundTopRight}
             showTimestamp={showTimestamp || false}
             showTimeDelta={showTimeDelta || false}
             formatJson={formatJson || false}
