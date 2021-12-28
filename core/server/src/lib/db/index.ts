@@ -115,7 +115,10 @@ export const createCollectionAccessor = <
 };
 export const addStaticMethods = <
   T,
-  StaticMethods extends Record<string, (...args: any[]) => any>
+  StaticMethods extends Record<
+    string,
+    (this: EntityAccessor<T>, ...args: any[]) => any
+  >
 >(
   entityAccessor: EntityAccessor<T>,
   statics: StaticMethods

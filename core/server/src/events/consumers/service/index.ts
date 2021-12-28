@@ -55,6 +55,10 @@ export const serviceQueue = createEventQueue('service', {
   ),
   remove: handler(
     async ({ name }: { name: string }, { dispatcher, logger }) => {
+      // const state = State.service.get(name);
+      // if (state && state.current_task_state === 'running') {
+      //   await
+      // }
       const removed = await Service.removeOne(name);
       if (removed) {
         logger.info(`'${name}' removed`);

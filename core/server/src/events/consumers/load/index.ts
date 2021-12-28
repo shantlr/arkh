@@ -1,25 +1,53 @@
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
-import { forEach, isEqual } from 'lodash';
+import { forEach, isEqual, keyBy } from 'lodash';
 
-import { createEventQueue, HandlerContext } from '@shantr/metro-queue';
-import { Config } from 'src/data';
+import { createEventQueue, handler, HandlerContext } from '@shantr/metro-queue';
+import { Config, Stack } from 'src/data';
 import { MetroSpec } from '@shantr/metro-common-types';
 import { EVENTS } from '../..';
 import { InvalidConfig, parseConfig } from './parseConfig';
-import { YAMLError, YAMLSemanticError } from 'yaml/util';
+import { YAMLError } from 'yaml/util';
+
+const listAllFiles = async (dirPath: string) => {
+  const res: string[] = [];
+
+  const dir = await fs.promises.readdir(dirPath, {
+    withFileTypes: true,
+  });
+  await Promise.all(
+    dir.map(async (file) => {
+      if (file.isFile()) {
+        res.push(path.resolve(dirPath, file.name));
+      } else if (file.isDirectory()) {
+        res.push(...(await listAllFiles(path.resolve(dirPath, file.name))));
+      }
+    })
+  );
+
+  return res;
+};
 
 export const loadQueue = createEventQueue('load', {
-  async dir(dirPath: string, { dispatcher, logger }: HandlerContext) {
+  syncDir: handler(async (dirPath: string, { dispatcher, logger }) => {
     try {
-      const files = await fs.promises.readdir(dirPath, {
-        withFileTypes: true,
-      });
-      files.forEach((file) => {
-        if (file.isFile()) {
-          dispatcher.push(loadQueue.file(path.resolve(dirPath, file.name)));
+      const filePaths = await listAllFiles(dirPath);
+
+      const filePathMap = keyBy(filePaths);
+      const configs = await Config.getAll();
+      // remove config in db that are not found anymore
+      configs.forEach((config) => {
+        if (config.name.startsWith(dirPath) && !filePathMap[config.name]) {
+          dispatcher.push(loadQueue.delete(config.name));
         }
+      });
+
+      // delete missing configs
+
+      // load all file configs
+      filePaths.forEach((filePath) => {
+        dispatcher.push(loadQueue.file(filePath));
       });
     } catch (err) {
       if (err.code === 'ENOENT') {
@@ -28,7 +56,7 @@ export const loadQueue = createEventQueue('load', {
       }
       throw err;
     }
-  },
+  }),
   async file(filePath: string, { logger, dispatcher }: HandlerContext) {
     try {
       const file = await fs.promises.readFile(filePath);
@@ -73,6 +101,7 @@ export const loadQueue = createEventQueue('load', {
           EVENTS.stack.save({
             name,
             spec: stack,
+            configKey: key,
           })
         );
       });
@@ -114,4 +143,22 @@ export const loadQueue = createEventQueue('load', {
       throw err;
     }
   },
+
+  delete: handler(async (filePath: string, { dispatcher, logger }) => {
+    const config = await Config.getOne(filePath);
+    if (config) {
+      await Config.removeOne(filePath);
+      const stacks = await Stack.ofConfig(filePath);
+      stacks.forEach((stack) => {
+        dispatcher.push(
+          EVENTS.stack.remove({
+            name: stack.name,
+          })
+        );
+      });
+      logger.info(`'${filePath}' deleted`);
+    } else {
+      logger.warn(`'${filePath}' not deleted: not found`);
+    }
+  }),
 });

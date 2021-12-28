@@ -12,7 +12,7 @@ import { createLogger } from '@shantr/metro-logger';
 const main = async (): Promise<void> => {
   await doMigrations();
 
-  EventManager.push(EVENTS.load.dir(config.get('configs.path')));
+  EventManager.push(EVENTS.load.syncDir(config.get('configs.path')));
 
   if (toLower(config.get('configs.watch')) === 'true') {
     const watchLogger = createLogger('file-watcher');
@@ -38,6 +38,7 @@ const main = async (): Promise<void> => {
     watcher.on('delete', (filename, root) => {
       const filepath = path.resolve(root, filename);
       watchLogger.info(`${filepath} deleted`);
+      EventManager.push(EVENTS.load.delete(filepath));
     });
   }
   EventManager.startConsumeEvent();

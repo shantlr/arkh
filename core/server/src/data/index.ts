@@ -31,21 +31,31 @@ export const Config = createCollectionAccessor<{
     spec: (v) => JSON.stringify(v),
   }),
 });
-export const Stack = createCollectionAccessor<{
-  spec: StackSpec;
-  to_remove?: boolean;
-}>({
-  name: 'stacks',
-  knex,
-  mapDoc: deserializer({
-    spec(value) {
-      return JSON.parse(value);
+export const Stack = addStaticMethods(
+  createCollectionAccessor<{
+    spec: StackSpec;
+    config_key: string;
+    to_remove?: boolean;
+  }>({
+    name: 'stacks',
+    knex,
+    mapDoc: deserializer({
+      spec(value) {
+        return JSON.parse(value);
+      },
+    }),
+    serializeDoc: serializer({
+      spec: (v) => JSON.stringify(v),
+    }),
+  }),
+  {
+    ofConfig(configKey: string) {
+      return this.find({
+        config_key: configKey,
+      });
     },
-  }),
-  serializeDoc: serializer({
-    spec: (v) => JSON.stringify(v),
-  }),
-});
+  }
+);
 export const Service = addStaticMethods(
   createCollectionAccessor<{
     spec: ServiceSpec;

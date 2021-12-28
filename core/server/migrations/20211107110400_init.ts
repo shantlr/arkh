@@ -16,6 +16,7 @@ exports.up = async (knex: Knex) => {
         name text NOT NULL PRIMARY KEY,
         spec text NOT NULL,
 
+        config_key string NOT NULL,
         to_remove boolean,
 
         created_at timestamptz NOT NULL,

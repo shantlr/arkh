@@ -8,21 +8,42 @@ import { SideEffects } from 'src/events/sideEffects';
 export const stackQueue = createEventQueue('stack', {
   save: handler(
     async (
-      { name, spec }: { name: string; spec: StackSpec },
+      {
+        name,
+        spec,
+        configKey,
+      }: { name: string; spec: StackSpec; configKey: string },
       { dispatcher, logger }
     ) => {
       const existingStack = await Stack.getOne(name);
       if (!existingStack) {
         await Stack.insertOne({
           name,
+          config_key: configKey,
           spec,
         });
         logger.info(`'${name}' created`);
         void SideEffects.emit('addStack', { name });
       } else {
-        if (!isEqual(existingStack.spec, spec) || existingStack.to_remove) {
+        if (
+          !existingStack.to_remove &&
+          existingStack.config_key !== configKey
+        ) {
+          logger.error(
+            `'${name}' not updated: db config_key is '${existingStack.config_key}' but received '${configKey}'`
+          );
+          return;
+        }
+
+        if (
+          existingStack.config_key !== configKey ||
+          !isEqual(existingStack.spec, spec) ||
+          existingStack.to_remove
+        ) {
           await Stack.updateOne(name, {
+            config_key: configKey,
             spec,
+            to_remove: false,
           });
           logger.info(`'${name}' updated`);
           void SideEffects.emit('updateStack', { name });
