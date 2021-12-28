@@ -1,6 +1,6 @@
 import { toLower } from 'lodash';
-import gaze from 'gaze';
 import path from 'path';
+import sane from 'sane';
 
 import { startApi } from './api';
 import { config } from './config';
@@ -17,31 +17,28 @@ const main = async (): Promise<void> => {
   if (toLower(config.get('configs.watch')) === 'true') {
     const watchLogger = createLogger('file-watcher');
 
-    gaze(
-      [
-        `${config.get('configs.path')}/**/*.yaml`,
-        `${config.get('configs.path')}/**/*.yml`,
-      ],
-      {},
-      function (err, watcher) {
-        if (err) {
-          watchLogger.error(err.message);
-        } else {
-          this.on('added', (filepath: string) => {
-            EventManager.push(EVENTS.load.file(filepath));
-          });
-          this.on('deleted', (filepath: string) => {
-            console.log('FILE REMOVED', filepath);
-          });
-          this.on('changed', (filepath: string) => {
-            EventManager.push(EVENTS.load.file(filepath));
-          });
-        }
-      }
-    );
-    watchLogger.info(
-      `watching config files in '${path.resolve(config.get('configs.path'))}'`
-    );
+    const watcher = sane(config.get('configs.path'), {
+      glob: ['**/*.yaml', '**/*.yml'],
+    });
+    watcher.on('ready', () => {
+      watchLogger.info(
+        `watching config files in '${path.resolve(config.get('configs.path'))}'`
+      );
+    });
+    watcher.on('add', (filename, root) => {
+      const filepath = path.resolve(root, filename);
+      watchLogger.info(`${root}/${filepath} added`);
+      EventManager.push(EVENTS.load.file(filepath));
+    });
+    watcher.on('change', (filename, root) => {
+      const filepath = path.resolve(root, filename);
+      watchLogger.info(`${filepath} updated`);
+      EventManager.push(EVENTS.load.file(filepath));
+    });
+    watcher.on('delete', (filename, root) => {
+      const filepath = path.resolve(root, filename);
+      watchLogger.info(`${filepath} deleted`);
+    });
   }
   EventManager.startConsumeEvent();
 

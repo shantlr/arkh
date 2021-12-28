@@ -105,7 +105,7 @@ export const parseStack = (name: string, config: any): StackSpec => {
 };
 
 export const parseConfig = (config: any): MetroSpec => {
-  if (typeof config !== 'object') {
+  if (typeof config !== 'object' || config === null) {
     throw new InvalidConfig('config is not an object');
   }
   const res: MetroSpec = {
