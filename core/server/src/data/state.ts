@@ -61,6 +61,20 @@ export const State = {
         logger.warn(`service '${name}' could not be removed: not found`);
       }
     },
+    async stopTask(name: string, reason?: string) {
+      const state = State.service.get(name);
+      if (state && (state.state === 'running' || state.state === 'assigned')) {
+        const runner = State.runner.get(state.assignedRunnerId);
+        if (runner.state === 'ready') {
+          await runner.stopService({ name, reason });
+          return { success: true, message: '' };
+        }
+        return { success: false, message: 'runner-not-ready' };
+      }
+
+      logger.warn(`service '${name}' is not running`);
+      return { success: false, message: 'service-not-running' };
+    },
     isRunning(name: string) {
       const state = State.service.get(name);
       return state.state === 'running';
@@ -73,6 +87,14 @@ export const State = {
     toPendingAssignment(name: string) {
       const state = State.service.get(name);
       state.state = 'pending-assignment';
+      state.assignedRunnerId = null;
+      void SideEffects.emit('updateServiceState', {
+        serviceName: name,
+      });
+    },
+    cancelPendingAssignment(name: string) {
+      const state = State.service.get(name);
+      state.state = 'off';
       state.assignedRunnerId = null;
       void SideEffects.emit('updateServiceState', {
         serviceName: name,

@@ -48,16 +48,9 @@ export const serviceRouter = () => {
         return res.status(200).send({ success: false, message: 'not-running' });
       }
 
-      if (state.assignedRunnerId && state.current_task_state === 'running') {
-        const runner = State.runner.get(state.assignedRunnerId);
-        if (runner.state === 'ready') {
-          await runner.stopService({ name, reason: 'api-endpoint' });
-          return res.status(200).send({ success: true });
-        } else {
-          return res
-            .status(200)
-            .send({ success: false, message: 'runner-not-ready' });
-        }
+      if (state.assignedRunnerId && state.state === 'running') {
+        const result = await State.service.stopTask(name, 'api-endpoint');
+        return res.status(200).send(result);
       }
 
       return res

@@ -61,6 +61,7 @@ export const Service = addStaticMethods(
     spec: ServiceSpec;
     key: string;
     stack: string;
+    to_delete?: boolean;
   }>({
     name: 'services',
     knex,

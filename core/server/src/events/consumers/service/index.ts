@@ -21,7 +21,7 @@ export const serviceQueue = createEventQueue('service', {
       const existing = await Service.getOne(name);
 
       if (existing) {
-        if (!isEqual(existing.spec, spec)) {
+        if (!isEqual(existing.spec, spec) || existing.to_delete) {
           await Service.updateOne(name, {
             spec,
           });
@@ -55,22 +55,27 @@ export const serviceQueue = createEventQueue('service', {
   ),
   remove: handler(
     async ({ name }: { name: string }, { dispatcher, logger }) => {
-      // const state = State.service.get(name);
-      // if (state && state.current_task_state === 'running') {
-      //   await
-      // }
-      const removed = await Service.removeOne(name);
-      if (removed) {
-        logger.info(`'${name}' removed`);
-        dispatcher.push(
-          EVENTS.service.removed({
-            name,
-          })
-        );
-        void SideEffects.emit('removeService', { serviceName: name });
-      } else {
+      const service = await Service.getOne(name);
+      if (!service) {
         logger.info(`'${name}' not found`);
+        return;
       }
+      const state = State.service.get(name);
+      if (state) {
+        if (state.state === 'assigned' || state.state === 'running') {
+          await State.service.stopTask(name, 'service-removed');
+        }
+      }
+
+      await Service.removeOne(name);
+      State.service.remove(name);
+      logger.info(`'${name}' removed`);
+      dispatcher.push(
+        EVENTS.service.removed({
+          name,
+        })
+      );
+      void SideEffects.emit('removeService', { serviceName: name });
     }
   ),
   removed: handlers<{ name: string }>({
