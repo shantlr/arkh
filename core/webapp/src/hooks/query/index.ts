@@ -2,19 +2,9 @@ import { Task } from '@shantr/metro-common-types';
 import { API } from 'configs';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useQuery, useQueryClient } from 'react-query';
+import { QUERY_KEY } from './key';
 
-const QUERY_KEY = {
-  stack: {
-    serviceStates: (stackName: string) => [`stack-service-states`, stackName],
-  },
-  service: {
-    state: (serviceName: string) => ['service', serviceName],
-    tasks: (serviceName: string) => ['service', serviceName, 'tasks'],
-  },
-  task: {
-    logs: (taskId: string) => ['task', taskId, 'logs'],
-  },
-};
+export * from './stack';
 
 export const useStackServiceStates = (stackName: string) => {
   return useQuery(QUERY_KEY.stack.serviceStates(stackName), () =>

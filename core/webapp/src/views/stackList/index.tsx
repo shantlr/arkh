@@ -9,6 +9,7 @@ import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { NoStyleLink } from 'components/noStyleLink';
 import { styles } from 'styles/css';
+import { useSubscribeStacks } from 'hooks/query';
 
 const ViewContainer = styled.div<{ shrinked?: boolean }>`
   ${styles.container.noScroll};
@@ -58,6 +59,7 @@ const ServiceItem = styled.div<{ shrinked?: boolean }>``;
 export const StackListView = () => {
   const [shrinked, setShrinked] = useState(true);
   const { data } = useQuery('stacks', () => API.stack.list());
+  useSubscribeStacks();
 
   const stackMatch = useMatch('/stack/:name/*');
 

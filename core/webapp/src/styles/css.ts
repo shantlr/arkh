@@ -50,21 +50,27 @@ export const createCssThemeKeyProxy = <
   );
 };
 
+const base = {
+  mainBg: css`
+    background-color: ${(props) => props.theme.color.mainBg};
+    color: ${(props) => props.theme.color.mainBgColor};
+  `,
+  action: css`
+    background-color: ${(props) => props.theme.color.actionBg};
+    color: ${(props) => props.theme.color.actionColor};
+  `,
+  secondaryBg: css`
+    background-color: ${(props) => props.theme.color.secondaryMainBg};
+    color: ${(props) => props.theme.color.secondaryMainColor};
+  `,
+  successBg: css`
+    background-color: ${(props) => props.theme.color.success};
+    color: ${(props) => props.theme.color.successColor};
+  `,
+};
+
 export const styles = {
-  base: {
-    mainBg: css`
-      background-color: ${(props) => props.theme.color.mainBg};
-      color: ${(props) => props.theme.color.mainBgColor};
-    `,
-    secondaryBg: css`
-      background-color: ${(props) => props.theme.color.secondaryMainBg};
-      color: ${(props) => props.theme.color.secondaryMainColor};
-    `,
-    successBg: css`
-      background-color: ${(props) => props.theme.color.success};
-      color: ${(props) => props.theme.color.successColor};
-    `,
-  },
+  base,
 
   color: createCssThemeKeyProxy('color', 'color'),
   bg: createCssThemeKeyProxy('background-color', 'color'),
@@ -133,8 +139,7 @@ export const styles = {
     `,
     action: css`
       :hover {
-        background-color: ${(props) => props.theme.color.actionBg};
-        color: ${(props) => props.theme.color.actionColor};
+        ${base.action}
       }
     `,
   },

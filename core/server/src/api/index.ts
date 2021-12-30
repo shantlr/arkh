@@ -1,6 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
+import bodyParser from 'body-parser';
 
 import { createLogger } from '@shantr/metro-logger';
 import { expressLogger } from './middlewares/logger';
@@ -16,6 +17,7 @@ export const startApi = async (port: number, logger = createLogger('api')) => {
     cors({
       origin: config.get('api.cors.origin'),
     }),
+    bodyParser.json(),
     expressLogger()
   );
   app.use('/api/stack', stackRouter());

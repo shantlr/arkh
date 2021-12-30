@@ -2,6 +2,7 @@ export type ServiceSpec = {
   path?: string;
   env?: Record<string, string>;
   cmd: string[];
+  pty?: boolean;
   logs: {
     json?: boolean;
     time?: boolean;
@@ -57,13 +58,13 @@ export type Task = {
   service_name: string;
   service_spec: ServiceSpec;
   runner_id: string;
-  creating_at: Date;
-  updated_at: Date;
-  running_at: Date;
-  stopping_at: Date;
-  stopped_at: Date;
-  exited_at: Date;
-  exit_code: number;
+  creating_at?: Date;
+  updated_at?: Date;
+  running_at?: Date;
+  stopping_at?: Date;
+  stopped_at?: Date;
+  exited_at?: Date;
+  exit_code?: number;
 };
 
 export type TaskLog = {
@@ -71,4 +72,25 @@ export type TaskLog = {
   task_id: string;
   text: string;
   date: Date;
+};
+
+export type StackRowConfig = {
+  cells: {
+    key: string;
+    width: number;
+  }[];
+  height: number;
+};
+export type StackTab = {
+  name: string;
+  slug: string;
+  keys: Record<string, true>;
+  rows?: StackRowConfig[];
+};
+
+export type StackTabConfig = {
+  stack: string;
+  tabs: StackTab[];
+  created_at: Date;
+  updated_at: Date;
 };

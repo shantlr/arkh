@@ -55,7 +55,9 @@ export const RootApp = () => {
                 <SideBar />
                 <Routes>
                   <Route path="stack" element={<StackListView />}>
-                    <Route path=":name" element={<StackDetails />} />
+                    <Route path=":name" element={<StackDetails />}>
+                      <Route path="t/:tabKey" element={null} />
+                    </Route>
                   </Route>
 
                   <Route path="/" element={<Navigate to="/stack" />}></Route>

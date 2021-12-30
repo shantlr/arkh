@@ -57,6 +57,7 @@ const HeaderActions = styled.div`
 const HeaderActionItem = styled.div<{ active?: boolean }>`
   cursor: pointer;
   ${(props) => (props.active ? styles.color.actionBg : null)};
+  white-space: nowrap;
   ${styles.text.sm};
   ${styles.hover.textAction};
   ${styles.transition.default};
@@ -69,9 +70,9 @@ const DragHandle = styled.div`
   width: 100%;
   height: 100%;
   z-index: 0;
-  border-top-left-radius: ${(props) => props.theme.borderRadius.md};
-  border-top-right-radius: ${(props) => props.theme.borderRadius.md};
   cursor: pointer;
+  ${styles.roundedTopLeft.md};
+  ${styles.roundedTopRight.md};
 
   background-color: transparent;
   transition: 0.3s;
@@ -211,6 +212,7 @@ export const ServiceLogs = ({
         setFormatJson(service.spec.logs.json === true);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [service]);
 
   // round logs top right corner when hover handle

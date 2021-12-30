@@ -15,12 +15,43 @@ export type State = {
 
   height: number;
   width: number;
+  updated_at: number;
 };
+export type Action =
+  | { type: 'sync-keys'; childKeys: Record<string, true> }
+  | { type: 'resize-height'; height: number }
+  | { type: 'resize-width'; width: number }
+  | {
+      type: 'resize-cell-width';
+      rowIndex: number;
+      cellIndex: number;
+      delta: number;
+    }
+  | {
+      type: 'resize-row-height';
+      rowIndex: number;
+      delta: number;
+    }
+  | {
+      type: 'move-cell';
+      srcRowIndex: number;
+      srcCellIndex: number;
+      dstRowIndex: number;
+      dstCellIndex: number;
+    }
+  | {
+      type: 'move-cell-to-new-row';
+      srcRowIndex: number;
+      srcCellIndex: number;
+      dstRowIndex: number;
+    };
+
 export const defaultState: State = {
   keys: {},
   rows: [],
   height: 0,
   width: 0,
+  updated_at: 0,
 };
 
 const MIN_ROW_HEIGHT = {
@@ -129,37 +160,7 @@ const redistributeRowCells = (rows: WritableDraft<RowState>[]) => {
   });
 };
 
-export const reducer = (
-  state: State,
-  action:
-    | { type: 'sync-keys'; childKeys: Record<string, true> }
-    | { type: 'resize-height'; height: number }
-    | { type: 'resize-width'; width: number }
-    | {
-        type: 'resize-cell-width';
-        rowIndex: number;
-        cellIndex: number;
-        delta: number;
-      }
-    | {
-        type: 'resize-row-height';
-        rowIndex: number;
-        delta: number;
-      }
-    | {
-        type: 'move-cell';
-        srcRowIndex: number;
-        srcCellIndex: number;
-        dstRowIndex: number;
-        dstCellIndex: number;
-      }
-    | {
-        type: 'move-cell-to-new-row';
-        srcRowIndex: number;
-        srcCellIndex: number;
-        dstRowIndex: number;
-      }
-): State => {
+export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'sync-keys': {
       return produce(state, (s) => {
@@ -184,12 +185,14 @@ export const reducer = (
             lastRowIdx >= 0 &&
             s.rows[lastRowIdx].cells.length < MAX_CELL_PER_ROW
           ) {
+            s.updated_at = Date.now();
             s.rows[lastRowIdx].cells.push(cell);
           } else {
             s.rows.push({
               cells: [cell],
               height: 0,
             });
+            s.updated_at = Date.now();
           }
         });
         s.keys = action.childKeys;
@@ -255,6 +258,7 @@ export const reducer = (
       return {
         ...state,
         rows: nextRows,
+        updated_at: Date.now(),
       };
     }
     case 'resize-row-height': {
@@ -286,6 +290,7 @@ export const reducer = (
           }
           return row;
         }),
+        updated_at: Date.now(),
       };
     }
     case 'move-cell': {
@@ -300,6 +305,7 @@ export const reducer = (
             row.cells.splice(action.dstCellIndex, 0, cell);
             row.cells.splice(action.srcCellIndex + 1, 1);
           }
+          s.updated_at = Date.now();
           return;
         } else {
           const srcRow = s.rows[action.srcRowIndex];
@@ -326,12 +332,12 @@ export const reducer = (
           }
           // resync cell widths
           redistributeRowCells(s.rows);
+          s.updated_at = Date.now();
         }
         return;
       });
     }
     case 'move-cell-to-new-row': {
-      console.log('NEW - ROW');
       return produce(state, (s) => {
         const srcRow = s.rows[action.srcRowIndex];
         const cell = srcRow.cells[action.srcCellIndex];
@@ -345,6 +351,7 @@ export const reducer = (
 
         redistributeRowSizes(s.rows);
         redistributeRowCells(s.rows);
+        s.updated_at = Date.now();
       });
     }
     default:

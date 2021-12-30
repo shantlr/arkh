@@ -1,128 +1,130 @@
-import { Knex } from 'knex';
 import { identity } from 'lodash';
 
-export interface IEntity {
-  name: string;
-  created_at: Date;
-  updated_at: Date;
-}
+export { createEntityAccessorBase } from './entityAccessorBase';
+export {
+  createNamedEntityAccessor,
+  StringifyNonScalar,
+} from './namedEntityAccessor';
 
-export type StringifyNonScalar<T extends Record<string, any>> = {
-  [key in keyof T]: T[key] extends string | number | boolean | Date
-    ? T[key]
-    : string;
-};
+// export interface IEntity {
+//   name: string;
+//   created_at: Date;
+//   updated_at: Date;
+// }
 
-export interface EntityAccessor<Deserialized> {
-  getOne(name: string): Promise<IEntity & Deserialized>;
-  getIn(name: string[]): Promise<(IEntity & Deserialized)[]>;
-  getAll(): Promise<(IEntity & Deserialized)[]>;
-  find(
-    query: Partial<IEntity & Deserialized>
-  ): Promise<(IEntity & Deserialized)[]>;
-  insertOne(
-    entity: Deserialized & { name: string }
-  ): Promise<IEntity & Deserialized>;
-  updateOne(
-    name: string,
-    update: Partial<Deserialized>
-  ): Promise<IEntity & Deserialized>;
-  removeOne(name: string): Promise<IEntity & Deserialized>;
-}
+// export type StringifyNonScalar<T extends Record<string, any>> = {
+//   [key in keyof T]: T[key] extends string | number | boolean | Date
+//     ? T[key]
+//     : string;
+// };
 
-export const createCollectionAccessor = <
-  DeserializedExtraData extends Record<string, any>,
-  // StaticMethods extends Record<string, (...args: any[]) => any>,
-  SerializedExtraData extends Record<
-    string,
-    string | boolean | number
-  > = StringifyNonScalar<DeserializedExtraData>
->({
-  name: collectionName,
-  knex,
-  mapDoc = identity,
-  serializeDoc = identity,
-}: {
-  name: string;
-  knex: Knex;
-  mapDoc?: (
-    doc: IEntity & SerializedExtraData
-  ) => IEntity & DeserializedExtraData;
-  serializeDoc?: (
-    doc: Partial<DeserializedExtraData>
-  ) => Partial<SerializedExtraData>;
-}): EntityAccessor<DeserializedExtraData> => {
-  const getCollection = <Type = IEntity & DeserializedExtraData>(t = knex) =>
-    t<Type>(collectionName);
+// export interface EntityAccessor<Deserialized> {
+//   getOne(name: string): Promise<IEntity & Deserialized>;
+//   getIn(name: string[]): Promise<(IEntity & Deserialized)[]>;
+//   getAll(): Promise<(IEntity & Deserialized)[]>;
+//   find(
+//     query: Partial<IEntity & Deserialized>
+//   ): Promise<(IEntity & Deserialized)[]>;
+//   insertOne(
+//     entity: Deserialized & { name: string }
+//   ): Promise<IEntity & Deserialized>;
+//   updateOne(
+//     name: string,
+//     update: Partial<Deserialized>
+//   ): Promise<IEntity & Deserialized>;
+//   removeOne(name: string): Promise<IEntity & Deserialized>;
+// }
 
-  const accessor: EntityAccessor<DeserializedExtraData> = {
-    async getOne(name) {
-      const res = await getCollection<IEntity>().select().first().where({
-        name,
-      });
-      if (res) {
-        return mapDoc(res as IEntity & SerializedExtraData);
-      }
-      return null;
-    },
-    async find(query) {
-      const res = await getCollection<IEntity>().select().where(query);
-      return res.map((i) => mapDoc(i as IEntity & SerializedExtraData));
-    },
-    async getIn(names) {
-      if (!names.length) {
-        return [];
-      }
+// export const createCollectionAccessor = <
+//   DeserializedExtraData extends Record<string, any>,
+//   // StaticMethods extends Record<string, (...args: any[]) => any>,
+//   SerializedExtraData extends Record<
+//     string,
+//     string | boolean | number
+//   > = StringifyNonScalar<DeserializedExtraData>
+// >({
+//   name: collectionName,
+//   knex,
+//   mapDoc = identity,
+//   serializeDoc = identity,
+// }: {
+//   name: string;
+//   knex: Knex;
+//   mapDoc?: (
+//     doc: IEntity & SerializedExtraData
+//   ) => IEntity & DeserializedExtraData;
+//   serializeDoc?: (
+//     doc: Partial<DeserializedExtraData>
+//   ) => Partial<SerializedExtraData>;
+// }): EntityAccessor<DeserializedExtraData> => {
+//   const getCollection = <Type = IEntity & DeserializedExtraData>(t = knex) =>
+//     t<Type>(collectionName);
 
-      const res = await getCollection<IEntity>()
-        .select()
-        .whereIn('name', names);
-      return res.map((r) => mapDoc(r as IEntity & SerializedExtraData));
-    },
-    async getAll() {
-      const res = (await getCollection<IEntity>().select()) as (IEntity &
-        SerializedExtraData)[];
-      return res.map((r) => mapDoc(r));
-    },
-    async insertOne(entity) {
-      await getCollection<IEntity>().insert({
-        created_at: new Date(),
-        updated_at: new Date(),
-        name: entity.name,
+//   const accessor: EntityAccessor<DeserializedExtraData> = {
+//     async getOne(name) {
+//       const res = await getCollection<IEntity>().select().first().where({
+//         name,
+//       });
+//       if (res) {
+//         return mapDoc(res as IEntity & SerializedExtraData);
+//       }
+//       return null;
+//     },
+//     async find(query) {
+//       const res = await getCollection<IEntity>().select().where(query);
+//       return res.map((i) => mapDoc(i as IEntity & SerializedExtraData));
+//     },
+//     async getIn(names) {
+//       if (!names.length) {
+//         return [];
+//       }
 
-        ...serializeDoc(entity),
-      });
-      return accessor.getOne(entity.name);
-    },
-    async updateOne(name, update) {
-      await getCollection<IEntity>().update(serializeDoc(update)).where({
-        name,
-      });
-      return accessor.getOne(name);
-    },
-    async removeOne(name) {
-      const existing = accessor.getOne(name);
-      if (existing) {
-        await getCollection<IEntity>().delete().where({
-          name,
-        });
-      }
-      return existing;
-    },
-  };
+//       const res = await getCollection<IEntity>()
+//         .select()
+//         .whereIn('name', names);
+//       return res.map((r) => mapDoc(r as IEntity & SerializedExtraData));
+//     },
+//     async getAll() {
+//       const res = (await getCollection<IEntity>().select()) as (IEntity &
+//         SerializedExtraData)[];
+//       return res.map((r) => mapDoc(r));
+//     },
+//     async insertOne(entity) {
+//       await getCollection<IEntity>().insert({
+//         created_at: new Date(),
+//         updated_at: new Date(),
+//         name: entity.name,
 
-  return accessor;
-};
+//         ...serializeDoc(entity),
+//       });
+//       return accessor.getOne(entity.name);
+//     },
+//     async updateOne(name, update) {
+//       await getCollection<IEntity>().update(serializeDoc(update)).where({
+//         name,
+//       });
+//       return accessor.getOne(name);
+//     },
+//     async removeOne(name) {
+//       const existing = accessor.getOne(name);
+//       if (existing) {
+//         await getCollection<IEntity>().delete().where({
+//           name,
+//         });
+//       }
+//       return existing;
+//     },
+//   };
+
+//   return accessor;
+// };
 export const addStaticMethods = <
   T,
-  StaticMethods extends Record<
-    string,
-    (this: EntityAccessor<T>, ...args: any[]) => any
-  >
+  StaticMethods extends Record<string, (this: T, ...args: any[]) => any>
 >(
-  entityAccessor: EntityAccessor<T>,
+  entityAccessor: T,
   statics: StaticMethods
-): EntityAccessor<T> & StaticMethods => {
+): T & StaticMethods => {
   return {
     ...statics,
     ...entityAccessor,

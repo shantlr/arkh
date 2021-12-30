@@ -1,4 +1,4 @@
-import { ServiceInfo } from '@shantr/metro-common-types';
+import { ServiceInfo, StackTab } from '@shantr/metro-common-types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
 import io from 'socket.io-client';
@@ -23,6 +23,19 @@ export const API = {
     },
     async run({ name }: { name: string }) {
       const res = await base.post(`stack/${name}/run`);
+      return res.json();
+    },
+
+    async getTabs(name: string): Promise<StackTab[]> {
+      const res = await base.get(`stack/${name}/tabs`);
+      return res.json();
+    },
+    async updateTab(name: string, tab: StackTab) {
+      const res = await base.post(`stack/${name}/tabs/update`, {
+        json: {
+          tab,
+        },
+      });
       return res.json();
     },
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { mapValues } from 'lodash';
-import { Stack } from 'src/data';
+import { Service, Stack, StackTab } from 'src/data';
 import { State } from 'src/data/state';
 import { EventManager, EVENTS } from 'src/events';
 
@@ -63,6 +63,84 @@ export const stackRouter = () => {
       return res.status(500).send();
     }
   });
+
+  router.get('/:name/tabs', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const stack = await Stack.getOne(name);
+      if (!stack) {
+        return res.status(404).send();
+      }
+
+      const existing = await StackTab.get(name);
+      if (existing && existing.tabs) {
+        return res.status(200).send(existing.tabs);
+      }
+
+      const keys: Record<string, true> = {};
+      Object.keys(stack.spec.services).forEach((serviceKey) => {
+        keys[Service.formatName(name, serviceKey)] = true;
+      });
+      return res.status(200).send([
+        {
+          name: 'All',
+          slug: 'all',
+          keys,
+        },
+      ]);
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send();
+    }
+  });
+  router.post('/:name/tabs/update', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const { tab } = req.body;
+      if (!tab) {
+        return res.status(400).send('tab-not-provided');
+      }
+      const existing = await StackTab.get(name);
+      if (!existing) {
+        await StackTab.upsert(name, [tab]);
+      } else {
+        const tabs = [...existing.tabs];
+        const idx = tabs.findIndex((t) => t.name === tab.name);
+        const update = {
+          name: tab.name,
+          slug: tab.slug,
+          keys: tab.keys,
+          rows: tab.rows,
+        };
+        if (idx === -1) {
+          tabs.push(update);
+        } else {
+          tabs[idx] = update;
+        }
+        await StackTab.upsert(name, tabs);
+      }
+
+      return res.status(200).send({ success: true });
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send();
+    }
+  });
+  // router.post('/:name/tabs/update-order', async (req, res) => {
+  //   try {
+  //     const { name } = req.params;
+  //     const { tabSlugs } = req.body;
+  //     if (!tabSlugs) {
+  //       return res.status(400).send('tab-slugs-not-provided');
+  //     }
+
+  //     // await StackTab.upsert(name, tab);
+  //     return res.status(200).send({ success: true });
+  //   } catch (err) {
+  //     req.logger.error(err);
+  //     return res.status(500).send();
+  //   }
+  // });
 
   return router;
 };

@@ -1,15 +1,18 @@
-import React, { CSSProperties, useEffect, useReducer } from 'react';
+import React, { CSSProperties, Dispatch, useEffect, useReducer } from 'react';
 import styled from 'styled-components';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { useEqualMemo } from 'lib/hooks';
-import { defaultState, reducer } from './reducer';
+import { Action, defaultState, reducer, State } from './reducer';
 import {
   GridHorizResizeDragHandle,
   GridVertResizeDragHandle,
 } from './components/dragHandle';
 import { GridCell } from './components/cell';
 import { GridRow, GridRowContent } from './components/row';
+import { useMemo } from 'react';
+import { StackTab } from '@shantr/metro-common-types';
+import { useState } from 'react';
 
 const Container = styled.div`
   width: 100%;
@@ -24,6 +27,33 @@ type GridProps = {
   dropAcceptType: string;
   className?: string;
   style?: CSSProperties;
+
+  grid: {
+    state: State;
+    dispatch: Dispatch<Action>;
+  };
+};
+
+export const useGridState = (tab: StackTab) => {
+  const [initialState] = useState(() => {
+    if (!tab.rows) {
+      return { ...defaultState };
+    }
+    return {
+      ...defaultState,
+      keys: tab.keys,
+      rows: tab.rows,
+    };
+  });
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return useMemo(
+    () => ({
+      state,
+      dispatch,
+    }),
+    [state]
+  );
 };
 
 const GridContainer = ({
@@ -33,17 +63,12 @@ const GridContainer = ({
   className,
   style,
   dropAcceptType,
+  grid,
 }: {
   height: number;
   width: number;
 } & GridProps) => {
-  const [state, dispatch] = useReducer(reducer, {
-    ...defaultState,
-    height,
-    width,
-  });
-
-  // console.log('grid state', state);
+  const { state, dispatch } = grid;
 
   let childKeys: Record<string, true> = {};
   const childrenByKey: Record<string, JSX.Element> = {};
@@ -64,14 +89,14 @@ const GridContainer = ({
 
   useEffect(() => {
     dispatch({ type: 'sync-keys', childKeys: memoChildKeys });
-  }, [memoChildKeys]);
+  }, [memoChildKeys, dispatch]);
 
   useEffect(() => {
     dispatch({ type: 'resize-height', height });
-  }, [height]);
+  }, [height, dispatch]);
   useEffect(() => {
     dispatch({ type: 'resize-width', width });
-  }, [width]);
+  }, [width, dispatch]);
 
   return (
     <Container

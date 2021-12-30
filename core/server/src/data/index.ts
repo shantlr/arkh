@@ -1,6 +1,7 @@
 import {
   addStaticMethods,
-  createCollectionAccessor,
+  createEntityAccessorBase,
+  createNamedEntityAccessor,
   deserializer,
   serializer,
   StringifyNonScalar,
@@ -12,17 +13,20 @@ import {
   ServiceSpec,
   Task as TaskType,
   TaskLog as TaskLogType,
+  StackTabConfig,
+  StackTab as StackTabType,
 } from '@shantr/metro-common-types';
 import { SideEffects } from 'src/events/sideEffects';
+import { sortBy } from 'lodash';
 
 export { doMigrations } from './knex';
 
-export const Config = createCollectionAccessor<{
+export const Config = createNamedEntityAccessor<{
   spec: MetroSpec;
 }>({
-  name: 'configs',
+  collectionName: 'configs',
   knex,
-  mapDoc: deserializer({
+  deserializeDoc: deserializer({
     spec(value) {
       return JSON.parse(value);
     },
@@ -32,14 +36,14 @@ export const Config = createCollectionAccessor<{
   }),
 });
 export const Stack = addStaticMethods(
-  createCollectionAccessor<{
+  createNamedEntityAccessor<{
     spec: StackSpec;
     config_key: string;
     to_remove?: boolean;
   }>({
-    name: 'stacks',
+    collectionName: 'stacks',
     knex,
-    mapDoc: deserializer({
+    deserializeDoc: deserializer({
       spec(value) {
         return JSON.parse(value);
       },
@@ -57,15 +61,15 @@ export const Stack = addStaticMethods(
   }
 );
 export const Service = addStaticMethods(
-  createCollectionAccessor<{
+  createNamedEntityAccessor<{
     spec: ServiceSpec;
     key: string;
     stack: string;
     to_delete?: boolean;
   }>({
-    name: 'services',
+    collectionName: 'services',
     knex,
-    mapDoc: deserializer({
+    deserializeDoc: deserializer({
       spec(value) {
         return JSON.parse(value);
       },
@@ -91,7 +95,25 @@ export const Service = addStaticMethods(
   }
 );
 
-const getTask = () => knex<StringifyNonScalar<TaskType>>(`tasks`);
+const taskAccessor = createEntityAccessorBase<
+  TaskType,
+  StringifyNonScalar<TaskType>
+>({
+  collectionName: 'tasks',
+  knex,
+  deserializeDoc: deserializer({
+    service_spec: (value) => {
+      if (value) {
+        return JSON.parse(value);
+      }
+      return null;
+    },
+  }),
+  serializeDoc: serializer({
+    service_spec: (value) => JSON.stringify(value),
+  }),
+});
+
 export const Task = {
   async create({
     id,
@@ -105,10 +127,10 @@ export const Task = {
     runnerId: string;
   }) {
     const date = new Date();
-    await getTask().insert({
+    await taskAccessor.insertOne({
       id,
       service_name: serviceName,
-      service_spec: JSON.stringify(serviceSpec),
+      service_spec: serviceSpec,
       runner_id: runnerId,
       creating_at: date,
       updated_at: date,
@@ -122,15 +144,16 @@ export const Task = {
   update: {
     async runningAt(taskId: string) {
       const date = new Date();
-      await getTask()
-        .update({
-          running_at: date,
-          updated_at: date,
-        })
-        .where({
+      await taskAccessor.updateOne(
+        {
           id: taskId,
           running_at: null,
-        });
+        },
+        {
+          running_at: date,
+          updated_at: date,
+        }
+      );
       void SideEffects.emit('updateTask', {
         id: taskId,
         running_at: date,
@@ -138,15 +161,16 @@ export const Task = {
     },
     async stoppingAt(taskId: string) {
       const date = new Date();
-      await getTask()
-        .update({
-          stopping_at: date,
-          updated_at: date,
-        })
-        .where({
+      await taskAccessor.updateOne(
+        {
           id: taskId,
           stopping_at: null,
-        });
+        },
+        {
+          stopping_at: date,
+          updated_at: date,
+        }
+      );
       void SideEffects.emit('updateTask', {
         id: taskId,
         stopping_at: date,
@@ -154,15 +178,16 @@ export const Task = {
     },
     async stoppedAt(taskId: string) {
       const date = new Date();
-      await getTask()
-        .update({
-          stopped_at: date,
-          updated_at: date,
-        })
-        .where({
+      await taskAccessor.updateOne(
+        {
           id: taskId,
           stopped_at: null,
-        });
+        },
+        {
+          stopped_at: date,
+          updated_at: date,
+        }
+      );
       void SideEffects.emit('updateTask', {
         id: taskId,
         stopped_at: date,
@@ -170,16 +195,17 @@ export const Task = {
     },
     async exited(taskId: string, exitCode: number) {
       const date = new Date();
-      await getTask()
-        .update({
+      await taskAccessor.updateOne(
+        {
+          id: taskId,
+          exited_at: null,
+        },
+        {
           exited_at: date,
           exit_code: exitCode,
           updated_at: date,
-        })
-        .where({
-          id: taskId,
-          exited_at: null,
-        });
+        }
+      );
       void SideEffects.emit('updateTask', {
         id: taskId,
         exited_at: date,
@@ -189,41 +215,25 @@ export const Task = {
   },
 
   get(taskId: string) {
-    return getTask()
-      .select()
-      .first()
-      .where({
-        id: taskId,
-      })
-      .then((r) => {
-        if (r) {
-          if (r.service_spec) {
-            r.service_spec = JSON.parse(r.service_spec);
-          }
-        }
-        return r as unknown as TaskType;
-      });
+    return taskAccessor.getOne({
+      id: taskId,
+    });
   },
-  list(serviceName: string) {
-    return getTask()
-      .select()
-      .where({
-        service_name: serviceName,
-      })
-      .orderBy('creating_at', 'desc')
-      .then((r) => {
-        r.forEach((task) => {
-          if (task.service_spec) {
-            task.service_spec = JSON.parse(task.service_spec);
-          }
-        });
-
-        return r as unknown as TaskType[];
-      });
+  async list(serviceName: string) {
+    const res = await taskAccessor.find({
+      service_name: serviceName,
+    });
+    return sortBy(res, (r) => new Date(r.creating_at));
   },
 };
 
-const getTaskLog = () => knex<TaskLogType>('task_logs');
+const taskLogAccessor = createEntityAccessorBase<
+  TaskLogType,
+  StringifyNonScalar<TaskLogType>
+>({
+  collectionName: 'task_logs',
+  knex,
+});
 export const TaskLog = {
   async add({
     id,
@@ -236,8 +246,7 @@ export const TaskLog = {
     text: string;
     date: Date;
   }) {
-    const col = getTaskLog();
-    await col.insert({
+    await taskLogAccessor.insertOne({
       task_id: id,
       out,
       text,
@@ -251,12 +260,52 @@ export const TaskLog = {
     });
   },
 
-  get(taskId: string) {
-    return getTaskLog()
-      .select()
-      .where({
-        task_id: taskId,
+  async get(taskId: string) {
+    const res = await taskLogAccessor.find({
+      task_id: taskId,
+    });
+    return sortBy(res, (r) => new Date(r.date));
+  },
+};
+
+const stackTabAccessor = createEntityAccessorBase<
+  StackTabConfig,
+  StringifyNonScalar<StackTabConfig>
+>({
+  collectionName: 'stack_tabs',
+  knex,
+  deserializeDoc: deserializer({
+    tabs: (tabs) => {
+      const r = JSON.parse(tabs);
+      r.forEach((t) => {
+        // add slug
+        if (r.name) {
+          t.slug = r.name.replace(/[ ]+/g, '-').toLowerCase();
+        }
+      });
+      return r;
+    },
+  }),
+  serializeDoc: serializer({
+    tabs: (tabs) => JSON.stringify(tabs),
+  }),
+});
+export const StackTab = {
+  async upsert(stackName: string, tabs: StackTabType[]) {
+    await stackTabAccessor
+      .getCollection()
+      .insert({
+        stack: stackName,
+        tabs: JSON.stringify(tabs),
+        created_at: new Date(),
+        updated_at: new Date(),
       })
-      .orderBy('date');
+      .onConflict('stack')
+      .merge(['tabs', 'updated_at']);
+  },
+  get(stackName: string) {
+    return stackTabAccessor.getOne({
+      stack: stackName,
+    });
   },
 };

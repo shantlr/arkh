@@ -27,6 +27,7 @@ export const parseService = (
   if (!('cmd' in config)) {
     throw new InvalidConfig(`${stackName}.${name}.cmd missing`);
   }
+
   if (typeof config.cmd === 'string') {
     res.cmd = config.cmd
       .split(' ')
@@ -40,6 +41,10 @@ export const parseService = (
     });
 
     res.cmd = config.cmd.map((elem) => elem.toString());
+  }
+
+  if ('pty' in config) {
+    res.pty = Boolean(config.pty);
   }
 
   if ('path' in config) {
