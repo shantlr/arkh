@@ -30,6 +30,19 @@ export const API = {
       const res = await base.get(`stack/${name}/tabs`);
       return res.json();
     },
+    async renameTab(
+      stackName: string,
+      oldName: string,
+      newName: string
+    ): Promise<{ success: true }> {
+      const res = await base.post(`stack/${stackName}/tabs/rename`, {
+        json: {
+          oldName,
+          newName,
+        },
+      });
+      return res.json();
+    },
     async updateTab(name: string, tab: StackTab) {
       const res = await base.post(`stack/${name}/tabs/update`, {
         json: {

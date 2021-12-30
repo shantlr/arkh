@@ -2,16 +2,18 @@ import { StackTab } from '@shantr/metro-common-types';
 import { Grid, useGridState } from 'components/grid';
 import { NoStyleLink } from 'components/noStyleLink';
 import { API } from 'configs';
+import { QUERY_KEY } from 'hooks/query/key';
 import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
 import { map } from 'lodash';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
 import { useMemo } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
 import { ServiceLogs } from '../serviceLog';
+import { Tab } from './tab';
 
 const Container = styled.div`
   height: 100%;
@@ -22,19 +24,6 @@ const Container = styled.div`
 const TabContainer = styled.div`
   display: flex;
   ${styles.pl.sm};
-`;
-
-const TabItem = styled.div<{ active?: boolean }>`
-  cursor: pointer;
-  min-width: 40px;
-  text-align: center;
-  font-weight: bold;
-  padding: ${(props) => `0 ${props.theme.space.md}`};
-  ${(props) => (props.active ? styles.base.action : styles.base.secondaryBg)};
-  ${styles.rounded.lg};
-  ${styles.hover.action};
-  ${styles.text.sm};
-  ${styles.transition.default};
 `;
 
 const StackGrid = ({
@@ -71,6 +60,37 @@ const StackGrid = ({
   );
 };
 
+const useRenameTab = (stackName: string) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return useMutation(
+    ({ oldName, newName }: { oldName: string; newName: string }) =>
+      API.stack.renameTab(stackName, oldName, newName),
+    {
+      onMutate({ oldName, newName }) {
+        const newSlug = newName.replace(/[]+/, '-').toLowerCase();
+        queryClient.setQueryData(QUERY_KEY.stack.tabs(stackName), (data) => {
+          if (!data) {
+            return data;
+          }
+
+          return (data as StackTab[]).map((tab) => {
+            if (tab.name === oldName) {
+              return {
+                ...tab,
+                name: newName,
+                slug: newSlug,
+              };
+            }
+            return tab;
+          });
+        });
+        navigate(`t/${newSlug}`);
+      },
+    }
+  );
+};
+
 export const StackTabs = ({
   stackName,
   tabs,
@@ -86,6 +106,7 @@ export const StackTabs = ({
     }
     return tabs.find((tab) => tab.slug === tabKey);
   }, [tabKey, tabs]);
+  const { mutate: renameTab } = useRenameTab(stackName);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -99,7 +120,16 @@ export const StackTabs = ({
       <TabContainer>
         {tabs.map((tab) => (
           <NoStyleLink to={`t/${tab.slug}`} key={tab.slug}>
-            <TabItem active={tabKey === tab.slug}>{tab.name}</TabItem>
+            <Tab
+              active={tabKey === tab.slug}
+              name={tab.name}
+              onChange={(name) => {
+                renameTab({
+                  oldName: tab.name,
+                  newName: name,
+                });
+              }}
+            />
           </NoStyleLink>
         ))}
       </TabContainer>

@@ -102,13 +102,20 @@ export const stackRouter = () => {
       }
       const existing = await StackTab.get(name);
       if (!existing) {
-        await StackTab.upsert(name, [tab]);
+        await StackTab.upsert(name, [
+          {
+            name: tab.name,
+            slug: StackTab.formatSlug(tab.name),
+            keys: tab.keys,
+            rows: tab.rows,
+          },
+        ]);
       } else {
         const tabs = [...existing.tabs];
         const idx = tabs.findIndex((t) => t.name === tab.name);
         const update = {
           name: tab.name,
-          slug: tab.slug,
+          slug: StackTab.formatSlug(tab.name),
           keys: tab.keys,
           rows: tab.rows,
         };
@@ -119,6 +126,35 @@ export const stackRouter = () => {
         }
         await StackTab.upsert(name, tabs);
       }
+
+      return res.status(200).send({ success: true });
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send();
+    }
+  });
+  router.post('/:name/tabs/rename', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const { oldName, newName } = req.body;
+      const existing = await StackTab.get(name);
+      if (!existing) {
+        return res.status(404).send();
+      }
+
+      await StackTab.upsert(
+        name,
+        existing.tabs.map((tab) => {
+          if (tab.name === oldName) {
+            return {
+              ...tab,
+              name: newName,
+              slug: StackTab.formatSlug(newName),
+            };
+          }
+          return tab;
+        })
+      );
 
       return res.status(200).send({ success: true });
     } catch (err) {

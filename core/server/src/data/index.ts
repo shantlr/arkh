@@ -279,8 +279,8 @@ const stackTabAccessor = createEntityAccessorBase<
       const r = JSON.parse(tabs);
       r.forEach((t) => {
         // add slug
-        if (r.name) {
-          t.slug = r.name.replace(/[ ]+/g, '-').toLowerCase();
+        if (t.name) {
+          t.slug = StackTab.formatSlug(t.name);
         }
       });
       return r;
@@ -291,6 +291,9 @@ const stackTabAccessor = createEntityAccessorBase<
   }),
 });
 export const StackTab = {
+  formatSlug(name: string) {
+    return name.replace(/[ ]+/g, '-').toLowerCase();
+  },
   async upsert(stackName: string, tabs: StackTabType[]) {
     await stackTabAccessor
       .getCollection()
