@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { NoStyleLink } from 'components/noStyleLink';
 import { styles } from 'styles/css';
 import { useSubscribeStacks } from 'hooks/query';
+import { Text } from 'components/text';
 
 const ViewContainer = styled.div<{ shrinked?: boolean }>`
   ${styles.container.noScroll};
@@ -58,7 +59,7 @@ const ServiceItem = styled.div<{ shrinked?: boolean }>``;
 
 export const StackListView = () => {
   const [shrinked, setShrinked] = useState(true);
-  const { data } = useQuery('stacks', () => API.stack.list());
+  const { data, error } = useQuery('stacks', () => API.stack.list());
   useSubscribeStacks();
 
   const stackMatch = useMatch('/stack/:name/*');
@@ -67,6 +68,11 @@ export const StackListView = () => {
     <>
       <ViewContainer shrinked={shrinked}>
         <ContainerCard t="secondary" shrinked={shrinked}>
+          {error && (
+            <Text t="error">
+              {error instanceof Error ? error.message : null}
+            </Text>
+          )}
           {Boolean(data) && (
             <Header>
               <HeaderActionItem onClick={() => setShrinked(!shrinked)}>
