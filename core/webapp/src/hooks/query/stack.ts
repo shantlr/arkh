@@ -1,7 +1,9 @@
+import { StackTab } from '@shantr/metro-common-types';
 import { API } from 'configs';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 import { QUERY_KEY } from './key';
 
 export const useStack = (stackName: string) =>
@@ -45,5 +47,59 @@ export const useSubscribeStacks = () => {
       },
       [queryClient]
     )
+  );
+};
+
+export const useRenameStackTab = (stackName: string) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return useMutation(
+    ({ oldName, newName }: { oldName: string; newName: string }) =>
+      API.stack.renameTab(stackName, oldName, newName),
+    {
+      onMutate({ oldName, newName }) {
+        const newSlug = newName.replace(/[ ]+/, '-').toLowerCase();
+        queryClient.setQueryData(QUERY_KEY.stack.tabs(stackName), (data) => {
+          if (!data) {
+            return data;
+          }
+
+          return (data as StackTab[]).map((tab) => {
+            if (tab.name === oldName) {
+              return {
+                ...tab,
+                name: newName,
+                slug: newSlug,
+              };
+            }
+            return tab;
+          });
+        });
+        navigate(`t/${newSlug}`);
+      },
+    }
+  );
+};
+export const useDeleteStackTab = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    ({ stackName, tabName }: { stackName: string; tabName: string }) =>
+      API.stack.deleteTab(stackName, tabName),
+    {
+      onMutate({ stackName, tabName }) {
+        queryClient.setQueryData(QUERY_KEY.stack.tabs(stackName), (data) => {
+          if (!data) {
+            return data;
+          }
+          return (data as StackTab[]).filter((tab) => {
+            return tab.name !== tabName;
+          });
+        });
+      },
+      onSuccess(d, { stackName }) {
+        queryClient.invalidateQueries(QUERY_KEY.stack.tabs(stackName));
+      },
+    }
   );
 };

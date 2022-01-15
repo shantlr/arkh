@@ -1,5 +1,5 @@
 import { ServiceInfo } from '@shantr/metro-common-types';
-import { Dropdown } from 'components/dropdown';
+import { Select } from 'components/select';
 import { ServiceTask } from 'configs/types';
 import { map } from 'lodash';
 import { useMemo } from 'react';
@@ -12,7 +12,7 @@ import { styles } from 'styles/css';
 import { useMutation } from 'react-query';
 import { API } from 'configs';
 
-const StyledDropdown = styled(Dropdown)`
+const StyledSelect = styled(Select)`
   z-index: 1;
 `;
 
@@ -139,7 +139,7 @@ export const ServiceName = ({
   }, [tasks]);
 
   return (
-    <StyledDropdown
+    <StyledSelect
       selected={selectedTaskId}
       placement="left-start"
       options={options}
@@ -161,6 +161,6 @@ export const ServiceName = ({
           )}
         </ActionContainer>
       </Container>
-    </StyledDropdown>
+    </StyledSelect>
   );
 };

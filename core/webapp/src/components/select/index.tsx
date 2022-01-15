@@ -66,7 +66,7 @@ const variants = {
   },
 };
 
-export function Dropdown<T extends IOption>({
+export function Select<T extends IOption>({
   className,
   style,
   placement,

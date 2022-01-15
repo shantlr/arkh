@@ -51,6 +51,15 @@ export const API = {
       });
       return res.json();
     },
+    async deleteTab(stackName: string, tabName: string) {
+      const res = await base.post(`stack/${stackName}/tabs/delete`, {
+        json: {
+          stackName,
+          tabName,
+        },
+      });
+      return res.json();
+    },
 
     async serviceStates({ name }: { name: string }) {
       const res = await base.get(`stack/${name}/services/state`);

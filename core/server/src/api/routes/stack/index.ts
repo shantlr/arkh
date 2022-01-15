@@ -162,21 +162,26 @@ export const stackRouter = () => {
       return res.status(500).send();
     }
   });
-  // router.post('/:name/tabs/update-order', async (req, res) => {
-  //   try {
-  //     const { name } = req.params;
-  //     const { tabSlugs } = req.body;
-  //     if (!tabSlugs) {
-  //       return res.status(400).send('tab-slugs-not-provided');
-  //     }
+  router.post('/:name/tabs/delete', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const { tabName } = req.body;
+      const existing = await StackTab.get(name);
+      if (!existing) {
+        return res.status(404).send();
+      }
 
-  //     // await StackTab.upsert(name, tab);
-  //     return res.status(200).send({ success: true });
-  //   } catch (err) {
-  //     req.logger.error(err);
-  //     return res.status(500).send();
-  //   }
-  // });
+      await StackTab.deleteTab({
+        stackName: name,
+        tabName,
+      });
+
+      return res.status(200).send({ success: true });
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send();
+    }
+  });
 
   return router;
 };

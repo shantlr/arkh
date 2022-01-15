@@ -67,6 +67,7 @@ export const theme = {
 
   zIndex: {
     dropdown: 999,
+    overDropdown: 1000,
   },
 
   logs: {

@@ -2,13 +2,13 @@ import { StackTab } from '@shantr/metro-common-types';
 import { Grid, useGridState } from 'components/grid';
 import { NoStyleLink } from 'components/noStyleLink';
 import { API } from 'configs';
-import { QUERY_KEY } from 'hooks/query/key';
+import { useDeleteStackTab, useRenameStackTab } from 'hooks/query';
 import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
 import { map } from 'lodash';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
 import { useMemo } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
@@ -60,37 +60,6 @@ const StackGrid = ({
   );
 };
 
-const useRenameTab = (stackName: string) => {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  return useMutation(
-    ({ oldName, newName }: { oldName: string; newName: string }) =>
-      API.stack.renameTab(stackName, oldName, newName),
-    {
-      onMutate({ oldName, newName }) {
-        const newSlug = newName.replace(/[]+/, '-').toLowerCase();
-        queryClient.setQueryData(QUERY_KEY.stack.tabs(stackName), (data) => {
-          if (!data) {
-            return data;
-          }
-
-          return (data as StackTab[]).map((tab) => {
-            if (tab.name === oldName) {
-              return {
-                ...tab,
-                name: newName,
-                slug: newSlug,
-              };
-            }
-            return tab;
-          });
-        });
-        navigate(`t/${newSlug}`);
-      },
-    }
-  );
-};
-
 export const StackTabs = ({
   stackName,
   tabs,
@@ -106,11 +75,19 @@ export const StackTabs = ({
     }
     return tabs.find((tab) => tab.slug === tabKey);
   }, [tabKey, tabs]);
-  const { mutate: renameTab } = useRenameTab(stackName);
+  const { mutate: renameTab } = useRenameStackTab(stackName);
+  const { mutate: deleteTab } = useDeleteStackTab();
 
   const navigate = useNavigate();
   useEffect(() => {
-    if (!tabKey && tabs.length) {
+    if (!tabs) {
+      return;
+    }
+
+    if (
+      (!tabKey && tabs.length) ||
+      (tabKey && tabs.findIndex((t) => t.slug === tabKey) === -1)
+    ) {
       navigate(`t/${tabs[0].slug}`);
     }
   }, [navigate, tabKey, tabs]);
@@ -127,6 +104,12 @@ export const StackTabs = ({
                 renameTab({
                   oldName: tab.name,
                   newName: name,
+                });
+              }}
+              onDelete={() => {
+                deleteTab({
+                  stackName,
+                  tabName: tab.name,
                 });
               }}
             />

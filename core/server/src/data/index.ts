@@ -294,6 +294,45 @@ export const StackTab = {
   formatSlug(name: string) {
     return name.replace(/[ ]+/g, '-').toLowerCase();
   },
+  async deleteTab({
+    stackName,
+    tabName,
+  }: {
+    stackName: string;
+    tabName: string;
+  }) {
+    await knex.transaction(async (trx) => {
+      const stackTab = await stackTabAccessor
+        .getCollection(trx)
+        .select()
+        .first()
+        .where({
+          stack: stackName,
+        })
+        .forUpdate()
+        .then((r) => {
+          if (r) {
+            return stackTabAccessor.deserializeDoc(r);
+          }
+        });
+      if (stackTab) {
+        const tabIdx = stackTab.tabs.findIndex((t) => t.name === tabName);
+        if (tabIdx) {
+          stackTab.tabs.splice(tabIdx, 1);
+          await stackTabAccessor
+            .getCollection(trx)
+            .update(
+              stackTabAccessor.serializeDoc({
+                tabs: stackTab.tabs,
+              })
+            )
+            .where({
+              stack: stackName,
+            });
+        }
+      }
+    });
+  },
   async upsert(stackName: string, tabs: StackTabType[]) {
     await stackTabAccessor
       .getCollection()

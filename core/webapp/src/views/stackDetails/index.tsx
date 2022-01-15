@@ -8,6 +8,7 @@ import { BaseCard } from 'components/card';
 import { NoStyleLink } from 'components/noStyleLink';
 import { useStack, useStackTabs } from 'hooks/query';
 import { StackTabs } from './tabs';
+import { styles } from 'styles/css';
 
 const Container = styled.div`
   background-color: white;
@@ -19,17 +20,22 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
+const Header = styled.div`
+  ${styles.mb.sm};
+  ${styles.pl.sm};
+`;
+
 export const StackDetails = () => {
   const { name } = useParams();
 
-  const { data: stack } = useStack(name as string);
+  const { data: stack, error: stackError } = useStack(name as string);
   const { data: tabs } = useStackTabs(name as string);
 
   return (
     <>
       <BaseCard style={{ width: '100%', flexGrow: 3, paddingLeft: 0 }}>
         <Container>
-          <div style={{ marginBottom: 5 }}>
+          <Header>
             <NoStyleLink to="/stack">
               <Button rounded>
                 <FontAwesomeIcon icon={faTimes} />
@@ -38,7 +44,12 @@ export const StackDetails = () => {
             {Boolean(stack) && (
               <Text style={{ marginLeft: 5 }}>{stack.name}</Text>
             )}
-          </div>
+            {stackError && (
+              <Text t="error">
+                {stackError instanceof Error ? stackError.message : null}
+              </Text>
+            )}
+          </Header>
           {tabs && <StackTabs stackName={stack.name} tabs={tabs} />}
         </Container>
       </BaseCard>

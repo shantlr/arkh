@@ -7,6 +7,8 @@ export interface EntityAccessor<DeserializedType, SerializedType> {
   getAll(): Promise<DeserializedType[]>;
   find(query: Partial<SerializedType>): Promise<DeserializedType[]>;
   insertOne(entity: DeserializedType): Promise<void>;
+  deserializeDoc?: (doc: SerializedType) => DeserializedType;
+  serializeDoc?: (doc: Partial<DeserializedType>) => Partial<SerializedType>;
   updateOne(
     query: Partial<SerializedType>,
     update: Partial<DeserializedType>
@@ -26,6 +28,8 @@ export const createEntityAccessorBase = <DeserializedType, SerializedType>({
   serializeDoc?: (doc: Partial<DeserializedType>) => Partial<SerializedType>;
 }) => {
   const accessor: EntityAccessor<DeserializedType, SerializedType> = {
+    serializeDoc,
+    deserializeDoc,
     getCollection(t = knex) {
       return t(collectionName);
     },

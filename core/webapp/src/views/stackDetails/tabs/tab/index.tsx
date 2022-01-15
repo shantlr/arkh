@@ -1,5 +1,4 @@
-import { faPen } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionDropdown } from 'components/actionDropdown';
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
@@ -52,26 +51,39 @@ export const Tab = ({
   name,
   active,
   onChange,
+  onDelete,
 }: {
   name: string;
   active?: boolean;
   onChange: (value: string) => void;
+  onDelete: () => void;
 }) => {
-  const ref = useRef<HTMLInputElement | null>(null);
+  const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [edit, setEdit] = useState(false);
   const [localText, setLocalText] = useState('');
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (edit && ref.current) {
-      ref.current.focus();
+    if (edit && inputRef.current) {
+      inputRef.current.focus();
     }
   }, [edit]);
 
   return (
-    <TabContainer active={active}>
+    <TabContainer
+      active={active}
+      ref={setContainerRef}
+      onMouseEnter={() => {
+        setShow(true);
+      }}
+      onMouseLeave={() => {
+        setShow(false);
+      }}
+    >
       {edit && (
         <Input
-          ref={ref}
+          ref={inputRef}
           onChange={(e) => {
             setLocalText(e.target.value);
           }}
@@ -89,18 +101,20 @@ export const Tab = ({
           }}
         />
       )}
-      {!edit && (
-        <>
-          {name}
-          <Icon
-            onClick={() => {
-              setEdit(true);
-              setLocalText(name);
-            }}
-          >
-            <FontAwesomeIcon icon={faPen} />
-          </Icon>
-        </>
+      {!edit && <>{name}</>}
+      {!edit && show && (
+        <ActionDropdown
+          placement="right-start"
+          size="sm"
+          parentRef={containerRef}
+        >
+          <div key="edit" onClick={() => setEdit(true)}>
+            Edit
+          </div>
+          <div key="edit" onClick={() => onDelete()}>
+            Delete
+          </div>
+        </ActionDropdown>
       )}
     </TabContainer>
   );
