@@ -71,8 +71,6 @@ export const AvailableServiceList = ({
     return null;
   }, [selectedTabSlug, tabs]);
 
-  console.log('TAB', tab);
-
   const availableServices = useMemo(() => {
     if (!stack || !tab) {
       return [];
