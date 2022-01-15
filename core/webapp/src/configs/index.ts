@@ -60,6 +60,17 @@ export const API = {
       });
       return res.json();
     },
+    tab: {
+      async create(stackName: string, tabName: string) {
+        const res = await base.post(`stack/${stackName}/tabs/create`, {
+          json: {
+            stackName,
+            tabName,
+          },
+        });
+        return res.json();
+      },
+    },
 
     async serviceStates({ name }: { name: string }) {
       const res = await base.get(`stack/${name}/services/state`);

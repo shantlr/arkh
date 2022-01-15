@@ -50,6 +50,7 @@ export const useSubscribeStacks = () => {
   );
 };
 
+const formatTabSlug = (name: string) => name.replace(/[ ]+/, '-').toLowerCase();
 export const useRenameStackTab = (stackName: string) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export const useRenameStackTab = (stackName: string) => {
       API.stack.renameTab(stackName, oldName, newName),
     {
       onMutate({ oldName, newName }) {
-        const newSlug = newName.replace(/[ ]+/, '-').toLowerCase();
+        const newSlug = formatTabSlug(newName);
         queryClient.setQueryData(QUERY_KEY.stack.tabs(stackName), (data) => {
           if (!data) {
             return data;
@@ -96,6 +97,44 @@ export const useDeleteStackTab = () => {
             return tab.name !== tabName;
           });
         });
+      },
+      onSuccess(d, { stackName }) {
+        queryClient.invalidateQueries(QUERY_KEY.stack.tabs(stackName));
+      },
+    }
+  );
+};
+export const useCreateStackTab = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation(
+    ({ stackName, tabName }: { stackName: string; tabName: string }) =>
+      API.stack.tab.create(stackName, tabName),
+    {
+      onMutate({ stackName, tabName }) {
+        const slug = formatTabSlug(tabName);
+        queryClient.setQueryData<StackTab[]>(
+          QUERY_KEY.stack.tabs(stackName),
+          (data) => {
+            if (!data) {
+              return [];
+            }
+            if (data.find((t) => t.name === tabName)) {
+              return data;
+            }
+            return [
+              ...data,
+              {
+                name: tabName,
+                slug,
+                keys: {},
+              },
+            ];
+          }
+        );
+
+        navigate(`t/${slug}`);
       },
       onSuccess(d, { stackName }) {
         queryClient.invalidateQueries(QUERY_KEY.stack.tabs(stackName));

@@ -1,8 +1,6 @@
 import { StackTab } from '@shantr/metro-common-types';
 import { Grid, useGridState } from 'components/grid';
-import { NoStyleLink } from 'components/noStyleLink';
 import { API } from 'configs';
-import { useDeleteStackTab, useRenameStackTab } from 'hooks/query';
 import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
 import { map } from 'lodash';
 import { useEffect } from 'react';
@@ -13,17 +11,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
 import { ServiceLogs } from '../serviceLog';
-import { Tab } from './tab';
+import { StackTabList } from './tabList';
 
 const Container = styled.div`
   height: 100%;
   width: 100%;
   ${styles.container.noScroll}
-`;
-
-const TabContainer = styled.div`
-  display: flex;
-  ${styles.pl.sm};
 `;
 
 const StackGrid = ({
@@ -75,8 +68,6 @@ export const StackTabs = ({
     }
     return tabs.find((tab) => tab.slug === tabKey);
   }, [tabKey, tabs]);
-  const { mutate: renameTab } = useRenameStackTab(stackName);
-  const { mutate: deleteTab } = useDeleteStackTab();
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -94,28 +85,11 @@ export const StackTabs = ({
 
   return (
     <Container>
-      <TabContainer>
-        {tabs.map((tab) => (
-          <NoStyleLink to={`t/${tab.slug}`} key={tab.slug}>
-            <Tab
-              active={tabKey === tab.slug}
-              name={tab.name}
-              onChange={(name) => {
-                renameTab({
-                  oldName: tab.name,
-                  newName: name,
-                });
-              }}
-              onDelete={() => {
-                deleteTab({
-                  stackName,
-                  tabName: tab.name,
-                });
-              }}
-            />
-          </NoStyleLink>
-        ))}
-      </TabContainer>
+      <StackTabList
+        stackName={stackName}
+        tabs={tabs}
+        selectedTabSlug={tabKey}
+      />
       {selectedTab && (
         <StackGrid
           stackName={stackName}

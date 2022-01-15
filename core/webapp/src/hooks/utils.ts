@@ -1,5 +1,5 @@
 import { createTimeout } from 'lib/createTimeout';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const useDebouncedState = <T>(state: T, delay: number = 300) => {
   const [debounced, setDebounced] = useState(state);
@@ -28,4 +28,20 @@ export const useUpdateEffect = (callback: () => void) => {
     }
     callback();
   }, [callback]);
+};
+
+export const useHover = () => {
+  const [isHover, setIsHover] = useState(false);
+  const bindings = useMemo(
+    () => ({
+      onMouseEnter() {
+        setIsHover(true);
+      },
+      onMouseLeave() {
+        setIsHover(false);
+      },
+    }),
+    []
+  );
+  return [isHover, bindings];
 };

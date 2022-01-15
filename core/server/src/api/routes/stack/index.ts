@@ -93,6 +93,9 @@ export const stackRouter = () => {
       return res.status(500).send();
     }
   });
+  /**
+   * Update one tab
+   */
   router.post('/:name/tabs/update', async (req, res) => {
     try {
       const { name } = req.params;
@@ -133,6 +136,50 @@ export const stackRouter = () => {
       return res.status(500).send();
     }
   });
+  /**
+   * Add tab
+   */
+  router.post('/:name/tabs/create', async (req, res) => {
+    try {
+      const { name } = req.params;
+      const { tabName } = req.body;
+      if (!tabName) {
+        return res.status(400).send('tab-name-not-provided');
+      }
+      const existing = await StackTab.get(name);
+      if (!existing) {
+        await StackTab.upsert(name, [
+          {
+            name: tabName,
+            slug: StackTab.formatSlug(tabName),
+            keys: {},
+            rows: null,
+          },
+        ]);
+      } else {
+        const tabs = [...existing.tabs];
+        const idx = tabs.findIndex((t) => t.name === tabName);
+        if (idx !== -1) {
+          return res.status(400).send(`tab-name-already-used`);
+        }
+        tabs.push({
+          name: tabName,
+          slug: StackTab.formatSlug(tabName),
+          keys: {},
+          rows: null,
+        });
+        await StackTab.upsert(name, tabs);
+      }
+
+      return res.status(200).send({ success: true });
+    } catch (err) {
+      req.logger.error(err);
+      return res.status(500).send();
+    }
+  });
+  /**
+   * Rename tab
+   */
   router.post('/:name/tabs/rename', async (req, res) => {
     try {
       const { name } = req.params;
@@ -140,6 +187,12 @@ export const stackRouter = () => {
       const existing = await StackTab.get(name);
       if (!existing) {
         return res.status(404).send();
+      }
+      if (!oldName) {
+        return res.status(400).send('old-name-not-provided');
+      }
+      if (!newName) {
+        return res.status(400).send('new-name-not-provided');
       }
 
       await StackTab.upsert(
@@ -162,6 +215,9 @@ export const stackRouter = () => {
       return res.status(500).send();
     }
   });
+  /**
+   * Delete tab
+   */
   router.post('/:name/tabs/delete', async (req, res) => {
     try {
       const { name } = req.params;

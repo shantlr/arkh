@@ -52,27 +52,33 @@ export const Tab = ({
   active,
   onChange,
   onDelete,
+
+  defaultEdit = false,
 }: {
   name: string;
   active?: boolean;
   onChange: (value: string) => void;
-  onDelete: () => void;
+  onDelete?: () => void;
+
+  defaultEdit?: boolean;
 }) => {
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [edit, setEdit] = useState(false);
+  const [edit, setEdit] = useState(defaultEdit);
   const [localText, setLocalText] = useState('');
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    console.log('edit', edit, inputRef.current);
     if (edit && inputRef.current) {
+      console.log('aoeu');
       inputRef.current.focus();
     }
   }, [edit]);
 
   return (
     <TabContainer
-      active={active}
+      active={active || edit}
       ref={setContainerRef}
       onMouseEnter={() => {
         setShow(true);
@@ -103,17 +109,15 @@ export const Tab = ({
       )}
       {!edit && <>{name}</>}
       {!edit && show && (
-        <ActionDropdown
-          placement="right-start"
-          size="sm"
-          parentRef={containerRef}
-        >
+        <ActionDropdown placement="bottom" size="sm" parentRef={containerRef}>
           <div key="edit" onClick={() => setEdit(true)}>
             Edit
           </div>
-          <div key="edit" onClick={() => onDelete()}>
-            Delete
-          </div>
+          {onDelete && (
+            <div key="delete" onClick={() => onDelete()}>
+              Delete
+            </div>
+          )}
         </ActionDropdown>
       )}
     </TabContainer>

@@ -1,9 +1,15 @@
 import { Placement } from '@popperjs/core';
 import { motion } from 'framer-motion';
 import { createTimeout } from 'lib/createTimeout';
+import { Children } from 'lib/types';
 import { useEffect, useState } from 'react';
 import { usePopper } from 'react-popper';
-import styled, { css } from 'styled-components';
+import styled, {
+  css,
+  DefaultTheme,
+  FlattenInterpolation,
+  ThemeProps,
+} from 'styled-components';
 import { styles } from 'styles/css';
 
 const sizes = {
@@ -18,9 +24,24 @@ const sizes = {
     padding: ${(props) => `${props.theme.space.sm} ${props.theme.space.lg}`};
   `,
 };
-const Container = styled(motion.div)`
-  ${styles.pl.md};
+
+const placement: Record<
+  string,
+  FlattenInterpolation<ThemeProps<DefaultTheme>>
+> = {
+  right: css`
+    ${styles.pl.md}
+  `,
+  bottom: css`
+    ${styles.pt.md}
+  `,
+};
+const Container = styled(motion.div)<{
+  placement: Placement;
+}>`
   ${styles.zIndex.dropdown}
+  ${(props) =>
+    props.placement in placement ? placement[props.placement] : null};
 `;
 
 const Item = styled(motion.div)<{ size?: keyof typeof sizes }>`
@@ -56,7 +77,7 @@ export const ActionDropdown = ({
   parentRef?: HTMLElement | null;
   size?: keyof typeof sizes;
   placement?: Placement;
-  children?: JSX.Element | JSX.Element[];
+  children?: Children;
   delay?: number;
 }) => {
   const [show, setShow] = useState(false);
@@ -81,6 +102,7 @@ export const ActionDropdown = ({
       variants={variants}
       initial="hidden"
       animate="visible"
+      placement={placement}
       style={popper.styles.popper}
       {...popper.attributes.popper}
     >
