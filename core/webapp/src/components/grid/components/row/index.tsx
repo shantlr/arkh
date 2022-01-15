@@ -29,8 +29,9 @@ export const GridRow = ({
   rowIndex: number;
   dropAcceptType: string;
   onMove: (data: {
-    srcRowIndex: number;
-    srcCellIndex: number;
+    key: string;
+    srcRowIndex?: number;
+    srcCellIndex?: number;
     dstRowIndex: number;
   }) => void;
 }) => {
@@ -76,6 +77,7 @@ export const GridRow = ({
           rowIndex={rowIndex}
           onDrop={(item) => {
             onMove({
+              key: item.id,
               srcCellIndex: item.cellIndex,
               srcRowIndex: item.rowIndex,
               dstRowIndex: rowIndex,
@@ -94,6 +96,7 @@ export const GridRow = ({
           rowIndex={rowIndex}
           onDrop={(item) => {
             onMove({
+              key: item.id,
               srcCellIndex: item.cellIndex,
               srcRowIndex: item.rowIndex,
               dstRowIndex: rowIndex + 1,

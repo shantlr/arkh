@@ -1,8 +1,8 @@
-import { ServiceInfo, StackTab } from '@shantr/metro-common-types';
+import { ServiceInfo, StackTab, Stack } from '@shantr/metro-common-types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
 import io from 'socket.io-client';
-import { ServiceTask, ServiceTaskLog, Stack } from './types';
+import { ServiceTask, ServiceTaskLog } from './types';
 
 export const API_URL = process.env.REACT_APP_API_URL;
 
@@ -17,7 +17,7 @@ export const API = {
       const res = await base.get('stack/list');
       return res.json();
     },
-    async get(name: string) {
+    async get(name: string): Promise<Stack> {
       const res = await base.get(`stack/${name}`);
       return res.json();
     },

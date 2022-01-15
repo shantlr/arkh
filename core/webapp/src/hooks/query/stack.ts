@@ -142,3 +142,11 @@ export const useCreateStackTab = () => {
     }
   );
 };
+export const useUpdateStackTab = (stackName: string) => {
+  const queryClient = useQueryClient();
+  return useMutation((tab: StackTab) => API.stack.updateTab(stackName, tab), {
+    onSuccess() {
+      queryClient.invalidateQueries(QUERY_KEY.stack.tabs(stackName));
+    },
+  });
+};

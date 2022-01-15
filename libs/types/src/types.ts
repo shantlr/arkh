@@ -74,6 +74,16 @@ export type TaskLog = {
   date: Date;
 };
 
+export type Stack = {
+  name: string;
+  config_key: string;
+  spec: StackSpec;
+  to_remove?: boolean;
+
+  created_at: number;
+  updated_at: number;
+};
+
 export type StackRowConfig = {
   cells: {
     key: string;

@@ -34,15 +34,17 @@ export type Action =
     }
   | {
       type: 'move-cell';
-      srcRowIndex: number;
-      srcCellIndex: number;
+      key: string;
+      srcRowIndex?: number;
+      srcCellIndex?: number;
       dstRowIndex: number;
       dstCellIndex: number;
     }
   | {
       type: 'move-cell-to-new-row';
-      srcRowIndex: number;
-      srcCellIndex: number;
+      key: string;
+      srcRowIndex?: number;
+      srcCellIndex?: number;
       dstRowIndex: number;
     };
 
@@ -295,7 +297,11 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'move-cell': {
       return produce(state, (s) => {
-        if (action.dstRowIndex === action.srcRowIndex) {
+        if (
+          typeof action.srcRowIndex === 'number' &&
+          typeof action.srcCellIndex === 'number' &&
+          action.dstRowIndex === action.srcRowIndex
+        ) {
           const row = s.rows[action.srcRowIndex];
           const cell = row.cells[action.srcCellIndex];
           if (action.srcCellIndex < action.dstCellIndex) {
@@ -308,24 +314,37 @@ export const reducer = (state: State, action: Action): State => {
           s.updated_at = Date.now();
           return;
         } else {
-          const srcRow = s.rows[action.srcRowIndex];
-          const cell = srcRow.cells[action.srcCellIndex];
+          if (
+            typeof action.srcRowIndex === 'number' &&
+            typeof action.srcCellIndex === 'number'
+          ) {
+            const srcRow = s.rows[action.srcRowIndex];
+            const cell = srcRow.cells[action.srcCellIndex];
 
-          // remove cell from src row
-          srcRow.cells.splice(action.srcCellIndex, 1);
+            // remove cell from src row
+            srcRow.cells.splice(action.srcCellIndex, 1);
 
-          //
-          const dstRow = s.rows[action.dstRowIndex];
-          dstRow.cells.splice(action.dstCellIndex, 0, {
-            ...cell,
-            // so its width is recomputed
-            width: 0,
-          });
+            const dstRow = s.rows[action.dstRowIndex];
+            dstRow.cells.splice(action.dstCellIndex, 0, {
+              ...cell,
+              // so its width is recomputed
+              width: 0,
+            });
 
-          if (!srcRow.cells.length) {
-            // remove src row if empty
-            s.rows.splice(action.srcRowIndex, 1);
+            if (!srcRow.cells.length) {
+              // remove src row if empty
+              s.rows.splice(action.srcRowIndex, 1);
+            }
+          } else {
+            s.keys[action.key] = true;
+            const dstRow = s.rows[action.dstRowIndex];
+            dstRow.cells.splice(action.dstCellIndex, 0, {
+              key: action.key,
+              // so its width is recomputed
+              width: 0,
+            });
           }
+
           if (s.rows.length !== state.rows.length) {
             // redistribute rows height in case some row has been deleted
             redistributeRowSizes(s.rows);
@@ -339,15 +358,32 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'move-cell-to-new-row': {
       return produce(state, (s) => {
-        const srcRow = s.rows[action.srcRowIndex];
-        const cell = srcRow.cells[action.srcCellIndex];
-        srcRow.cells.splice(action.srcCellIndex, 1);
-
-        s.rows.splice(action.dstRowIndex, 0, {
-          cells: [cell],
-          height: 0,
-        });
-        s.rows = s.rows.filter((row) => row.cells.length);
+        if (
+          typeof action.srcCellIndex === 'number' &&
+          typeof action.srcRowIndex === 'number'
+        ) {
+          const srcRow = s.rows[action.srcRowIndex];
+          const cell = srcRow.cells[action.srcCellIndex];
+          srcRow.cells.splice(action.srcCellIndex, 1);
+          s.rows.splice(action.dstRowIndex, 0, {
+            cells: [cell],
+            height: 0,
+          });
+          s.rows = s.rows.filter((row) => row.cells.length);
+        } else {
+          if (action.key && !s.keys[action.key]) {
+            s.keys[action.key] = true;
+          }
+          s.rows.splice(action.dstRowIndex, 0, {
+            cells: [
+              {
+                key: action.key,
+                width: 0,
+              },
+            ],
+            height: 0,
+          });
+        }
 
         redistributeRowSizes(s.rows);
         redistributeRowCells(s.rows);

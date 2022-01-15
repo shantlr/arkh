@@ -3,7 +3,7 @@ import { useDrop } from 'react-dnd';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
 
-const GridCellVertContainer = styled.div<{ isOver?: boolean }>`
+const GridRowVertContainer = styled.div<{ isOver?: boolean }>`
   position: absolute;
   height: 33%;
   width: 100%;
@@ -22,11 +22,11 @@ export const GridRowVertDroppable = ({
   dropAcceptType: string;
   rowIndex: number;
 
-  onDrop?: (item: { rowIndex: number; cellIndex: number }) => void;
+  onDrop?: (item: { id: string; rowIndex: number; cellIndex: number }) => void;
 }) => {
   const [{ isOver }, drop] = useDrop(
     () => ({
-      drop(item: { rowIndex: number; cellIndex: number }) {
+      drop(item: { id: string; rowIndex: number; cellIndex: number }) {
         if (onDrop) {
           onDrop(item);
         }
@@ -42,10 +42,10 @@ export const GridRowVertDroppable = ({
   );
 
   return (
-    <GridCellVertContainer
+    <GridRowVertContainer
       ref={drop}
       isOver={isOver}
       style={style}
-    ></GridCellVertContainer>
+    ></GridRowVertContainer>
   );
 };

@@ -1,15 +1,15 @@
-import { StackTab } from '@shantr/metro-common-types';
+import { Stack, StackTab } from '@shantr/metro-common-types';
 import { Grid, useGridState } from 'components/grid';
-import { API } from 'configs';
+import { useUpdateStackTab } from 'hooks/query';
 import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
 import { map } from 'lodash';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
 import { useMemo } from 'react';
-import { useMutation } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
+import { AvailableServiceList } from '../availableServices';
 import { ServiceLogs } from '../serviceLog';
 import { StackTabList } from './tabList';
 
@@ -22,17 +22,17 @@ const Container = styled.div`
 const StackGrid = ({
   stackName,
   tab,
+  dragType,
 }: {
   stackName: string;
   tab: StackTab;
+  dragType: string;
 }) => {
   const grid = useGridState(tab);
 
   const debouncedGridState = useDebouncedState(grid.state);
+  const { mutate: updateTab } = useUpdateStackTab(stackName);
 
-  const { mutate: updateTab } = useMutation((tab: StackTab) =>
-    API.stack.updateTab(stackName, tab)
-  );
   useUpdateEffect(
     useCallback(() => {
       updateTab({
@@ -45,20 +45,22 @@ const StackGrid = ({
   );
 
   return (
-    <Grid grid={grid} dropAcceptType="cell">
-      {map(tab.keys, (v, key) => (
-        <ServiceLogs key={key} fullName={key} dragType="cell" />
+    <Grid grid={grid} dropAcceptType={dragType}>
+      {map(grid.state.keys, (v, key) => (
+        <ServiceLogs key={key} fullName={key} dragType={dragType} />
       ))}
     </Grid>
   );
 };
 
 export const StackTabs = ({
-  stackName,
+  stack,
   tabs,
+  dragType = 'grid-cell',
 }: {
-  stackName: string;
+  stack: Stack;
   tabs: StackTab[];
+  dragType?: string;
 }) => {
   const { tabKey } = useParams();
 
@@ -85,16 +87,19 @@ export const StackTabs = ({
 
   return (
     <Container>
-      <StackTabList
-        stackName={stackName}
+      <StackTabList stack={stack} tabs={tabs} selectedTabSlug={tabKey} />
+      <AvailableServiceList
+        stack={stack}
         tabs={tabs}
         selectedTabSlug={tabKey}
+        dragType={dragType}
       />
       {selectedTab && (
         <StackGrid
-          stackName={stackName}
+          stackName={stack.name}
           key={selectedTab.slug}
           tab={selectedTab}
+          dragType={dragType}
         />
       )}
     </Container>

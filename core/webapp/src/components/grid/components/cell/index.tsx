@@ -25,6 +25,7 @@ export const GridCell = ({
   cellIndex: number;
   rowIndex: number;
   onMove: (data: {
+    key: string;
     srcRowIndex: number;
     srcCellIndex: number;
     dstRowIndex: number;
@@ -77,6 +78,7 @@ export const GridCell = ({
           }}
           onDrop={(item) => {
             onMove({
+              key: item.key,
               srcCellIndex: item.cellIndex,
               srcRowIndex: item.rowIndex,
               dstRowIndex: rowIndex,
@@ -96,6 +98,7 @@ export const GridCell = ({
           }}
           onDrop={(item) => {
             onMove({
+              key: item.key,
               srcCellIndex: item.cellIndex,
               srcRowIndex: item.rowIndex,
               dstRowIndex: rowIndex,

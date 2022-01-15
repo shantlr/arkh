@@ -10,7 +10,6 @@ import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
 import { Text } from 'components/text';
 import { API } from 'configs';
-import { Stack } from 'configs/types';
 import { useStackServiceStates, useSubscribeServiceStates } from 'hooks/query';
 import { StackStatusIndicator } from './indicator';
 import { RunStack } from './runStack';
@@ -19,6 +18,7 @@ import { useEffect } from 'react';
 import { CSSProperties } from 'react';
 import { ServiceDropdownList } from '../serviceDropdownList';
 import { createTimeout } from 'lib/createTimeout';
+import { Stack } from '@shantr/metro-common-types';
 
 const StackHeader = styled.div`
   width: 100%;

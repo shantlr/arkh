@@ -1,4 +1,4 @@
-import { StackTab } from '@shantr/metro-common-types';
+import { Stack, StackTab } from '@shantr/metro-common-types';
 import { NoStyleLink } from 'components/noStyleLink';
 import {
   useCreateStackTab,
@@ -37,15 +37,15 @@ const TabContainer = styled.div`
 `;
 
 export const StackTabList = ({
-  stackName,
+  stack,
   tabs,
   selectedTabSlug,
 }: {
-  stackName: string;
+  stack: Stack;
   tabs: StackTab[];
   selectedTabSlug?: string;
 }) => {
-  const { mutate: renameTab } = useRenameStackTab(stackName);
+  const { mutate: renameTab } = useRenameStackTab(stack.name);
   const { mutate: deleteTab } = useDeleteStackTab();
   const { mutate: createTab } = useCreateStackTab();
   const [showAdd, setShowAdd] = useState(false);
@@ -69,7 +69,7 @@ export const StackTabList = ({
             }}
             onDelete={() => {
               deleteTab({
-                stackName,
+                stackName: stack.name,
                 tabName: tab.name,
               });
             }}
@@ -91,7 +91,7 @@ export const StackTabList = ({
           defaultEdit
           onChange={(tabName) => {
             if (tabName) {
-              createTab({ stackName, tabName });
+              createTab({ stackName: stack.name, tabName });
             }
             setShowAdd(false);
           }}

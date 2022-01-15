@@ -13,6 +13,7 @@ import { GridRow, GridRowContent } from './components/row';
 import { useMemo } from 'react';
 import { StackTab } from '@shantr/metro-common-types';
 import { useState } from 'react';
+import { GridEmptyDroppable } from './components/emptyDroppable';
 
 const Container = styled.div`
   width: 100%;
@@ -107,6 +108,18 @@ const GridContainer = ({
         width,
       }}
     >
+      {!state.rows.length && (
+        <GridEmptyDroppable
+          dropAcceptType={dropAcceptType}
+          onDrop={(item) => {
+            dispatch({
+              type: 'move-cell-to-new-row',
+              key: item.id,
+              dstRowIndex: 0,
+            });
+          }}
+        />
+      )}
       {state.rows.map((row, idx) => (
         <GridRow
           key={idx}

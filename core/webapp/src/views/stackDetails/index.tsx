@@ -41,16 +41,14 @@ export const StackDetails = () => {
                 <FontAwesomeIcon icon={faTimes} />
               </Button>
             </NoStyleLink>
-            {Boolean(stack) && (
-              <Text style={{ marginLeft: 5 }}>{stack.name}</Text>
-            )}
+            {stack && <Text style={{ marginLeft: 5 }}>{stack.name}</Text>}
             {stackError && (
               <Text t="error">
                 {stackError instanceof Error ? stackError.message : null}
               </Text>
             )}
           </Header>
-          {tabs && <StackTabs stackName={stack.name} tabs={tabs} />}
+          {stack && tabs && <StackTabs stack={stack} tabs={tabs} />}
         </Container>
       </BaseCard>
       <Outlet />

@@ -1,4 +1,3 @@
-import { Stack } from 'configs/types';
 import { createTimeout } from 'lib/createTimeout';
 import { map } from 'lodash';
 import { useEffect } from 'react';
@@ -7,6 +6,7 @@ import { usePopper } from 'react-popper';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { styles } from 'styles/css';
+import { Stack } from '@shantr/metro-common-types';
 
 const Container = styled(motion.div)`
   ${styles.pl.md};

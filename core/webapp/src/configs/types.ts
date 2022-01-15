@@ -1,13 +1,3 @@
-import { StackSpec } from '@shantr/metro-common-types';
-
-export type Stack = {
-  created_at: number;
-  name: string;
-  to_remove: boolean;
-  updated_at: number;
-  spec: StackSpec;
-};
-
 export type ServiceTask = {
   id: string;
 

@@ -69,9 +69,7 @@ export const Tab = ({
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    console.log('edit', edit, inputRef.current);
     if (edit && inputRef.current) {
-      console.log('aoeu');
       inputRef.current.focus();
     }
   }, [edit]);
