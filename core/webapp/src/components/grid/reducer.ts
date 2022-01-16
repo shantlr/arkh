@@ -46,6 +46,10 @@ export type Action =
       srcRowIndex?: number;
       srcCellIndex?: number;
       dstRowIndex: number;
+    }
+  | {
+      type: 'remove-cell';
+      key: string;
     };
 
 export const defaultState: State = {
@@ -203,6 +207,33 @@ export const reducer = (state: State, action: Action): State => {
         redistributeRowCells(s.rows);
       });
     }
+    case 'remove-cell': {
+      if (!(action.key in state.keys)) {
+        return state;
+      }
+      return produce(state, (s) => {
+        delete s.keys[action.key];
+
+        // Remove cell
+        let rowIdx: number = -1;
+        let cellIdx: number = -1;
+        rowIdx = s.rows.findIndex((r) => {
+          cellIdx = r.cells.findIndex((c) => c.key === action.key);
+          return cellIdx !== -1;
+        });
+        if (rowIdx !== -1 && cellIdx !== -1) {
+          const row = s.rows[rowIdx];
+          row.cells.splice(cellIdx, 1);
+          if (!row.cells.length) {
+            s.rows.splice(rowIdx, 1);
+          }
+        }
+
+        redistributeRowCells(s.rows);
+        s.updated_at = Date.now();
+      });
+    }
+
     case 'resize-height': {
       if (action.height === state.height) {
         return state;

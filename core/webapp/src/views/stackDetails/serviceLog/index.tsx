@@ -18,6 +18,8 @@ import { Duration } from 'components/duration';
 import { styles } from 'styles/css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+import { ActionDropdown } from 'components/actionDropdown';
+import { useHover } from 'hooks/utils';
 
 const ContainerOuter = styled.div`
   height: 100%;
@@ -118,6 +120,7 @@ export const ServiceLogs = ({
   cellIndex,
 
   defaultTaskId,
+  onDelete,
 }: {
   style?: CSSProperties;
   dragType: string;
@@ -128,6 +131,7 @@ export const ServiceLogs = ({
   showTimestamp?: boolean;
 
   defaultTaskId?: string;
+  onDelete?: () => void;
 }) => {
   const { data: service } = useService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
@@ -218,10 +222,13 @@ export const ServiceLogs = ({
   // round logs top right corner when hover handle
   const [shouldRoundTopRight, setShouldRoundTopRight] = useState(false);
 
+  const [headerRef, setHeaderRef] = useState<HTMLElement | null>(null);
+  const [isHeaderHover, headerHoverBindings] = useHover();
+
   return (
     <ContainerOuter style={style}>
       <ContainerInner>
-        <Header>
+        <Header ref={setHeaderRef} {...headerHoverBindings}>
           {service && (
             <>
               <ServiceName
@@ -278,6 +285,21 @@ export const ServiceLogs = ({
               setShouldRoundTopRight(true);
             }}
           />
+          {isHeaderHover && (
+            <ActionDropdown placement="left" size="sm" parentRef={headerRef}>
+              {onDelete && (
+                <div
+                  style={{ cursor: 'pointer' }}
+                  key="delete"
+                  onClick={() => {
+                    onDelete();
+                  }}
+                >
+                  Remove from tab
+                </div>
+              )}
+            </ActionDropdown>
+          )}
         </Header>
         {taskId && (
           <ServiceTaskLogs

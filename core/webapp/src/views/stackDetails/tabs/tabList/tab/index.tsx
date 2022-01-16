@@ -108,11 +108,19 @@ export const Tab = ({
       {!edit && <>{name}</>}
       {!edit && show && (
         <ActionDropdown placement="bottom" size="sm" parentRef={containerRef}>
-          <div key="edit" onClick={() => setEdit(true)}>
+          <div
+            key="edit"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setEdit(true)}
+          >
             Edit
           </div>
           {onDelete && (
-            <div key="delete" onClick={() => onDelete()}>
+            <div
+              key="delete"
+              style={{ cursor: 'pointer' }}
+              onClick={() => onDelete()}
+            >
               Delete
             </div>
           )}

@@ -47,7 +47,17 @@ const StackGrid = ({
   return (
     <Grid grid={grid} dropAcceptType={dragType}>
       {map(grid.state.keys, (v, key) => (
-        <ServiceLogs key={key} fullName={key} dragType={dragType} />
+        <ServiceLogs
+          key={key}
+          fullName={key}
+          dragType={dragType}
+          onDelete={() => {
+            grid.dispatch({
+              type: 'remove-cell',
+              key,
+            });
+          }}
+        />
       ))}
     </Grid>
   );

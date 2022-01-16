@@ -1,8 +1,9 @@
+import ReactDOM from 'react-dom';
 import { Placement } from '@popperjs/core';
 import { motion } from 'framer-motion';
 import { createTimeout } from 'lib/createTimeout';
 import { Children } from 'lib/types';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePopper } from 'react-popper';
 import styled, {
   css,
@@ -34,6 +35,9 @@ const placement: Record<
   `,
   bottom: css`
     ${styles.pt.md}
+  `,
+  left: css`
+    ${styles.pr.md}
   `,
 };
 const Container = styled(motion.div)<{
@@ -96,7 +100,7 @@ export const ActionDropdown = ({
     return null;
   }
 
-  return (
+  return ReactDOM.createPortal(
     <Container
       ref={setPopperRef}
       variants={variants}
@@ -122,6 +126,7 @@ export const ActionDropdown = ({
           {children}
         </Item>
       )}
-    </Container>
+    </Container>,
+    document.body
   );
 };
