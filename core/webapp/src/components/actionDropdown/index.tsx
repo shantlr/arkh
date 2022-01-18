@@ -3,7 +3,7 @@ import { Placement } from '@popperjs/core';
 import { motion } from 'framer-motion';
 import { createTimeout } from 'lib/createTimeout';
 import { Children } from 'lib/types';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePopper } from 'react-popper';
 import styled, {
   css,
@@ -37,6 +37,12 @@ const placement: Record<
     ${styles.pt.md}
   `,
   left: css`
+    ${styles.pr.md}
+  `,
+  'left-start': css`
+    ${styles.pr.md}
+  `,
+  'left-end': css`
     ${styles.pr.md}
   `,
 };

@@ -11,6 +11,7 @@ import { faPlay, faStopCircle } from '@fortawesome/free-solid-svg-icons';
 import { styles } from 'styles/css';
 import { useMutation } from 'react-query';
 import { API } from 'configs';
+import React from 'react';
 
 const StyledSelect = styled(Select)`
   z-index: 1;
@@ -76,19 +77,16 @@ const Status = styled.div<{
   ${styles.transition.default};
 `;
 
-export const ServiceName = ({
-  name,
-  service,
-  tasks,
-  selectedTaskId,
-  onSelectTask,
-}: {
-  name: string;
-  service: ServiceInfo;
-  tasks: ServiceTask[] | undefined;
-  selectedTaskId?: string | null;
-  onSelectTask: (taskId: string) => void;
-}) => {
+export const ServiceName = React.forwardRef<
+  HTMLDivElement,
+  {
+    name: string;
+    service: ServiceInfo;
+    tasks: ServiceTask[] | undefined;
+    selectedTaskId?: string | null;
+    onSelectTask: (taskId: string) => void;
+  }
+>(({ name, service, tasks, selectedTaskId, onSelectTask }, ref) => {
   const options = useMemo(() => {
     return map(tasks, (task) => ({
       key: task.id,
@@ -145,7 +143,7 @@ export const ServiceName = ({
       options={options}
       onSelect={(task) => onSelectTask(task.value)}
     >
-      <Container>
+      <Container ref={ref}>
         <Status state={currentTaskState} />
         <Name>{service.key}</Name>
         <ActionContainer>
@@ -163,4 +161,4 @@ export const ServiceName = ({
       </Container>
     </StyledSelect>
   );
-};
+});

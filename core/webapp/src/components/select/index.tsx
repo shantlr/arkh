@@ -41,6 +41,8 @@ const activeCss = css`
 const OptionContainer = styled(({ active, ...props }) => (
   <motion.li {...props} />
 ))<{ active?: boolean } & HTMLMotionProps<'div'>>`
+  display: flex;
+  align-items: center;
   padding: ${(props) => `${props.theme.space.sm} ${props.theme.space.md}`};
   cursor: pointer;
 

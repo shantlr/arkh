@@ -26,27 +26,29 @@ export const CustomDragLayer = () => {
   if (!isDragging || !item || !off) {
     return null;
   }
-
-  return (
-    <Container>
-      <div
-        style={{
-          transform: `translate(${off.x - 85}px, ${off.y - 12}px)`,
-          opacity: 0.7,
-        }}
-      >
-        <ServiceLogs
+  if (item.id === 'grid-cell') {
+    return (
+      <Container>
+        <div
           style={{
-            maxWidth: 150,
-            maxHeight: 200,
+            transform: `translate(${off.x - 85}px, ${off.y - 12}px)`,
+            opacity: 0.7,
           }}
-          dragType={itemType}
-          fullName={item.id}
-          defaultTaskId={item.taskId}
-          rowIndex={item.rowIndex}
-          cellIndex={item.cellIndex}
-        />
-      </div>
-    </Container>
-  );
+        >
+          <ServiceLogs
+            style={{
+              maxWidth: 150,
+              maxHeight: 200,
+            }}
+            dragType={itemType}
+            fullName={item.id}
+            defaultTaskId={item.taskId}
+            rowIndex={item.rowIndex}
+            cellIndex={item.cellIndex}
+          />
+        </div>
+      </Container>
+    );
+  }
+  return null;
 };

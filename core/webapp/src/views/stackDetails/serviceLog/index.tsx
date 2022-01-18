@@ -228,10 +228,11 @@ export const ServiceLogs = ({
   return (
     <ContainerOuter style={style}>
       <ContainerInner>
-        <Header ref={setHeaderRef} {...headerHoverBindings}>
+        <Header {...headerHoverBindings}>
           {service && (
             <>
               <ServiceName
+                ref={setHeaderRef}
                 name={fullName}
                 service={service}
                 tasks={tasks}
@@ -286,7 +287,11 @@ export const ServiceLogs = ({
             }}
           />
           {isHeaderHover && (
-            <ActionDropdown placement="left" size="sm" parentRef={headerRef}>
+            <ActionDropdown
+              placement="left-start"
+              size="sm"
+              parentRef={headerRef}
+            >
               {onDelete && (
                 <div
                   style={{ cursor: 'pointer' }}
