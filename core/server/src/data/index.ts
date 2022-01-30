@@ -223,7 +223,7 @@ export const Task = {
     const res = await taskAccessor.find({
       service_name: serviceName,
     });
-    return sortBy(res, (r) => new Date(r.creating_at));
+    return sortBy(res, (r) => -new Date(r.creating_at));
   },
 };
 
