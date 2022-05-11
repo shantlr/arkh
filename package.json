@@ -1,8 +1,8 @@
 {
-  "name": "metro",
+  "name": "shipyard",
   "version": "1.0.0",
-  "repository": "git@github.com:shantlr/metro.git",
-  "author": "Patrick <shantry@hotmail.fr>",
+  "repository": "git@github.com:shantlr/shipyard.git",
+  "author": "Patrick",
   "license": "MIT",
   "private": true,
   "workspaces": {
