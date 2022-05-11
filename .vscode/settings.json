@@ -4,6 +4,7 @@
     "./core/server",
     "./core/runner",
     "./libs/queue",
+    "./libs/workflow",
     "./libs/types",
     "./libs/logger"
   ]
