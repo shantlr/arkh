@@ -1,3 +1,4 @@
+import { Text } from 'components/text';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { useReducer } from 'react';
@@ -10,12 +11,10 @@ import { logDefaultState, LogPage, logReducer } from './reducer';
 
 const Timestamp = styled.span`
   color: ${(props) => props.theme.logs.timestampColor};
-  font-size: 11px;
   user-select: none;
 `;
 const TimeDelta = styled.span`
   color: ${(props) => props.theme.logs.timeDeltaColor};
-  font-size: 11px;
   user-select: none;
 `;
 
@@ -41,10 +40,10 @@ export const TextBatch = ({
   return (
     <>
       {lines.map((l, idx) => (
-        <div key={idx}>
+        <Text as="div" size="xs" key={idx}>
           <Timestamp>{showTimestamp ? d : ''}</Timestamp>
           {l}
-        </div>
+        </Text>
       ))}
     </>
   );
@@ -82,11 +81,11 @@ const Page = React.memo(
     return (
       <>
         {lines.map((line, idx) => (
-          <div key={idx}>
+          <Text as="div" size="xs" key={idx}>
             {showTimestamp && <Timestamp>{line.date} </Timestamp>}
             {line.text}
             {showTimeDelta && <TimeDelta> {line.delta}</TimeDelta>}
-          </div>
+          </Text>
         ))}
       </>
     );

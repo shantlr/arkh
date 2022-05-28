@@ -2,6 +2,12 @@ import styled, { css } from 'styled-components';
 import { styles } from 'styles/css';
 
 const sizeCss = {
+  xxs: css`
+    ${styles.text.xxs}
+  `,
+  xs: css`
+    ${styles.text.xs}
+  `,
   sm: css`
     ${styles.text.sm}
   `,
