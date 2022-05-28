@@ -12,7 +12,7 @@ export const { internalActions, ...runnerMainWorkflow } = createWorkflowEntity(
     actions: {
       runService({ name, spec }: { name: string; spec: ServiceSpec }) {
         const service = Services.get(name);
-        service.actions.run(spec);
+        void service.actions.run(spec, { promise: true });
       },
       stopService({ name, reason }: { name: string; reason?: string }) {
         if (!Services.has[name]) {

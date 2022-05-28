@@ -9,8 +9,9 @@ import { isEqual } from 'lodash';
 import { Task } from '../lib/task';
 
 export const createService = (serviceName: string) => {
+  const logger = createLogger(`service:${serviceName}`);
+  logger.info(`creating service '${serviceName}'`);
   const task = new Task({ serviceName, spec: null });
-  const logger = createLogger(`service:${name}`);
 
   const state = { task };
   const service = createWorkflowEntity(state, {
@@ -62,10 +63,12 @@ export const createService = (serviceName: string) => {
 };
 export type ServiceEntity = ReturnType<typeof createService>;
 
+const logger = createLogger('services');
 export const Services = createWorkflowEntityGroup({
   name: 'services',
   initEntity: createService,
-  leaveEntity: async (entity) => {
+  leaveEntity: async (entity, name) => {
     await entity.actions.stop({ reason: 'service removed' }, { promise: true });
+    logger.info(`'${name}' removed`);
   },
 });
