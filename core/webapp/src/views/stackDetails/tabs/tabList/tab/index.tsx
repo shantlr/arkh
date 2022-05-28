@@ -20,9 +20,8 @@ const Input = styled.input`
   min-width: 40px;
   width: auto;
   font-weight: bold;
-  height: 16px;
-  ${styles.color.actionColor}
-  ${styles.text.sm}
+  ${styles.color.actionColor};
+  ${styles.text.sm};
 `;
 
 const TabContainer = styled.div<{ active?: boolean }>`
@@ -65,7 +64,7 @@ export const Tab = ({
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [edit, setEdit] = useState(defaultEdit);
-  const [localText, setLocalText] = useState('');
+  const [localText, setLocalText] = useState(name);
   const [show, setShow] = useState(false);
 
   useEffect(() => {

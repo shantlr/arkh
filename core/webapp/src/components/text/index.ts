@@ -5,6 +5,12 @@ const sizeCss = {
   sm: css`
     ${styles.text.sm}
   `,
+  md: css`
+    ${styles.text.md}
+  `,
+  lg: css`
+    ${styles.text.lg}
+  `,
 };
 
 const typeCss = {
@@ -17,6 +23,6 @@ export const Text = styled.span<{
   t?: keyof typeof typeCss;
   size?: keyof typeof sizeCss;
 }>`
-  ${(props) => (props.size ? sizeCss[props.size] : null)};
+  ${(props) => sizeCss[props.size || 'sm']};
   ${(props) => (props.t ? typeCss[props.t] : null)}
 `;

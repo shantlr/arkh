@@ -35,7 +35,7 @@ const Container = styled.div`
 
   cursor: pointer;
 `;
-const Name = styled.div`
+const Name = styled(Text)`
   ${styles.mr.md};
 `;
 
@@ -145,7 +145,7 @@ export const ServiceName = React.forwardRef<
     >
       <Container ref={ref}>
         <Status state={currentTaskState} />
-        <Name>{service.key}</Name>
+        <Name size="sm">{service.key}</Name>
         <ActionContainer>
           {isRunning === false && (
             <ActionItem onClick={() => runService()}>

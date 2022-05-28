@@ -25,6 +25,7 @@ const Container = styled.div`
 const Header = styled.div`
   ${styles.mb.sm};
   ${styles.pl.sm};
+  ${styles.flex.vertCenter}
 `;
 
 export const StackDetails = memo(() => {
@@ -43,7 +44,11 @@ export const StackDetails = memo(() => {
                 <FontAwesomeIcon icon={faTimes} />
               </Button>
             </NoStyleLink>
-            {stack && <Text style={{ marginLeft: 5 }}>{stack.name}</Text>}
+            {stack && (
+              <Text size="md" style={{ marginLeft: 5 }}>
+                {stack.name}
+              </Text>
+            )}
             {stackError && (
               <Text t="error">
                 {stackError instanceof Error ? stackError.message : null}

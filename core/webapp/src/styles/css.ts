@@ -111,6 +111,10 @@ export const styles = {
       align-items: center;
       justify-content: center;
     `,
+    vertCenter: css`
+      display: flex;
+      align-items: center;
+    `,
   },
   transition: createCssThemeKeyProxy('transition', 'transition'),
   shadow: createCssThemeKeyProxy('box-shadow', 'shadow'),
