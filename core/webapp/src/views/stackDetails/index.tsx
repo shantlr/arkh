@@ -1,8 +1,10 @@
 import { Outlet, useParams } from 'react-router';
 import styled from 'styled-components';
-import { Text } from 'components/text';
+import { memo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+
+import { Text } from 'components/text';
 import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
 import { NoStyleLink } from 'components/noStyleLink';
@@ -25,7 +27,7 @@ const Header = styled.div`
   ${styles.pl.sm};
 `;
 
-export const StackDetails = () => {
+export const StackDetails = memo(() => {
   const { name } = useParams();
 
   const { data: stack, error: stackError } = useStack(name as string);
@@ -54,4 +56,4 @@ export const StackDetails = () => {
       <Outlet />
     </>
   );
-};
+});

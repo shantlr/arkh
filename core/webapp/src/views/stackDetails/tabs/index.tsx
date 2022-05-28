@@ -33,6 +33,14 @@ const StackGrid = ({
   const debouncedGridState = useDebouncedState(grid.state);
   const { mutate: updateTab } = useUpdateStackTab(stackName);
 
+  // Sync keys for default tab
+  useEffect(() => {
+    if (Object.keys(tab.keys).length && !grid.state.rows.length) {
+      grid.dispatch({ type: 'sync-keys', childKeys: tab.keys });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useUpdateEffect(
     useCallback(() => {
       updateTab({

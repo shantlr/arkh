@@ -56,10 +56,10 @@ export const theme = {
 
   fontSize: {
     xxs: `6px`,
-    xs: `10px`,
-    sm: `12px`,
-    md: `14px`,
-    lg: `18px`,
+    xs: `8px`,
+    sm: `10px`,
+    md: `12px`,
+    lg: `16px`,
   },
   shadow: {
     md: `var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);`,
