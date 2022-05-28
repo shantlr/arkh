@@ -1,5 +1,5 @@
 import { createLogger } from '@shantr/metro-logger';
-import { Task } from 'src/lib/task';
+import { Task } from '../lib/task';
 
 export type ServiceState = {
   name: string;

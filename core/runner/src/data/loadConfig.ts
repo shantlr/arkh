@@ -3,7 +3,7 @@ import { createLogger } from '@shantr/metro-logger';
 import fs from 'fs';
 import { nanoid } from 'nanoid';
 import path from 'path';
-import { config } from 'src/config';
+import { config } from '../config';
 import { State } from '.';
 
 export const loadConfig = () => {

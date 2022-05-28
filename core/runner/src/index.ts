@@ -1,19 +1,19 @@
 import { io } from 'socket.io-client';
 import { createLogger } from '@shantr/metro-logger';
+import { ServiceSpec } from '@shantr/metro-common-types';
 
 import { config } from './config';
-import { EventManager, EVENTS } from './events';
+import { runnerMainWorkflow } from './workflow';
 import { loadConfig } from './data/loadConfig';
 import { State } from './data';
-import { ServiceSpec } from '@shantr/metro-common-types';
-import { SideEffects } from './events/sideEffects';
+import { SideEffects } from './workflow/sideEffects';
 import { map } from 'lodash';
 
 const logger = createLogger('runner');
 
 const main = async () => {
   loadConfig();
-  EventManager.startConsumeEvent();
+  // EventManager.startConsumeEvent();
 
   logger.info(`Connecting to metro server at ${config.get('server.url')}`);
   const socket = io(`${config.get('server.url')}`);
@@ -54,19 +54,22 @@ const main = async () => {
     'run-service',
     ({ name, spec }: { name: string; spec: ServiceSpec }, callback) => {
       logger.info(`assigned '${name}'`);
-      EventManager.push(EVENTS.tasks.run({ name, spec }));
+      runnerMainWorkflow.actions.runService({
+        name,
+        spec,
+      });
       callback({ success: true });
     }
   );
   socket.on(
     'stop-service',
     ({ name, reason }: { name: string; reason?: string }, callback) => {
-      EventManager.push(EVENTS.tasks.stop({ name, reason }));
+      runnerMainWorkflow.actions.stopService({ name, reason });
       callback({ success: true });
     }
   );
   socket.on('remove-service', ({ name }: { name: string }) => {
-    EventManager.push(EVENTS.tasks.remove({ name }));
+    runnerMainWorkflow.actions.removeService({ name });
   });
 
   // Side effects

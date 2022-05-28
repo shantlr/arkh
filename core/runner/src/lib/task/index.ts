@@ -6,7 +6,7 @@ import {
   ChildProcessWithoutNullStreams,
 } from 'child_process';
 import { nanoid } from 'nanoid';
-import { SideEffects } from 'src/events/sideEffects';
+import { SideEffects } from '../../workflow/sideEffects';
 
 export type TaskState =
   | 'noop'
