@@ -2,14 +2,14 @@ import {
   createWorkflowQueue,
   wkAction,
   WorkflowCancel,
-} from "../src/workflowQueue";
+} from '../src/workflowQueue';
 
 const sleep = (delay: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, delay));
 
-describe("workflow queue", () => {
-  describe("transaction", () => {
-    it("should call transaction one after another", async () => {
+describe('workflow queue', () => {
+  describe('transaction', () => {
+    it('should call transaction one after another', async () => {
       const queue = createWorkflowQueue();
       const fn1 = jest.fn(() => sleep(10));
       const fn2 = jest.fn(() => sleep(10));
@@ -28,7 +28,7 @@ describe("workflow queue", () => {
       expect(fn3).toHaveBeenCalled();
     });
 
-    it("should add action and run it", async () => {
+    it('should add action and run it', async () => {
       const queue = createWorkflowQueue();
 
       const arg = {};
@@ -38,7 +38,7 @@ describe("workflow queue", () => {
 
       queue.transaction((trx) => {
         trx.addAction({
-          name: "test",
+          name: 'test',
           handler: fn,
           arg,
         });
@@ -48,7 +48,7 @@ describe("workflow queue", () => {
       expect(fn).toBeCalled();
     });
 
-    it("should cancel action", async () => {
+    it('should cancel action', async () => {
       const queue = createWorkflowQueue();
 
       let DONE = false;
@@ -62,7 +62,7 @@ describe("workflow queue", () => {
 
       queue.transaction((trx) => {
         trx.addAction({
-          name: "test",
+          name: 'test',
           handler: fn,
           arg,
         });
@@ -78,7 +78,7 @@ describe("workflow queue", () => {
       expect(DONE).toBe(false);
     });
 
-    it("should gracefully cancel action", async () => {
+    it('should gracefully cancel action', async () => {
       const queue = createWorkflowQueue();
 
       let DONE = false;
@@ -100,7 +100,7 @@ describe("workflow queue", () => {
 
       queue.transaction((trx) => {
         trx.addAction({
-          name: "test",
+          name: 'test',
           handler: fn,
           arg,
         });
@@ -117,8 +117,16 @@ describe("workflow queue", () => {
       expect(DONE).toBe(false);
     });
 
-    it("should", async () => {
-      //
+    it('should have no ongoing action when done', async () => {
+      const queue = createWorkflowQueue();
+
+      expect(queue.isActionOngoing).toBe(false);
+      expect(queue.ongoingAction).toBe(null);
+      queue.transaction(async () => {
+        await sleep(10);
+      });
+      expect(queue.isActionOngoing).toBe(false);
+      expect(queue.ongoingAction).toBe(null);
     });
   });
 
@@ -148,9 +156,9 @@ describe("workflow queue", () => {
   //   });
   // });
 
-  describe("action", () => {
-    describe("promise api", () => {
-      it("should cancel action", async () => {
+  describe('action', () => {
+    describe('promise api', () => {
+      it('should cancel action', async () => {
         const queue = createWorkflowQueue();
 
         let DONE = false;
@@ -164,7 +172,7 @@ describe("workflow queue", () => {
 
         queue.transaction((trx) => {
           trx.addAction({
-            name: "test",
+            name: 'test',
             handler: fn,
             arg,
           });

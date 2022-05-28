@@ -1,9 +1,9 @@
-import { isPromise } from "./utils";
+import { isPromise } from './utils';
 
-export type WorkflowActionPromiseApiFn<Arg = any> = (
+export type WorkflowActionPromiseApiFn<Arg = any, Ret = void> = (
   arg: Arg,
   api: WorkflowPromiseApi
-) => void | Promise<void>;
+) => Ret extends Promise<any> ? Ret : Ret | Promise<Ret>;
 
 export type WorkflowPromiseApi = {
   call<T, Args extends any[]>(
@@ -11,16 +11,24 @@ export type WorkflowPromiseApi = {
     ...args: Args
   ): Promise<T>;
   wait(duration: number): Promise<void>;
+  run<Arg, Ret>(
+    fn: WorkflowActionPromiseApiFn<Arg, Ret>,
+    arg: Arg
+  ): ReturnType<WorkflowActionPromiseApiFn<Arg, Ret>>;
 };
 
-export type WorkflowEntityInternalAction<T = any> = {
+export type WorkflowEntityInternalAction<Arg = any, Ret = any> = {
   name: string;
-  handler: WorkflowActionPromiseApiFn<T>;
-  arg: T;
+  handler: WorkflowActionPromiseApiFn<Arg, Ret>;
+  arg: Arg;
   cancel?: () => void | Promise<void>;
+  /**
+   * called after action is marked as done
+s   */
+  afterDone?: (err?: any, result?: Ret) => void;
 };
 
-export const WorkflowCancel = Symbol("workflow cancel");
+export const WorkflowCancel = Symbol('workflow cancel');
 
 export type WorkflowQueueTransactionApi = {
   ongoingAction(): { name: string; arg: any };
@@ -37,7 +45,10 @@ type WorkflowQueueState = {
     resolve: () => void;
   };
 };
-
+/**
+ * Workflow Queue contain two queue
+ * one for processing actions and one for interacting with the queue (add action, cancel action, ...)
+ */
 export const createWorkflowQueue = () => {
   let actionQueue: WorkflowEntityInternalAction[] = [];
 
@@ -46,37 +57,6 @@ export const createWorkflowQueue = () => {
     ongoingAction: null,
     shouldCancel: null,
   };
-
-  // const runGeneratorSaga = async (saga: Generator) => {
-  //   let sagaIt: IteratorResult<any> = null;
-
-  //   let sagaRes = undefined;
-  //   let sagaErr: undefined | { err: unknown } = undefined;
-
-  //   do {
-  //     if (state.shouldCancel && !state.shouldCancel.isCancelling) {
-  //       state.shouldCancel.isCancelling = true;
-  //       sagaIt = saga.throw(WorkflowCancel);
-  //     }
-  //     sagaIt = sagaErr ? saga.throw(sagaErr.err) : saga.next(sagaRes);
-  //     const { value } = sagaIt;
-  //     if (value === WorkflowCancel) {
-  //       throw WorkflowCancel;
-  //     }
-  //     try {
-  //       if (isGenerator(value)) {
-  //         sagaRes = await runGeneratorSaga(value);
-  //       } else if (isPromise(value)) {
-  //         sagaRes = await value;
-  //       } else {
-  //         sagaRes = value;
-  //       }
-  //       sagaErr = undefined;
-  //     } catch (err) {
-  //       sagaErr = { err };
-  //     }
-  //   } while (sagaIt && !sagaIt.done);
-  // };
 
   const promiseSagaApiCheckCancelled = () => {
     if (state.shouldCancel && !state.shouldCancel.isCancelling) {
@@ -104,13 +84,20 @@ export const createWorkflowQueue = () => {
         }, duration);
       });
     },
+    run(fn, arg) {
+      return fn(arg, promiseSagaApi);
+    },
   };
   const runAction = () => {
     if (state.isActionOngoing || !actionQueue.length) {
       return;
     }
 
-    const onFinally = () => {
+    const event = actionQueue.shift();
+    state.ongoingAction = event;
+    state.isActionOngoing = true;
+
+    const onFinally = (err: any, res?: any) => {
       state.isActionOngoing = false;
       state.ongoingAction = null;
 
@@ -119,35 +106,35 @@ export const createWorkflowQueue = () => {
         state.shouldCancel = null;
         shouldCancel.resolve();
       }
+      if (typeof event.afterDone === 'function') {
+        event.afterDone(err, res);
+      }
 
       setImmediate(runAction);
     };
 
-    const event = actionQueue.shift();
-    state.ongoingAction = event;
-    state.isActionOngoing = true;
-    const res = event.handler(event.arg, promiseSagaApi);
-    // if (isGenerator(res)) {
-    //   runGeneratorSaga(res)
-    //     .catch((err) => {
-    //       if (err !== WorkflowCancel) {
-    //         throw err;
-    //       }
-    //     })
-    //     .finally(onFinally);
-    // } else
-    if (isPromise(res)) {
-      res
-        .catch((err) => {
-          if (err !== WorkflowCancel) {
-            throw err;
-          }
-        })
-        .finally(onFinally);
-    } else {
-      state.isActionOngoing = false;
-      state.ongoingAction = null;
-      runAction();
+    try {
+      const res = event.handler(event.arg, promiseSagaApi);
+      if (isPromise(res)) {
+        res
+          .then((r) => {
+            onFinally(null, r);
+          })
+          .catch((err) => {
+            onFinally(err);
+          });
+      } else {
+        if (typeof event.afterDone === 'function') {
+          event.afterDone(null, res);
+        }
+        state.isActionOngoing = false;
+        state.ongoingAction = null;
+        runAction();
+      }
+    } catch (err) {
+      if (typeof event.afterDone === 'function') {
+        event.afterDone(err);
+      }
     }
   };
 
@@ -166,7 +153,7 @@ export const createWorkflowQueue = () => {
       }
 
       if (state.shouldCancel) {
-        throw new Error("Already cancel ongoing");
+        throw new Error('Already cancel ongoing');
       }
 
       const p = new Promise<void>((resolve) => {
@@ -208,6 +195,15 @@ export const createWorkflowQueue = () => {
   };
 
   const sagaQueue = {
+    get isActionOngoing() {
+      return state.isActionOngoing === true;
+    },
+    get actionQueueSize() {
+      return actionQueue.length;
+    },
+    get ongoingAction() {
+      return state.ongoingAction;
+    },
     transaction: (
       cb: (trxApi: typeof transactionApi) => void | Promise<void>
     ) => {
@@ -222,5 +218,5 @@ export const createWorkflowQueue = () => {
 };
 
 export const wkAction = <Arg = void>(
-  handler: (arg: Arg, wkApi: WorkflowPromiseApi) => void | Promise<void>
+  handler: (arg: Arg, api: WorkflowPromiseApi) => void | Promise<void>
 ) => handler;

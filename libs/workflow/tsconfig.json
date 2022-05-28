@@ -8,6 +8,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "outDir": "dist",
+    "declaration": true,
     "moduleResolution": "node",
     "resolveJsonModule": true
   },

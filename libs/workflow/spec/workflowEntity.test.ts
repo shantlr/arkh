@@ -1,10 +1,10 @@
-import { createWorkflowEntity, wkAction } from "../src";
+import { createWorkflowEntity, wkAction } from '../src';
 
 const sleep = (delay: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, delay));
 
-describe("workflow entity", () => {
-  it("should call action handler", async () => {
+describe('workflow entity', () => {
+  it('should call action handler', async () => {
     const fn = jest.fn(
       wkAction(() => {
         //
@@ -22,7 +22,7 @@ describe("workflow entity", () => {
     expect(fn).toBeCalled();
   });
 
-  it("should call action handler with arg", async () => {
+  it('should call action handler with arg', async () => {
     const arg = {};
     const fn = jest.fn(
       wkAction<typeof arg>((a) => {
@@ -38,12 +38,29 @@ describe("workflow entity", () => {
       }
     );
     await entity.actions.act(arg, { promise: true });
-    await sleep(0);
     expect(fn).toBeCalled();
   });
 
-  describe("trx api", () => {
-    it("should wait", async () => {
+  it('should mark entity as not ongoing before resolving', async () => {
+    const { state, internalActions, ...entity } = createWorkflowEntity(
+      {},
+      {
+        actions: {
+          act: async () => {
+            await sleep(10);
+          },
+        },
+      }
+    );
+
+    await entity.actions.act(null, { promise: true });
+    expect(entity.actionQueueSize).toBe(0);
+    expect(entity.isActionOngoing).toBe(false);
+    expect(entity.ongoingAction).toBe(null);
+  });
+
+  describe('trx api', () => {
+    it('should wait', async () => {
       let DONE = false;
       const fn = jest.fn(
         wkAction(async (a, api) => {

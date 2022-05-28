@@ -17,8 +17,8 @@ export type WorkflowActionHandlerMap<Arg = void> = {
 };
 
 export interface ActionCreator<Arg, Ret> {
-  (arg: Arg, options: { promise?: true }): Promise<Ret>;
-  (arg: Arg, options?: { promise?: false }): void;
+  (arg: Arg, options: { promise?: true }): Promise<Awaited<Ret>>;
+  (arg: Arg, options?: { promise?: boolean }): void;
 }
 
 /**
@@ -42,3 +42,7 @@ export type WorkflowEntityInternalActionCreators<
     arg: Parameters<InternalWorkflows[key]>[0]
   ) => Promise<ReturnType<InternalWorkflows[key]>>;
 };
+export interface WorkflowEntityTransaction {
+  (): void;
+  (): Promise<void>;
+}
