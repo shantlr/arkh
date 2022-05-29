@@ -202,14 +202,12 @@ export const Task = {
       await taskAccessor.updateOne(
         {
           id: taskId,
+        },
+        {
           stopped_at: date,
           stopping_at: date,
           exit_code: -1,
           exited_at: date,
-        },
-        {
-          stopped_at: date,
-          updated_at: date,
         }
       );
       void SideEffects.emit('updateTask', {
