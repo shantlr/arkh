@@ -294,7 +294,6 @@ export const ServiceLogs = ({
             >
               {onDelete && (
                 <div
-                  style={{ cursor: 'pointer' }}
                   key="delete"
                   onClick={() => {
                     onDelete();

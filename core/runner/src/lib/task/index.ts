@@ -1,11 +1,11 @@
-import { ServiceSpec } from '@shantr/metro-common-types';
-import { createLogger } from '@shantr/metro-logger';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import {
   spawn,
   SpawnOptionsWithoutStdio,
   ChildProcessWithoutNullStreams,
 } from 'child_process';
 import { nanoid } from 'nanoid';
+import { baseLogger } from '../../config';
 import { SideEffects } from '../../workflow/sideEffects';
 
 export type TaskState =
@@ -16,7 +16,7 @@ export type TaskState =
   | 'stopped'
   | 'exited';
 
-const logger = createLogger(`task`);
+const logger = baseLogger.extend(`task`);
 
 export class Task {
   id: string;

@@ -61,6 +61,7 @@ const Item = styled(motion.div)<{ size?: keyof typeof sizes }>`
   ${styles.rounded.lg};
   ${styles.transition.default};
   ${styles.hover.action};
+  cursor: pointer;
   ${(props) => (props.size ? sizes[props.size] : null)}
 `;
 
@@ -82,7 +83,7 @@ export const ActionDropdown = ({
   size = 'md',
   placement = 'right',
   children,
-  delay = 200,
+  delay = 0,
 }: {
   parentRef?: HTMLElement | null;
   size?: keyof typeof sizes;

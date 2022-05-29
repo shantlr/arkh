@@ -24,8 +24,8 @@ export type WorkflowEntityInternalAction<Arg = any, Ret = any> = {
   cancel?: () => void | Promise<void>;
   /**
    * called after action is marked as done
-s   */
-  afterDone?: (err?: any, result?: Ret) => void;
+   */
+  onDone?: (err?: any, result?: Ret) => void;
 };
 
 export const WorkflowCancel = Symbol('workflow cancel');
@@ -106,8 +106,8 @@ export const createWorkflowQueue = () => {
         state.shouldCancel = null;
         shouldCancel.resolve();
       }
-      if (typeof event.afterDone === 'function') {
-        event.afterDone(err, res);
+      if (typeof event.onDone === 'function') {
+        event.onDone(err, res);
       }
 
       setImmediate(runAction);
@@ -122,18 +122,21 @@ export const createWorkflowQueue = () => {
           })
           .catch((err) => {
             onFinally(err);
+            if (!event.onDone && err !== WorkflowCancel) {
+              throw err;
+            }
           });
       } else {
-        if (typeof event.afterDone === 'function') {
-          event.afterDone(null, res);
+        if (typeof event.onDone === 'function') {
+          event.onDone(null, res);
         }
         state.isActionOngoing = false;
         state.ongoingAction = null;
         runAction();
       }
     } catch (err) {
-      if (typeof event.afterDone === 'function') {
-        event.afterDone(err);
+      if (typeof event.onDone === 'function') {
+        event.onDone(err);
       }
     }
   };

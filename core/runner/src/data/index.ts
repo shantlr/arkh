@@ -1,4 +1,4 @@
-import { createLogger } from '@shantr/metro-logger';
+import { baseLogger } from '../config';
 import { Task } from '../lib/task';
 
 export type ServiceState = {
@@ -22,7 +22,7 @@ const IN_MEMORY_STATE: {
   },
 };
 
-const logger = createLogger('state');
+const logger = baseLogger.extend('state');
 
 export const State = {
   runner: {

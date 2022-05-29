@@ -1,7 +1,7 @@
 import {
   SocketIOClientToServerEvents,
   SocketIOServerToClientEvents,
-} from '@shantr/metro-common-types';
+} from '@shantlr/shipyard-common-types';
 import { useEqualMemo } from 'lib/hooks';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';

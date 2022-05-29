@@ -1,7 +1,6 @@
 import { faCog, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NoStyleLink } from 'components/noStyleLink';
-import { useEffect } from 'react';
 import { useMatch } from 'react-router';
 import styled from 'styled-components';
 import { styles } from 'styles/css';
@@ -17,10 +16,13 @@ const Container = styled.div`
   box-sizing: border-box;
   width: ${WIDTH};
   min-width: ${WIDTH};
-  z-index: 9999;
   background-color: ${(props) => props.theme.color.sideBarBg};
 
   transition: 0.5s;
+  ${styles.zIndex.dropdown}
+  :hover {
+    ${styles.zIndex.overDropdown}
+  }
 `;
 
 const BarCard = styled.div`

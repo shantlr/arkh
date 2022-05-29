@@ -1,4 +1,4 @@
-import { ServiceInfo } from '@shantr/metro-common-types';
+import { ServiceInfo } from '@shantlr/shipyard-common-types';
 import { Select } from 'components/select';
 import { ServiceTask } from 'configs/types';
 import { map } from 'lodash';
@@ -92,7 +92,7 @@ export const ServiceName = React.forwardRef<
       key: task.id,
       value: task.id,
       label: (
-        <Text size="sm">
+        <Text size="xs">
           <DateFromNow date={task.creating_at} />
           {typeof task.exit_code === 'number' ? ` (${task.exit_code})` : null}
         </Text>

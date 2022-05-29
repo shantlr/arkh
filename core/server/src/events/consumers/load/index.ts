@@ -4,11 +4,11 @@ import YAML from 'yaml';
 import { forEach, isEqual, keyBy } from 'lodash';
 
 import { createEventQueue, handler, HandlerContext } from '@shantr/metro-queue';
-import { Config, Stack } from 'src/data';
-import { MetroSpec } from '@shantr/metro-common-types';
+import { Config, Stack } from '../../../data';
 import { EVENTS } from '../..';
 import { InvalidConfig, parseConfig } from './parseConfig';
 import { YAMLError } from 'yaml/util';
+import { ShipyardFileSpec } from '@shantlr/shipyard-common-types';
 
 const listAllFiles = async (dirPath: string) => {
   const res: string[] = [];
@@ -107,7 +107,7 @@ export const loadQueue = createEventQueue('load', {
       });
 
       if (existing) {
-        const prevConfig = existing.spec as MetroSpec;
+        const prevConfig = existing.spec as ShipyardFileSpec;
         // Remove missing stack
         forEach(prevConfig.stacks, (prevStack, prevStackName) => {
           if (!config.stacks[prevStackName]) {

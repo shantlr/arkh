@@ -6,6 +6,7 @@ import { Placement } from '@popperjs/core';
 import { motion, HTMLMotionProps } from 'framer-motion';
 
 import { createTimeout } from 'lib/createTimeout';
+import { styles } from 'styles/css';
 
 const Container = styled.div`
   display: inline-block;
@@ -14,9 +15,9 @@ const Container = styled.div`
 const PopperContainer = styled(motion.ul)`
   background-color: white;
   max-height: 400px;
-  z-index: ${(props) => props.theme.zIndex.dropdown};
-  box-shadow: ${(props) => props.theme.shadow.md};
-  border-radius: ${(props) => props.theme.borderRadius.md};
+  ${styles.zIndex.dropdown}
+  ${styles.shadow.md}
+  ${styles.rounded.md}
   list-style: none;
   padding: 0;
 
@@ -45,6 +46,7 @@ const OptionContainer = styled(({ active, ...props }) => (
   align-items: center;
   padding: ${(props) => `${props.theme.space.sm} ${props.theme.space.md}`};
   cursor: pointer;
+  ${styles.text.sm};
 
   ${(props) => (props.active ? activeCss : null)};
   transition: 0.3s;

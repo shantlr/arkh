@@ -1,33 +1,33 @@
 import { createWorkflowEntity } from '@shantlr/workflow';
-import { ServiceSpec } from '@shantr/metro-common-types';
-import { createLogger } from '@shantr/metro-logger';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
-import { Services } from './service';
+import { servicesWorkflow } from './service';
+import { baseLogger } from '../config';
 
-const logger = createLogger('main');
+const logger = baseLogger.extend('main-wk');
 
 export const { internalActions, ...runnerMainWorkflow } = createWorkflowEntity(
   null,
   {
     actions: {
       runService({ name, spec }: { name: string; spec: ServiceSpec }) {
-        const service = Services.get(name);
+        const service = servicesWorkflow.get(name);
         void service.actions.run(spec, { promise: true });
       },
       stopService({ name, reason }: { name: string; reason?: string }) {
-        if (!Services.has[name]) {
+        if (!servicesWorkflow.has[name]) {
           logger.warn(`service '${name}' could not be stopped: not found`);
           return;
         }
-        const service = Services.get(name);
+        const service = servicesWorkflow.get(name);
         service.actions.stop({ reason });
       },
       removeService({ name }: { name: string }) {
-        if (!Services.has(name)) {
+        if (!servicesWorkflow.has(name)) {
           logger.warn(`service '${name}' could not be removed: not found`);
           return;
         }
-        Services.leave(name);
+        void servicesWorkflow.leave(name);
       },
     },
   }

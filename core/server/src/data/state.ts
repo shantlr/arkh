@@ -1,9 +1,9 @@
 import { filter, some } from 'lodash';
 import { Socket } from 'socket.io';
-import { ServiceState, ServiceStateEnum } from '@shantr/metro-common-types';
-import { createLogger } from '@shantr/metro-logger';
-import { Runner, RunnerType } from 'src/runnerWs/class';
-import { SideEffects } from 'src/events/sideEffects';
+import { ServiceState, ServiceStateEnum } from '@shantlr/shipyard-common-types';
+import { Runner, RunnerType } from '../runnerWs/class';
+import { SideEffects } from '../events/sideEffects';
+import { baseLogger } from '../config';
 
 const IN_MEMORY_STATE: {
   stack: {
@@ -39,7 +39,7 @@ const IN_MEMORY_STATE: {
   },
 };
 
-const logger = createLogger('state');
+const logger = baseLogger.extend('state');
 export const State = {
   logs: {},
   service: {
@@ -77,7 +77,7 @@ export const State = {
     },
     isRunning(name: string) {
       const state = State.service.get(name);
-      return state.state === 'running';
+      return Boolean(state) && state.state === 'running';
     },
     isPendingAssignment(name: string) {
       const state = State.service.get(name);

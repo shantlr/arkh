@@ -1,7 +1,7 @@
 import {
   WorkflowActionPromiseApiFn,
   WorkflowQueueTransactionApi,
-} from "./workflowQueue";
+} from './workflowQueue';
 
 export type WorkflowActionHandlerDef<Arg> = {
   beforeEmitAction?: (
@@ -32,7 +32,7 @@ export type WorkflowEntityActionCreators<
   >
     ? ActionCreator<Arg, ReturnType<ActionHandlerMap[key]>>
     : ActionHandlerMap[key] extends WorkflowActionHandlerDef<infer Arg>
-    ? ActionCreator<Arg, ReturnType<ActionHandlerMap[key]["handler"]>>
+    ? ActionCreator<Arg, ReturnType<ActionHandlerMap[key]['handler']>>
     : never;
 };
 export type WorkflowEntityInternalActionCreators<

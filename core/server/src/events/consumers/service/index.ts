@@ -1,11 +1,11 @@
 import { isEqual, keyBy } from 'lodash';
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import { handler, handlers, createEventQueue } from '@shantr/metro-queue';
 
-import { Service, Stack } from 'src/data';
-import { State } from 'src/data/state';
-import { EVENTS } from 'src/events';
-import { SideEffects } from 'src/events/sideEffects';
+import { Service, Stack } from '../../../data';
+import { State } from '../../../data/state';
+import { EVENTS } from '../../../events';
+import { SideEffects } from '../../../events/sideEffects';
 
 export const serviceQueue = createEventQueue('service', {
   save: handler(

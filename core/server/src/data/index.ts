@@ -5,24 +5,24 @@ import {
   deserializer,
   serializer,
   StringifyNonScalar,
-} from 'src/lib/db';
+} from '../lib/db';
 import { knex } from './knex';
 import {
-  MetroSpec,
+  ShipyardFileSpec,
   StackSpec,
   ServiceSpec,
   Task as TaskType,
   TaskLog as TaskLogType,
   StackTabConfig,
   StackTab as StackTabType,
-} from '@shantr/metro-common-types';
-import { SideEffects } from 'src/events/sideEffects';
+} from '@shantlr/shipyard-common-types';
+import { SideEffects } from '../events/sideEffects';
 import { sortBy } from 'lodash';
 
 export { doMigrations } from './knex';
 
 export const Config = createNamedEntityAccessor<{
-  spec: MetroSpec;
+  spec: ShipyardFileSpec;
 }>({
   collectionName: 'configs',
   knex,
@@ -182,6 +182,30 @@ export const Task = {
         {
           id: taskId,
           stopped_at: null,
+        },
+        {
+          stopped_at: date,
+          updated_at: date,
+        }
+      );
+      void SideEffects.emit('updateTask', {
+        id: taskId,
+        stopped_at: date,
+      });
+    },
+    /**
+     * Consider task as stopped due to sync
+     * task may not be actually stopped in runner
+     */
+    async syncStopped(taskId: string) {
+      const date = new Date();
+      await taskAccessor.updateOne(
+        {
+          id: taskId,
+          stopped_at: date,
+          stopping_at: date,
+          exit_code: -1,
+          exited_at: date,
         },
         {
           stopped_at: date,

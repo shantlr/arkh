@@ -1,4 +1,4 @@
-import { Stack, StackTab } from '@shantr/metro-common-types';
+import { Stack, StackTab } from '@shantlr/shipyard-common-types';
 import { NoStyleLink } from 'components/noStyleLink';
 import {
   useCreateStackTab,

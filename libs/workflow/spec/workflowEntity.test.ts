@@ -85,4 +85,37 @@ describe('workflow entity', () => {
       expect(DONE).toBe(true);
     });
   });
+
+  it('should propagate error on await promise', async () => {
+    const entity = createWorkflowEntity(
+      {},
+      {
+        actions: {
+          act: async () => {
+            await sleep(50);
+            throw new Error('err');
+          },
+        },
+      }
+    );
+    expect(() => entity.actions.act(null, { promise: true })).rejects.toThrow(
+      'err'
+    );
+  });
+
+  // it.only('should propagate error on await promise', async () => {
+  //   const entity = createWorkflowEntity(
+  //     {},
+  //     {
+  //       actions: {
+  //         act: async () => {
+  //           await sleep(50);
+  //           throw new Error('err');
+  //         },
+  //       },
+  //     }
+  //   );
+  //   entity.actions.act(null);
+  //   await sleep(100);
+  // });
 });

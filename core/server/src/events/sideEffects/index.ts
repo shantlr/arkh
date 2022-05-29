@@ -1,4 +1,4 @@
-import { TaskLog } from '@shantr/metro-common-types';
+import { TaskLog } from '@shantlr/shipyard-common-types';
 import Emittery from 'emittery';
 
 export const SideEffects = new Emittery<{

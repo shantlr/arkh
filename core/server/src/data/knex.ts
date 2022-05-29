@@ -1,6 +1,5 @@
 import Knex from 'knex';
-import { config } from 'src/config';
-import { createLogger } from '@shantr/metro-logger';
+import { baseLogger, config } from '../config';
 
 export const knex = Knex({
   client: 'sqlite3',
@@ -10,7 +9,7 @@ export const knex = Knex({
 });
 
 export const doMigrations = async () => {
-  const logger = createLogger('migration');
+  const logger = baseLogger.extend('migration');
   logger.info('starting knex migration');
   const [from, migrateds] = await knex.migrate.latest({
     loadExtensions: ['.ts', 'js'],

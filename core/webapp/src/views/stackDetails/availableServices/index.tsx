@@ -1,4 +1,4 @@
-import { Stack, StackTab } from '@shantr/metro-common-types';
+import { Stack, StackTab } from '@shantlr/shipyard-common-types';
 import { reduce } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import { useDrag } from 'react-dnd';

@@ -45,7 +45,7 @@ export const StackDetails = memo(() => {
               </Button>
             </NoStyleLink>
             {stack && (
-              <Text size="md" style={{ marginLeft: 5 }}>
+              <Text size="md" mr="md" ml="md">
                 {stack.name}
               </Text>
             )}

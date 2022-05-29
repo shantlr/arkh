@@ -1,4 +1,4 @@
-import { Stack, StackTab } from '@shantr/metro-common-types';
+import { Stack, StackTab } from '@shantlr/shipyard-common-types';
 import { Grid, useGridState } from 'components/grid';
 import { useUpdateStackTab } from 'hooks/query';
 import { useDebouncedState, useUpdateEffect } from 'hooks/utils';

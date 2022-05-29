@@ -6,7 +6,7 @@ import { usePopper } from 'react-popper';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { styles } from 'styles/css';
-import { Stack } from '@shantr/metro-common-types';
+import { Stack } from '@shantlr/shipyard-common-types';
 
 const Container = styled(motion.div)`
   ${styles.pl.md};

@@ -1,14 +1,14 @@
 import {
   SocketIOClientToServerEvents,
   SocketIOServerToClientEvents,
-} from '@shantr/metro-common-types';
-import { Logger } from '@shantr/metro-logger';
+} from '@shantlr/shipyard-common-types';
+import { Logger } from '@shantlr/shipyard-logger';
 import { Server as HttpServer } from 'http';
 import { forEach } from 'lodash';
 import { Server } from 'socket.io';
-import { Service, Task } from 'src/data';
-import { State } from 'src/data/state';
-import { SideEffects } from 'src/events/sideEffects';
+import { Service, Task } from '../../data';
+import { State } from '../../data/state';
+import { SideEffects } from '../../events/sideEffects';
 import {
   ROOMS,
   SUBCRIBE_PREFIX,

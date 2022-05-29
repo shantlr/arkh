@@ -1,6 +1,6 @@
-import { State } from 'src/data/state';
-import { EventManager, EVENTS } from 'src/events';
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { State } from '../../../data/state';
+import { EventManager, EVENTS } from '../../../events';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import { createEventQueue, handler } from '@shantr/metro-queue';
 
 export const runnerQueue = createEventQueue('runner', {

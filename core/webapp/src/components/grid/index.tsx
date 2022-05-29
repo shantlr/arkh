@@ -11,7 +11,7 @@ import {
 import { GridCell } from './components/cell';
 import { GridRow, GridRowContent } from './components/row';
 import { useMemo } from 'react';
-import { StackTab } from '@shantr/metro-common-types';
+import { StackTab } from '@shantlr/shipyard-common-types';
 import { useState } from 'react';
 import { GridEmptyDroppable } from './components/emptyDroppable';
 

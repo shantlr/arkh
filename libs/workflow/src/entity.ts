@@ -56,7 +56,7 @@ export const createWorkflowEntity = <
               arg,
               cancel: reject,
               // resolve in after done to ensure that promise is resolved only when action is marked as done
-              afterDone(err, result) {
+              onDone(err, result) {
                 if (err) {
                   reject(err);
                 } else {

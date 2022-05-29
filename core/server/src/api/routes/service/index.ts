@@ -1,7 +1,8 @@
+import { Logger } from '@shantlr/shipyard-logger';
 import { Router } from 'express';
-import { Service, Task } from 'src/data';
-import { State } from 'src/data/state';
-import { EventManager, EVENTS } from 'src/events';
+import { Service, Task } from '../../../data';
+import { State } from '../../../data/state';
+import { servicesWorkflow } from '../../../workflow';
 
 export const serviceRouter = () => {
   const router = Router();
@@ -31,20 +32,34 @@ export const serviceRouter = () => {
       if (!service) {
         return res.status(404).send();
       }
-      EventManager.push(
-        EVENTS.service.run({ name: service.key, stackName: service.stack })
-      );
+      servicesWorkflow.get(service.name).actions.run();
       return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);
       return res.status(500).send(err.message);
     }
   });
+  const stopRelicasTasks = async (serviceName: string, logger: Logger) => {
+    // check if any reliacas of not stopped task
+    const tasks = await Task.list(serviceName);
+    let someStopped = false;
+    await Promise.all(
+      tasks.map(async (t) => {
+        if (!t.exited_at) {
+          logger.info(`stop relicas tasks '${t.id}'`);
+          await Task.update.syncStopped(t.id);
+          someStopped = true;
+        }
+      })
+    );
+    return someStopped;
+  };
   router.post('/:name/stop', async (req, res) => {
     try {
       const { name } = req.params;
       const state = State.service.get(name);
       if (!state) {
+        await stopRelicasTasks(name, req.logger);
         return res.status(200).send({ success: false, message: 'not-running' });
       }
 
@@ -53,6 +68,9 @@ export const serviceRouter = () => {
         return res.status(200).send(result);
       }
 
+      if (await stopRelicasTasks(name, req.logger)) {
+        return res.status(200).send({ success: true, message: 'stopped' });
+      }
       return res
         .status(200)
         .send({ success: false, message: 'service-not-running' });

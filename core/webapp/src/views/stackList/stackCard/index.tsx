@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 import { CSSProperties } from 'react';
 import { ServiceDropdownList } from '../serviceDropdownList';
 import { createTimeout } from 'lib/createTimeout';
-import { Stack } from '@shantr/metro-common-types';
+import { Stack } from '@shantlr/shipyard-common-types';
 
 const StackHeader = styled.div`
   width: 100%;

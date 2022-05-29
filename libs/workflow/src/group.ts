@@ -1,4 +1,5 @@
 import { createWorkflowEntity, WorkflowEntity } from './entity';
+import { WorkflowActionHandlerMap } from './types';
 import { WorkflowActionPromiseApiFn } from './workflowQueue';
 
 export type WorkflowEntityGroupMember<
@@ -34,8 +35,9 @@ export type WorkflowEntityMemberProxy<
  */
 export type WorkflowEntityGroup<
   Entity extends WorkflowEntity<any, any, any>,
+  GroupActionHandlers extends WorkflowActionHandlerMap<any>,
   Key extends string | number | symbol
-> = {
+> = WorkflowEntity<any, GroupActionHandlers, any> & {
   get(key: Key): WorkflowEntityMemberProxy<Entity>;
   has(key: Key): boolean;
   isLeaving(key: Key): boolean;
@@ -152,11 +154,14 @@ const createEntityMemberProxy = <
 
 export const createWorkflowEntityGroup = <
   Entity extends WorkflowEntity<any, any, any>,
+  GroupActionHandlers extends WorkflowActionHandlerMap<any>,
   Key extends string | number | symbol = string
 >({
   name,
   initEntity,
   leaveEntity,
+
+  actions,
 }: {
   /**
    * Group name
@@ -167,10 +172,15 @@ export const createWorkflowEntityGroup = <
    * Handler called when entity is leaving
    */
   leaveEntity?: (entity: Entity, key: Key) => Promise<void> | void;
-}): WorkflowEntityGroup<Entity, Key> => {
+
+  actions?: GroupActionHandlers;
+}): WorkflowEntityGroup<Entity, GroupActionHandlers, Key> => {
   const members = {} as Record<Key, WorkflowEntityGroupMember<Entity, Key>>;
 
-  const group: WorkflowEntityGroup<Entity, Key> = {
+  const group: WorkflowEntityGroup<Entity, GroupActionHandlers, Key> = {
+    ...createWorkflowEntity(null, {
+      actions,
+    }),
     get(key: Key) {
       return createEntityMemberProxy({
         initEntity,

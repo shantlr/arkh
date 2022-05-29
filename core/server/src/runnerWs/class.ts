@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
 export type RunnerType = 'run-process';
 export type RunnerState =

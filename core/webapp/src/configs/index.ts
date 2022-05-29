@@ -1,4 +1,4 @@
-import { ServiceInfo, StackTab, Stack } from '@shantr/metro-common-types';
+import { ServiceInfo, StackTab, Stack } from '@shantlr/shipyard-common-types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
 import io from 'socket.io-client';

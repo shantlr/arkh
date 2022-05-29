@@ -1,5 +1,6 @@
 import './env';
 import convict from 'convict';
+import { createLogger } from '@shantlr/shipyard-logger';
 
 export const config = convict({
   api: {
@@ -49,3 +50,5 @@ export const config = convict({
     },
   },
 });
+
+export const baseLogger = createLogger('shipyard');

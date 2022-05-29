@@ -1,4 +1,4 @@
-import { Subscriptions } from '@shantr/metro-common-types';
+import { Subscriptions } from '@shantlr/shipyard-common-types';
 import { forEach } from 'lodash';
 
 export const SUBCRIBE_PREFIX = 'subscribe';
@@ -18,7 +18,7 @@ export const SUBSCRIPTIONS: Subscriptions = {
     key: 'task-logs',
     params: (taskId: string) => taskId,
   },
-};
+} as const;
 
 const mapSubsToRoom = <
   T extends {
@@ -57,4 +57,4 @@ const mapSubsToRoom = <
 
 export const ROOMS = {
   subscription: mapSubsToRoom(SUBSCRIPTIONS),
-};
+} as const;

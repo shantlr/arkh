@@ -1,9 +1,9 @@
 import { forEach, isEqual } from 'lodash';
-import { Service, Stack } from 'src/data';
-import { EVENTS } from 'src/events';
-import { StackSpec } from '@shantr/metro-common-types';
+import { Service, Stack } from '../../../data';
+import { EVENTS } from '../../../events';
+import { StackSpec } from '@shantlr/shipyard-common-types';
 import { handler, createEventQueue } from '@shantr/metro-queue';
-import { SideEffects } from 'src/events/sideEffects';
+import { SideEffects } from '../../../events/sideEffects';
 
 export const stackQueue = createEventQueue('stack', {
   save: handler(

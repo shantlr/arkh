@@ -3,13 +3,13 @@ import {
   createWorkflowEntityGroup,
 } from '@shantlr/workflow';
 import { WorkflowCancel } from '@shantlr/workflow/dist/workflowQueue';
-import { ServiceSpec } from '@shantr/metro-common-types';
-import { createLogger } from '@shantr/metro-logger';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import { isEqual } from 'lodash';
 import { Task } from '../lib/task';
+import { baseLogger } from '../config';
 
 export const createService = (serviceName: string) => {
-  const logger = createLogger(`service:${serviceName}`);
+  const logger = baseLogger.extend(`service:${serviceName}`);
   logger.info(`creating service '${serviceName}'`);
   const task = new Task({ serviceName, spec: null });
 
@@ -63,8 +63,8 @@ export const createService = (serviceName: string) => {
 };
 export type ServiceEntity = ReturnType<typeof createService>;
 
-const logger = createLogger('services');
-export const Services = createWorkflowEntityGroup({
+const logger = baseLogger.extend('services');
+export const servicesWorkflow = createWorkflowEntityGroup({
   name: 'services',
   initEntity: createService,
   leaveEntity: async (entity, name) => {

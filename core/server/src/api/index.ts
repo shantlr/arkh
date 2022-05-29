@@ -3,15 +3,17 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { createLogger } from '@shantr/metro-logger';
 import { expressLogger } from './middlewares/logger';
 import { stackRouter } from './routes/stack';
 import { serviceRouter } from './routes/service';
-import { config } from 'src/config';
+import { baseLogger, config } from '../config';
 import { serviceTaskRouter } from './routes/serviceTask';
 import { startClientWs } from './clientWs';
 
-export const startApi = async (port: number, logger = createLogger('api')) => {
+export const startApi = async (
+  port: number,
+  logger = baseLogger.extend('api')
+) => {
   const app = express();
   app.use(
     cors({

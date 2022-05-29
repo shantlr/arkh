@@ -1,15 +1,14 @@
 import { io } from 'socket.io-client';
-import { createLogger } from '@shantr/metro-logger';
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
-import { config } from './config';
+import { baseLogger, config } from './config';
 import { runnerMainWorkflow } from './workflow';
 import { loadConfig } from './data/loadConfig';
 import { State } from './data';
 import { SideEffects } from './workflow/sideEffects';
 import { map } from 'lodash';
 
-const logger = createLogger('runner');
+const logger = baseLogger.extend('runner');
 
 const main = async () => {
   loadConfig();

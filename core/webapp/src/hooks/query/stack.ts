@@ -1,4 +1,4 @@
-import { StackTab } from '@shantr/metro-common-types';
+import { StackTab } from '@shantlr/shipyard-common-types';
 import { API } from 'configs';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useCallback } from 'react';

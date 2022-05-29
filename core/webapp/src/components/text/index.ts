@@ -1,3 +1,4 @@
+import { mapStylePropsToCss, StyleProps } from 'components/box';
 import styled, { css } from 'styled-components';
 import { styles } from 'styles/css';
 
@@ -25,10 +26,13 @@ const typeCss = {
   `,
 };
 
-export const Text = styled.span<{
-  t?: keyof typeof typeCss;
-  size?: keyof typeof sizeCss;
-}>`
+export const Text = styled.span<
+  {
+    t?: keyof typeof typeCss;
+    size?: keyof typeof sizeCss;
+  } & StyleProps
+>`
+  ${mapStylePropsToCss};
   ${(props) => sizeCss[props.size || 'sm']};
   ${(props) => (props.t ? typeCss[props.t] : null)}
 `;

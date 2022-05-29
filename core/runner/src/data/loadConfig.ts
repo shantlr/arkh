@@ -1,13 +1,11 @@
-import { createLogger } from '@shantr/metro-logger';
-
 import fs from 'fs';
 import { nanoid } from 'nanoid';
 import path from 'path';
-import { config } from '../config';
+import { baseLogger, config } from '../config';
 import { State } from '.';
 
 export const loadConfig = () => {
-  const logger = createLogger('load-config');
+  const logger = baseLogger.extend('load-config');
 
   const configPath = path.resolve(config.get('config.path'));
   try {

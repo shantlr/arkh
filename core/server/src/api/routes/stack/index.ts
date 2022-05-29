@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { mapValues } from 'lodash';
-import { Service, Stack, StackTab } from 'src/data';
-import { State } from 'src/data/state';
-import { EventManager, EVENTS } from 'src/events';
+import { Service, Stack, StackTab } from '../../../data';
+import { State } from '../../../data/state';
+import { stacksWorkflow } from '../../../workflow';
+// import { EventManager, EVENTS } from '../../../events';
 
 export const stackRouter = () => {
   const router = Router();
@@ -52,11 +53,7 @@ export const stackRouter = () => {
       if (!stack) {
         return res.status(404).send();
       }
-      EventManager.push(
-        EVENTS.stack.run({
-          name: stack.name,
-        })
-      );
+      stacksWorkflow.get(stack.name).actions.run();
       return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);

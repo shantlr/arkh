@@ -1,5 +1,6 @@
+import { Logger } from '@shantlr/shipyard-logger';
 import { Request, Response } from 'express';
-import { createLogger, Logger } from '@shantr/metro-logger';
+import { baseLogger } from '../../config';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -11,16 +12,17 @@ declare global {
 }
 
 export const expressLogger = (loggerName = 'api') => {
-  const logger = createLogger(loggerName);
+  const logger = baseLogger.extend(loggerName);
+  const l = logger.extend('mdw');
   return (req: Request, res: Response, next: () => void) => {
     req.logger = logger.prefix(`${req.method} ${req.originalUrl}`);
-    req.logger.info('started');
+    l.info('started');
 
     res.on('close', () => {
       if (res.statusCode < 400) {
-        req.logger.info(`[${res.statusCode}]`);
+        l.info(`[${res.statusCode}]`);
       } else {
-        req.logger.error(`[${res.statusCode}]`);
+        l.error(`[${res.statusCode}]`);
       }
     });
 

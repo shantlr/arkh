@@ -1,4 +1,4 @@
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import Emittery from 'emittery';
 
 import { TaskState } from '../lib/task';

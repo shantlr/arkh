@@ -125,6 +125,7 @@ describe('workflow queue', () => {
       queue.transaction(async () => {
         await sleep(10);
       });
+      await sleep(15);
       expect(queue.isActionOngoing).toBe(false);
       expect(queue.ongoingAction).toBe(null);
     });
@@ -187,6 +188,46 @@ describe('workflow queue', () => {
         await sleep(20);
         expect(DONE).toBe(false);
       });
+    });
+
+    it('should provide error to afterDone', async () => {
+      expect.assertions(2);
+      const queue = createWorkflowQueue();
+
+      queue.transaction(async (api) => {
+        api.addAction({
+          name: 'action',
+          handler: () => {
+            throw new Error('err');
+          },
+          arg: null,
+          onDone: (err) => {
+            expect(err).toBeInstanceOf(Error);
+            expect(err.message).toBe('err');
+          },
+        });
+      });
+      await sleep(10);
+    });
+    it('should provide async error to afterDone', async () => {
+      expect.assertions(2);
+      const queue = createWorkflowQueue();
+
+      queue.transaction(async (api) => {
+        api.addAction({
+          name: 'action',
+          handler: async () => {
+            await sleep(10);
+            throw new Error('err');
+          },
+          arg: null,
+          onDone: (err) => {
+            expect(err).toBeInstanceOf(Error);
+            expect(err.message).toBe('err');
+          },
+        });
+      });
+      await sleep(15);
     });
   });
 });

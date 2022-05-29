@@ -1,4 +1,4 @@
-import { Task } from '@shantr/metro-common-types';
+import { Task } from '@shantlr/shipyard-common-types';
 import { API } from 'configs';
 import { createUseSubscribe, useSocketListen } from 'lib/context/socket';
 import { useQuery, useQueryClient } from 'react-query';

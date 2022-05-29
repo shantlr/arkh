@@ -1,15 +1,14 @@
 import { Server } from 'socket.io';
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
-import { config } from 'src/config';
-import { State } from 'src/data/state';
-import { EventManager, EVENTS } from 'src/events';
-import { createLogger } from '@shantr/metro-logger';
+import { baseLogger, config } from '../config';
+import { State } from '../data/state';
 import { RunnerType } from './class';
-import { Task, TaskLog } from 'src/data';
-import { ServiceSpec } from '@shantr/metro-common-types';
+import { Task, TaskLog } from '../data';
+import { runnersWorkflow } from '../workflow';
 
 export const startRunnerWs = async ({
-  logger = createLogger('runner'),
+  logger = baseLogger.extend('ws:runner'),
 } = {}) => {
   const io = new Server({});
 
@@ -32,11 +31,7 @@ export const startRunnerWs = async ({
         socket,
       });
 
-      EventManager.push(
-        EVENTS.runner.joined({
-          runnerId,
-        })
-      );
+      runnersWorkflow.get(runnerId).actions.joined();
     });
 
     socket.on('disconnect', () => {

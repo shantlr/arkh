@@ -14,7 +14,7 @@ export type StackSpec = {
   services: Record<string, ServiceSpec>;
 };
 
-export type MetroSpec = {
+export type ShipyardFileSpec = {
   stacks: Record<string, StackSpec>;
 };
 
