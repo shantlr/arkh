@@ -22,8 +22,8 @@ const stateCss = {
   'all-off': css``,
 };
 const Indicator = styled.div<{ state: keyof typeof stateCss }>`
-  width: 10px;
-  height: 10px;
+  width: 5px;
+  height: 5px;
   border: 2px solid ${(props) => props.theme.color.secondaryMainBg};
   border-radius: 50%;
   background-color: transparent;

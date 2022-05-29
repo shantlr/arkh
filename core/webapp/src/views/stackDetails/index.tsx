@@ -15,7 +15,6 @@ import { styles } from 'styles/css';
 const Container = styled.div`
   background-color: white;
   box-sizing: border-box;
-  min-width: 500px;
   height: 100%;
 
   display: flex;

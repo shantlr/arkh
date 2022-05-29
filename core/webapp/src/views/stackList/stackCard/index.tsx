@@ -1,15 +1,8 @@
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { map } from 'lodash';
 import { useState } from 'react';
 import { usePopper } from 'react-popper';
-import { useMutation } from 'react-query';
 import styled, { css } from 'styled-components';
 
-import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
-import { Text } from 'components/text';
-import { API } from 'configs';
 import { useStackServiceStates, useSubscribeServiceStates } from 'hooks/query';
 import { StackStatusIndicator } from './indicator';
 import { RunStack } from './runStack';
@@ -26,7 +19,6 @@ const StackHeader = styled.div`
   align-items: center;
   overflow: hidden;
   flex-wrap: nowrap;
-  margin-bottom: ${(props) => props.theme.space.md};
 `;
 const StackTitle = styled.div`
   ${styles.container.textEllipsis};
@@ -39,66 +31,14 @@ const StackTitle = styled.div`
 const StyledRunStack = styled(RunStack)``;
 
 type CardProps = {
-  shrinked?: boolean;
   active?: boolean;
   withHoverCss?: boolean;
 };
 
-const StackHeaderActions = styled.div<{ shrinked?: boolean }>`
+const StackHeaderActions = styled.div`
   display: flex;
   align-items: center;
   margin-left: ${(props) => props.theme.space.md};
-`;
-const ServiceList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const stateCss = {
-  running: css`
-    border-color: transparent;
-    ${styles.base.successBg};
-  `,
-  exited: css`
-    border-color: transparent;
-    ${styles.base.secondaryBg};
-  `,
-};
-
-const ServiceItem = styled.div<{ state?: keyof typeof stateCss }>`
-  ${styles.rounded.md};
-  ${styles.mr.md};
-  ${styles.padding.sm};
-  ${styles.transition.default};
-  margin-bottom: 2px;
-  display: flex;
-  justify-content: space-between;
-  color: ${(props) => props.theme.color.text};
-  ${(props) => (props.state ? stateCss[props.state] : null)};
-
-  border: 1px solid ${(props) => props.theme.color.secondaryMainBg};
-
-  :hover {
-    border-color: transparent;
-    color: ${(props) => props.theme.color.text};
-    background-color: ${(props) => props.theme.color.mainHighlightBg};
-    ${styles.shadow.md};
-  }
-`;
-
-const shrinkedCss = css<CardProps>`
-  font-size: ${(props) => props.theme.fontSize.sm};
-  padding: ${(props) => props.theme.space.sm};
-
-  ${StackHeader} {
-    margin-bottom: 0;
-  }
-
-  ${StyledRunStack} {
-    width: ${(props) => (props.active ? `20px` : '0px')};
-    opacity: ${(props) => (props.active ? 1 : 0)};
-    overflow: hidden;
-  }
 `;
 
 const hoverCss = css<CardProps>`
@@ -113,14 +53,20 @@ const hoverCss = css<CardProps>`
 `;
 const StackCardContainer = styled(BaseCard)<CardProps>`
   position: relative;
-  ${styles.padding.lg};
   ${styles.rounded.lg};
   ${styles.mb.md};
+  ${styles.text.xs};
+  ${styles.padding.sm};
 
   cursor: pointer;
   transition: all 0.5s;
 
-  ${(props) => (props.shrinked ? shrinkedCss : null)};
+  ${StyledRunStack} {
+    width: ${(props) => (props.active ? `20px` : '0px')};
+    opacity: ${(props) => (props.active ? 1 : 0)};
+    overflow: hidden;
+  }
+
   ${(props) => (props.withHoverCss ? hoverCss : null)};
 `;
 
@@ -128,7 +74,6 @@ const StackCardBase = ({
   style,
   active,
   stack,
-  shrinked,
   children,
   serviceStates,
   setContainerRef,
@@ -139,7 +84,6 @@ const StackCardBase = ({
   style?: CSSProperties;
   active: boolean;
   stack: Stack;
-  shrinked?: boolean;
   children?: JSX.Element | boolean | null;
 
   serviceStates: any;
@@ -159,7 +103,6 @@ const StackCardBase = ({
     <StackCardContainer
       style={style}
       ref={setContainerRef}
-      shrinked={shrinked}
       withHoverCss={hoverCss}
       active={active}
       onMouseEnter={onMouseEnter}
@@ -168,7 +111,7 @@ const StackCardBase = ({
         <StackStatusIndicator serviceStates={serviceStates} />
         <StackTitle>{stack.name}</StackTitle>
         <StackHeaderActions>
-          <StyledRunStack shrinked={shrinked} stackName={stack.name} />
+          <StyledRunStack stackName={stack.name} />
         </StackHeaderActions>
       </StackHeader>
 
@@ -180,19 +123,12 @@ const StackCardBase = ({
 export const StackCard = ({
   active,
   stack,
-  shrinked,
 }: {
   active: boolean;
   stack: Stack;
-  shrinked?: boolean;
 }) => {
   const { data: serviceStates } = useStackServiceStates(stack.name);
   useSubscribeServiceStates(stack.name);
-
-  const { mutate: runService } = useMutation(
-    ({ serviceName }: { serviceName: string }) =>
-      API.service.run({ name: serviceName })
-  );
 
   const [showPopper, setShowPopper] = useState(false);
   const [hasEnteredPopper, setHasEnteredPopper] = useState(false);
@@ -218,10 +154,7 @@ export const StackCard = ({
     if (!showPopper) {
       setHasEnteredPopper(false);
     }
-    if (!shrinked && showPopper) {
-      setShowPopper(false);
-    }
-  }, [showPopper, shrinked]);
+  }, [showPopper]);
 
   // Clean relicas
   useEffect(() => {
@@ -238,44 +171,12 @@ export const StackCard = ({
       <StackCardBase
         stack={stack}
         active={active}
-        shrinked={shrinked}
         setContainerRef={setContainerRef}
         serviceStates={serviceStates}
         onMouseEnter={() => {
-          if (!shrinked) {
-            return;
-          }
           setShowPopper(true);
         }}
-      >
-        {!shrinked && (
-          <ServiceList>
-            {map(stack.spec.services, (service, serviceKey) => (
-              <ServiceItem
-                key={serviceKey}
-                state={
-                  serviceStates && serviceStates[serviceKey]
-                    ? serviceStates[serviceKey].current_task_state
-                    : 'off'
-                }
-              >
-                <Text style={{ marginRight: 5 }}>{serviceKey}</Text>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    runService({
-                      serviceName: `${stack.name}.${serviceKey}`,
-                    });
-                  }}
-                >
-                  <FontAwesomeIcon icon={faPlay} />
-                </Button>
-              </ServiceItem>
-            ))}
-          </ServiceList>
-        )}
-      </StackCardBase>
+      />
       {showPopper && (
         <div
           ref={setPopperRef}
@@ -295,7 +196,6 @@ export const StackCard = ({
             setContainerRef={setServicesContainerRef}
             active={active}
             stack={stack}
-            shrinked
             serviceStates={serviceStates}
             withHoverCss
           />
