@@ -147,6 +147,23 @@ export const startRunnerWs = async ({
         });
       }
     );
+
+    socket.on('unknown-service', async ({ name }: { name: string }) => {
+      const serviceState = State.service.get(name);
+      if (serviceState) {
+        if (serviceState.assignedRunnerId === runnerId) {
+          await Task.update.stopRelicas(name, logger);
+        } else {
+          logger.warn(
+            `runner '${runnerId}' is signaling to not know service '${name}' but service is not assigned to this runner`
+          );
+        }
+      } else {
+        logger.warn(
+          `runner '${runnerId}' is signaling to not know service '${name}' but service does not exists in state`
+        );
+      }
+    });
   });
 
   io.listen(config.get('runner.port'));

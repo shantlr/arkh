@@ -18,6 +18,8 @@ import {
 } from '@shantlr/shipyard-common-types';
 import { SideEffects } from '../events/sideEffects';
 import { sortBy } from 'lodash';
+import { Logger } from '@shantlr/shipyard-logger';
+import { State } from './state';
 
 export { doMigrations } from './knex';
 
@@ -233,6 +235,27 @@ export const Task = {
         exited_at: date,
         exit_code: exitCode,
       });
+    },
+
+    async stopRelicas(serviceName: string, logger?: Logger) {
+      const tasks = await Task.list(serviceName);
+      const stoppedTaskIds: string[] = [];
+      await Promise.all(
+        tasks.map(async (t) => {
+          if (!t.exited_at) {
+            if (logger) {
+              logger.info(`stop relicas tasks '${t.id}'`);
+            }
+            await Task.update.syncStopped(t.id);
+            stoppedTaskIds.push(t.id);
+            const serviceState = State.service.get(serviceName);
+            if (serviceState && serviceState.current_task_id === t.id) {
+              State.service.toTaskStopped(t.id, serviceName);
+            }
+          }
+        })
+      );
+      return stoppedTaskIds;
     },
   },
 

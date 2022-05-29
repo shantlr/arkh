@@ -82,6 +82,10 @@ const main = async () => {
     socket.emit('task-stderr', data);
   });
 
+  SideEffects.on('unknownService', (data) => {
+    socket.emit('unknown-service', data);
+  });
+
   const gracefulShutdown = async (signal: string) => {
     console.log('signal', signal);
     console.log('shutting down...');

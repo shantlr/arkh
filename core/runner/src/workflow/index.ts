@@ -3,6 +3,7 @@ import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
 import { servicesWorkflow } from './service';
 import { baseLogger } from '../config';
+import { SideEffects } from './sideEffects';
 
 const logger = baseLogger.extend('main-wk');
 
@@ -17,6 +18,7 @@ export const { internalActions, ...runnerMainWorkflow } = createWorkflowEntity(
       stopService({ name, reason }: { name: string; reason?: string }) {
         if (!servicesWorkflow.has(name)) {
           logger.warn(`service '${name}' could not be stopped: not found`);
+          void SideEffects.emit('unknownService', { name });
           return;
         }
         const service = servicesWorkflow.get(name);

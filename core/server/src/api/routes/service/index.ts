@@ -39,27 +39,12 @@ export const serviceRouter = () => {
       return res.status(500).send(err.message);
     }
   });
-  const stopRelicasTasks = async (serviceName: string, logger: Logger) => {
-    // check if any reliacas of not stopped task
-    const tasks = await Task.list(serviceName);
-    let someStopped = false;
-    await Promise.all(
-      tasks.map(async (t) => {
-        if (!t.exited_at) {
-          logger.info(`stop relicas tasks '${t.id}'`);
-          await Task.update.syncStopped(t.id);
-          someStopped = true;
-        }
-      })
-    );
-    return someStopped;
-  };
   router.post('/:name/stop', async (req, res) => {
     try {
       const { name } = req.params;
       const state = State.service.get(name);
       if (!state) {
-        await stopRelicasTasks(name, req.logger);
+        await Task.update.stopRelicas(name, req.logger);
         return res.status(200).send({ success: false, message: 'not-running' });
       }
 
@@ -68,7 +53,7 @@ export const serviceRouter = () => {
         return res.status(200).send(result);
       }
 
-      if (await stopRelicasTasks(name, req.logger)) {
+      if ((await Task.update.stopRelicas(name, req.logger)).length) {
         return res.status(200).send({ success: true, message: 'stopped' });
       }
       return res

@@ -13,4 +13,6 @@ export const SideEffects = new Emittery<{
   };
   taskStdout: { id: string; serviceName: string; log: string };
   taskStderr: { id: string; serviceName: string; log: string };
+
+  unknownService: { name: string };
 }>({});
