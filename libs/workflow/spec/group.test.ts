@@ -76,6 +76,26 @@ describe('workflow group', () => {
     await group.leave(key);
     expect(group.has(key)).toBe(false);
   });
+
+  it('should has member', async () => {
+    const test = jest.fn(async () => {
+      //
+    });
+    const initEntity = jest.fn(() =>
+      createWorkflowEntity(null, {
+        actions: {
+          test,
+        },
+      })
+    );
+
+    const group = createWorkflowEntityGroup({
+      name: 'group-test',
+      initEntity,
+    });
+    await group.get('k').actions.test(null, { promise: true });
+    expect(group.has('k')).toBe(true);
+  });
   it('should rejoin after leave', async () => {
     const test = jest.fn(async () => {
       //

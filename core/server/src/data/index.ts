@@ -206,7 +206,7 @@ export const Task = {
         {
           stopped_at: date,
           stopping_at: date,
-          exit_code: -1,
+          exit_code: null,
           exited_at: date,
         }
       );

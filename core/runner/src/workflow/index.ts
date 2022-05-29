@@ -15,7 +15,7 @@ export const { internalActions, ...runnerMainWorkflow } = createWorkflowEntity(
         void service.actions.run(spec, { promise: true });
       },
       stopService({ name, reason }: { name: string; reason?: string }) {
-        if (!servicesWorkflow.has[name]) {
+        if (!servicesWorkflow.has(name)) {
           logger.warn(`service '${name}' could not be stopped: not found`);
           return;
         }
