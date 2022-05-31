@@ -65,7 +65,7 @@ export const runnerQueue = createEventQueue('runner', {
           name: serviceName,
           spec,
         });
-        logger.info(`service '${serviceName}' pushed to '${runner.id}'`);
+        logger.info(`service '${serviceName}' assigned to '${runner.id}'`);
       } catch (err) {
         console.error(err);
         reassignService();

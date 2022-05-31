@@ -125,6 +125,10 @@ export const startClientWs = ({
   });
   SideEffects.on('updateTask', async (taskStateUpdate) => {
     const task = await Task.get(taskStateUpdate.id);
+    if (!task) {
+      logger.warn(`task ${taskStateUpdate.id} updated but not founds`);
+      return;
+    }
     io.in(ROOMS.subscription.serviceTasks(task.service_name)).emit(
       `service-task:${task.service_name}`,
       {

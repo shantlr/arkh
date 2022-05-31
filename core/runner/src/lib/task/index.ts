@@ -50,12 +50,8 @@ export class Task {
       this.id = nanoid();
       this.state = 'creating';
       logger.info(`creating '${this.serviceName}'`);
-      void SideEffects.emit('taskStateUpdate', {
-        id: this.id,
-        serviceName: this.serviceName,
-        state: this.state,
-        spec: this.spec,
-      });
+      this.sendState();
+
       const cmd = this.spec.cmd[0];
       const args = this.spec.cmd.slice(1);
       const options: SpawnOptionsWithoutStdio = {};
@@ -149,6 +145,15 @@ export class Task {
       this.process = null;
       throw err;
     }
+  }
+
+  sendState() {
+    void SideEffects.emit('taskStateUpdate', {
+      id: this.id,
+      serviceName: this.serviceName,
+      state: this.state,
+      spec: this.spec,
+    });
   }
 
   async restart() {

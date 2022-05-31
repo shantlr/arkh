@@ -25,6 +25,8 @@ export const createService = (serviceName: string) => {
               await task.exec();
               logger.info(`started`);
             }
+            logger.info('already running');
+            task.sendState();
             return;
           }
 

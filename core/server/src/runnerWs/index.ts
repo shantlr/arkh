@@ -148,6 +148,9 @@ export const startRunnerWs = async ({
       }
     );
 
+    /**
+     * Runner signal server that a service is unknown (happen when server ask runner to stop service)
+     */
     socket.on('unknown-service', async ({ name }: { name: string }) => {
       const serviceState = State.service.get(name);
       if (serviceState) {
