@@ -7,6 +7,7 @@ export type WorkflowEntityGroupMember<
   Key extends string | number | symbol
 > = WorkflowEntity<
   {
+    key: Key;
     entity: Entity;
     isLeaving: boolean;
   },
@@ -25,6 +26,7 @@ export type WorkflowEntityGroupMember<
 export type WorkflowEntityMemberProxy<
   Entity extends WorkflowEntity<any, any, any>
 > = {
+  state: Entity['state'];
   actions: Entity['actions'];
 };
 
@@ -38,6 +40,7 @@ export type WorkflowEntityGroup<
   GroupActionHandlers extends WorkflowActionHandlerMap<any>,
   Key extends string | number | symbol
 > = WorkflowEntity<any, GroupActionHandlers, any> & {
+  keys(): Key[];
   get(key: Key): WorkflowEntityMemberProxy<Entity>;
   has(key: Key): boolean;
   isLeaving(key: Key): boolean;
@@ -52,19 +55,19 @@ const createEntityMember = <
   Key extends string | number | symbol
 >({
   memberKey,
-  // members,
   initEntity,
   leaveEntity,
 }: {
   memberKey: Key;
-  // members: Record<Key, WorkflowEntityGroupMember<Entity, Key>>;
   initEntity: (key: Key) => Entity;
   leaveEntity?: (entity: Entity, key: Key) => void | Promise<void>;
 }) => {
   const state: {
+    key: Key;
     entity: Entity;
     isLeaving: boolean;
   } = {
+    key: memberKey,
     entity: null,
     isLeaving: false,
   };
@@ -124,6 +127,16 @@ const createEntityMemberProxy = <
   const actionState: Entity['actions'] = {};
 
   return {
+    get state() {
+      if (!members[memberKey]) {
+        members[memberKey] = createEntityMember({
+          memberKey,
+          initEntity,
+          leaveEntity,
+        });
+      }
+      return members[memberKey].state.sentity.state;
+    },
     actions: new Proxy<Entity['actions']>(actionState, {
       get(target, actionName: keyof Entity['actions']) {
         if (!target[actionName]) {
@@ -191,6 +204,9 @@ export const createWorkflowEntityGroup = <
     },
     has(key: Key) {
       return key in members;
+    },
+    keys() {
+      return Object.keys(members) as Key[];
     },
     isLeaving(key: Key) {
       return key in members && members[key].state.isLeaving;
