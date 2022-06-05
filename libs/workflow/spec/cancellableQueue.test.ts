@@ -167,45 +167,4 @@ describe('cancellable queue', () => {
       expect(DONE).toBe(false);
     });
   });
-
-  // describe('transaction', () => {
-  // describe('action', () => {
-  //   it('should provide error to afterDone', async () => {
-  //     expect.assertions(2);
-  //     const queue = createWorkflowQueue();
-  //     queue.transaction(async (api) => {
-  //       api.addAction({
-  //         name: 'action',
-  //         handler: () => {
-  //           throw new Error('err');
-  //         },
-  //         arg: null,
-  //         onDone: (err) => {
-  //           expect(err).toBeInstanceOf(Error);
-  //           expect(err.message).toBe('err');
-  //         },
-  //       });
-  //     });
-  //     await sleep(10);
-  //   });
-  //   it('should provide async error to afterDone', async () => {
-  //     expect.assertions(2);
-  //     const queue = createWorkflowQueue();
-  //     queue.transaction(async (api) => {
-  //       api.addAction({
-  //         name: 'action',
-  //         handler: async () => {
-  //           await sleep(10);
-  //           throw new Error('err');
-  //         },
-  //         arg: null,
-  //         onDone: (err) => {
-  //           expect(err).toBeInstanceOf(Error);
-  //           expect(err.message).toBe('err');
-  //         },
-  //       });
-  //     });
-  //     await sleep(15);
-  //   });
-  // });
 });

@@ -1,96 +1,81 @@
 import {
-  createWorkflowQueue,
-  WorkflowActionPromiseApiFn,
-} from './workflowQueue';
+  CancellableAction,
+  CancellableApi,
+  createCancellableQueue,
+  TransactionApi,
+} from './cancellableQueue';
+import { QueueAction } from './queue';
 import { mapObject } from './utils';
-import {
-  WorkflowActionHandlerDef,
-  WorkflowActionHandlerMap,
-  WorkflowEntityActionCreators,
-  WorkflowEntityInternalActionCreators,
-} from './types';
 
-export type WorkflowEntity<
-  State,
-  ActionWorkflows extends WorkflowActionHandlerMap<any>,
-  InternalActions extends Record<string, WorkflowActionPromiseApiFn>
-> = {
+type EntityAction = CancellableAction;
+
+type Entity<State, Actions extends EntityActionHandlerMap> = {
   state: State;
-  actions: WorkflowEntityActionCreators<ActionWorkflows>;
-
+  actions: EntityActionCreatorMap<Actions>;
   get isActionOngoing(): boolean;
   get actionQueueSize(): number;
-  get ongoingAction(): { name: string };
-  // transaction: (
-  //   handler: () => void,
-  //   options: { promise: true }
-  // ) => Promise<void>;
-  internalActions: WorkflowEntityInternalActionCreators<InternalActions>;
+  get ongoingAction(): EntityAction;
 };
 
-export const createWorkflowEntity = <
-  State,
-  InternalActions extends Record<string, WorkflowActionPromiseApiFn<any>>,
-  HandlerMap extends WorkflowActionHandlerMap<any>
->(
+export function createEntity<State, Actions extends EntityActionHandlerMap>(
   state: State,
-  params: {
-    actions: HandlerMap;
-    internalActions?: InternalActions;
+  {
+    actions,
+  }: {
+    actions: Actions;
   }
-): WorkflowEntity<State, HandlerMap, InternalActions> => {
-  const queue = createWorkflowQueue();
+): Entity<State, Actions> {
+  const queue = createCancellableQueue();
 
-  const createActionCreator =
-    <T>(actionName: string, act: WorkflowActionHandlerDef<T>) =>
-    (arg: T, { promise }: { promise?: boolean } = {}) => {
+  const createActionCreator = (
+    actionName: keyof Actions,
+    handler: EntityActionAdvHandler<unknown>
+  ): EntityActionCreator<unknown> => {
+    return (arg: unknown, { promise }: { promise?: boolean }) => {
       if (promise) {
-        return new Promise((resolve, reject) => {
-          queue.transaction(async (trxApi) => {
-            if (act.beforeEmitAction) {
-              await act.beforeEmitAction(trxApi);
+        return new Promise<void>((resolve, reject) => {
+          queue.transaction(async (trx) => {
+            if (handler.beforeEmitAction) {
+              await handler.beforeEmitAction(arg, trx);
             }
-            trxApi.addAction({
-              name: actionName,
-              handler: act.handler,
-              arg,
-              cancel: reject,
-              // resolve in after done to ensure that promise is resolved only when action is marked as done
-              onDone(err, result) {
+            trx.addAction({
+              data: (api) => handler.handler(arg, api),
+              onDone(err, res) {
                 if (err) {
                   reject(err);
                 } else {
-                  resolve(result);
+                  resolve(res);
                 }
               },
             });
           });
         });
       }
-
-      void queue.transaction(async (trxApi) => {
-        if (act.beforeEmitAction) {
-          await act.beforeEmitAction(trxApi);
+      queue.transaction(async (trx) => {
+        if (handler.beforeEmitAction) {
+          await handler.beforeEmitAction(arg, trx);
         }
-        trxApi.addAction({
-          name: actionName,
-          handler: act.handler,
-          arg,
+        trx.addAction({
+          data: (api) => {
+            handler.handler(arg, api);
+          },
         });
       });
     };
+  };
+
+  const actionCreators = mapObject(actions, (act, actionName) => {
+    if (typeof act === 'function') {
+      return createActionCreator(actionName, {
+        handler: act,
+      });
+    }
+    return createActionCreator(actionName, act);
+  });
 
   return {
     state,
-    actions: mapObject(params.actions, (act, actionName) => {
-      if (typeof act === 'function') {
-        return createActionCreator(actionName, {
-          handler: act,
-        });
-      } else {
-        return createActionCreator(actionName, act);
-      }
-    }) as WorkflowEntityActionCreators<HandlerMap>,
+    actions: actionCreators,
     get isActionOngoing() {
       return queue.isActionOngoing;
     },
@@ -100,17 +85,46 @@ export const createWorkflowEntity = <
     get ongoingAction() {
       return queue.ongoingAction;
     },
-
-    // transaction: (handler, { promise } = {}) => {
-    //   queue.transaction((trxApi) => {
-    //     handler();
-    //   });
-    // },
-
-    internalActions: mapObject(params.internalActions, (act, actionName) => {
-      return createActionCreator(`@internal/${actionName}`, {
-        handler: act,
-      });
-    }) as WorkflowEntityInternalActionCreators<InternalActions>,
   };
+}
+
+type EntityActionApi = CancellableApi;
+type BeforeEmiActionApi = TransactionApi;
+
+/** INPUT TYPES */
+type EntityActionHandler<Arg> = (
+  arg: Arg,
+  api: EntityActionApi
+) => void | Promise<void>;
+type EntityActionAdvHandler<Arg> = {
+  beforeEmitAction?: (
+    arg: Arg,
+    api: BeforeEmiActionApi
+  ) => void | Promise<void>;
+  handler: EntityActionHandler<Arg>;
+};
+
+export type EntityActionHandlerMap = Record<
+  string,
+  EntityActionHandler<any> | EntityActionAdvHandler<any>
+>;
+
+/** Mapped types */
+
+/**
+ * Extract arg of action handler
+ */
+type ActionHandlerArg<
+  Handler extends EntityActionAdvHandler<any> | EntityActionHandler<any>
+> = Handler extends EntityActionHandler<infer Arg>
+  ? Arg
+  : Handler extends EntityActionAdvHandler<infer Arg>
+  ? Arg
+  : never;
+interface EntityActionCreator<Arg = void> {
+  (arg: Arg, options: { promise: true }): Promise<void>;
+  (arg: Arg, options?: { promise?: boolean }): void;
+}
+export type EntityActionCreatorMap<Actions extends EntityActionHandlerMap> = {
+  [key in keyof Actions]: EntityActionCreator<ActionHandlerArg<Actions[key]>>;
 };

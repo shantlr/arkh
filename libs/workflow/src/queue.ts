@@ -75,18 +75,25 @@ export function createQueue<Action extends QueueAction<any, any>>({
     const onFinally = (err: any, res?: any) => {
       isOngoing = false;
       ongoingAction = null;
+
+      // if action is an end action => mark queue as ended
       if (action[IS_END_ACTION]) {
         isEnded = true;
       }
+
       // NOTE: onDone should be called before runAction
       onDone(err, res);
+
+      // process next action
       runAction();
     };
+
     let actionRes: any;
     try {
       actionRes = handleAction(action.data);
     } catch (err) {
-      onDone(err);
+      onFinally(err);
+      return;
     }
 
     if (isPromise(actionRes)) {

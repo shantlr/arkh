@@ -27,8 +27,18 @@ const defaultOnDone = (err: any, res?: any) => {
   }
 };
 
+export type CancellableAction = QueueAction<
+  (api: CancellableApi) => void | Promise<void>
+>;
+
+export type TransactionApi = {
+  get ongoingAction(): CancellableAction;
+  cancelOngoing(): Promise<void>;
+  filterQueue(fn: (action: CancellableAction) => boolean): void;
+  addAction(action: CancellableAction): void;
+};
+
 export const createCancellableQueue = () => {
-  type Action = QueueAction<(api: CancellableApi) => void | Promise<void>>;
   const actionQueueState: {
     shouldCancel?: {
       resolve: () => void;
@@ -70,7 +80,7 @@ export const createCancellableQueue = () => {
       });
     },
   };
-  const actionQueue = createQueue<Action>({
+  const actionQueue = createQueue<CancellableAction>({
     handleAction(cb) {
       return cb(actionApi);
     },
@@ -79,8 +89,8 @@ export const createCancellableQueue = () => {
   /**
    * transaction part allow atomic action on queue
    */
-  const transactionApi = {
-    ongoingAction() {
+  const transactionApi: TransactionApi = {
+    get ongoingAction() {
       return actionQueue.ongoingAction;
     },
     async cancelOngoing() {
@@ -99,10 +109,10 @@ export const createCancellableQueue = () => {
       });
       await p;
     },
-    filterQueue(filterFn: (action: Action) => boolean) {
+    filterQueue(filterFn: (action: CancellableAction) => boolean) {
       actionQueue.actionInQueue = actionQueue.actionInQueue.filter(filterFn);
     },
-    addAction(action: Action) {
+    addAction(action: CancellableAction) {
       actionQueue.addAction({
         data: action.data,
         onDone(err, res) {
@@ -127,7 +137,7 @@ export const createCancellableQueue = () => {
     },
   };
   const transactionQueue = createQueue<
-    QueueAction<(api: typeof transactionApi) => void | Promise<void>>
+    QueueAction<(api: TransactionApi) => void | Promise<void>>
   >({
     handleAction: (cb) => {
       return cb(transactionApi);
@@ -138,13 +148,13 @@ export const createCancellableQueue = () => {
     get isActionOngoing() {
       return actionQueue.isOngoing;
     },
-    get queueSize() {
+    get actionQueueSize() {
       return actionQueue.queueSize;
     },
     get ongoingAction() {
       return actionQueue.ongoingAction;
     },
-    transaction(fn: (api: typeof transactionApi) => void | Promise<void>) {
+    transaction(fn: (api: TransactionApi) => void | Promise<void>) {
       transactionQueue.addAction({
         data: fn,
       });
