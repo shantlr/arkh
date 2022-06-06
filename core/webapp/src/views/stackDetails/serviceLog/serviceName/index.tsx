@@ -142,8 +142,6 @@ export const ServiceName = React.forwardRef<
     return false;
   }, [tasks]);
 
-  console.log(service, currentTask);
-
   return (
     <StyledSelect
       selected={selectedTaskId}

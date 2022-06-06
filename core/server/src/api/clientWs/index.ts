@@ -102,15 +102,24 @@ export const startClientWs = ({
     });
   });
 
-  SideEffects.on('updateServiceState', ({ serviceName }) => {
+  SideEffects.on('updateServiceState', async ({ serviceName }) => {
     if (servicesWorkflow.has(serviceName)) {
       const { stackName, serviceKey } = Service.splitFullName(serviceName);
-      io.in(ROOMS.subscription.serviceStates(stackName)).emit(
-        `update-service-state:${stackName}`,
+      io.in([ROOMS.subscription.stackServiceStates(stackName)]).emit(
+        `update-stack-service-state:${stackName}`,
         {
           serviceName,
           stackName,
           serviceKey,
+          state: servicesWorkflow.get(serviceName)?.state,
+        }
+      );
+
+      const service = await Service.getOne(serviceName);
+      io.in(ROOMS.subscription.serviceState(serviceName)).emit(
+        `update-service-state:${serviceName}`,
+        {
+          ...service,
           state: servicesWorkflow.get(serviceName)?.state,
         }
       );

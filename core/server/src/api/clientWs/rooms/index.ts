@@ -6,8 +6,12 @@ export const UNSUBSCRIBE_PREFIX = 'unsubscribe';
 
 export const SUBSCRIPTIONS: Subscriptions = {
   stacks: 'stacks',
-  serviceStates: {
-    key: 'service-states',
+  serviceState: {
+    key: 'service-state',
+    params: (serviceName: string) => serviceName,
+  },
+  stackServiceStates: {
+    key: 'stack-service-states',
     params: (stackName: string) => stackName,
   },
   serviceTasks: {

@@ -16,19 +16,19 @@ export const useStackServiceStates = (stackName: string) => {
   );
 };
 
-const useSubServiceStates = createUseSubscribe<string>({
+const useSubStackServiceStates = createUseSubscribe<string>({
   key: (stackName) => `subscribe-service-states:${stackName}`,
   subscribe(socket, stackName) {
-    socket.emit(`subscribe-service-states`, stackName);
+    socket.emit(`subscribe-stack-service-states`, stackName);
   },
   unsubscribe(socket, stackName) {
-    socket.emit(`unsubscribe-service-states`, stackName);
+    socket.emit(`unsubscribe-stack-service-states`, stackName);
   },
 });
-export const useSubscribeServiceStates = (stackName: string) => {
+export const useSubscribeStackServiceStates = (stackName: string) => {
   const queryClient = useQueryClient();
-  useSubServiceStates(stackName);
-  useSocketListen(`update-service-state:${stackName}`, (event) => {
+  useSubStackServiceStates(stackName);
+  useSocketListen(`update-stack-service-state:${stackName}`, (event) => {
     // Add service to cache
     queryClient.setQueryData(
       QUERY_KEY.stack.serviceStates(stackName),
@@ -42,6 +42,28 @@ export const useSubscribeServiceStates = (stackName: string) => {
   });
 };
 
+const useSubServiceState = createUseSubscribe<string>({
+  key: (serviceName) => `subscribe-service-state:${serviceName}`,
+  subscribe(socket, serviceName) {
+    socket.emit(`subscribe-service-state`, serviceName);
+  },
+  unsubscribe(socket, serviceName) {
+    socket.emit(`unsubscribe-service-state`, serviceName);
+  },
+});
+export const useSubscribeService = (serviceName: string) => {
+  useSubServiceState(serviceName);
+  const queryClient = useQueryClient();
+  useSocketListen(`update-service-state:${serviceName}`, (event) => {
+    queryClient.setQueryData(
+      QUERY_KEY.service.state(serviceName),
+      (prev: any) => {
+        return event;
+      }
+    );
+    //
+  });
+};
 export const useService = (serviceName: string) => {
   return useQuery(QUERY_KEY.service.state(serviceName), () =>
     API.service.get(serviceName)

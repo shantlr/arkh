@@ -1,4 +1,4 @@
-import { ServiceState, Task, TaskLog } from '../types';
+import { ServiceInfo, ServiceState, Task, TaskLog } from '../types';
 
 /**
  * Subscription that require parameters
@@ -16,7 +16,8 @@ type ParametricSubscription<
  */
 export type Subscriptions = {
   stacks: 'stacks';
-  serviceStates: ParametricSubscription<'service-states', [string]>;
+  serviceState: ParametricSubscription<'service-state', [string]>;
+  stackServiceStates: ParametricSubscription<'stack-service-states', [string]>;
   serviceTasks: ParametricSubscription<'service-tasks', [string]>;
   taskLogs: ParametricSubscription<'task-logs', [string]>;
 };
@@ -103,7 +104,7 @@ export type SocketIOServerToClientEvents = {
         }
   ) => void;
 } & PatternEvents<
-  'update-service-state',
+  'update-stack-service-state',
   (serviceState: {
     serviceName: string;
     serviceKey: string;
@@ -111,6 +112,14 @@ export type SocketIOServerToClientEvents = {
     state: ServiceState;
   }) => void
 > &
+  PatternEvents<
+    'update-service-state',
+    (
+      serviceState: ServiceInfo & {
+        state: ServiceState;
+      }
+    ) => void
+  > &
   PatternEvents<
     'service-task',
     (

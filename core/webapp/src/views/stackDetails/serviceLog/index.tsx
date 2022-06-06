@@ -15,6 +15,7 @@ import {
   useService,
   useServiceTaskLogs,
   useServiceTasks,
+  useSubscribeService,
   useSubscribeServiceTasks,
 } from 'hooks/query';
 import { useHover } from 'hooks/utils';
@@ -136,6 +137,7 @@ export const ServiceLogs = ({
   onDelete?: () => void;
 }) => {
   const { data: service } = useService(fullName);
+  useSubscribeService(fullName);
   const { data: tasks } = useServiceTasks(fullName);
 
   const [taskId, setTaskId] = useState(() => {

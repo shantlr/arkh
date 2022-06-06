@@ -7,7 +7,10 @@ import { usePopper } from 'react-popper';
 import styled, { css } from 'styled-components';
 
 import { BaseCard } from 'components/card';
-import { useStackServiceStates, useSubscribeServiceStates } from 'hooks/query';
+import {
+  useStackServiceStates,
+  useSubscribeStackServiceStates,
+} from 'hooks/query';
 import { createTimeout } from 'lib/createTimeout';
 import { styles } from 'styles/css';
 
@@ -130,9 +133,7 @@ export const StackCard = ({
   stack: Stack;
 }) => {
   const { data: serviceStates } = useStackServiceStates(stack.name);
-  useSubscribeServiceStates(stack.name);
-
-  console.log(serviceStates);
+  useSubscribeStackServiceStates(stack.name);
 
   const [showPopper, setShowPopper] = useState(false);
   const [hasEnteredPopper, setHasEnteredPopper] = useState(false);
