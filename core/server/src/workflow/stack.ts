@@ -1,17 +1,16 @@
 import { forEach, isEqual } from 'lodash';
 import { StackSpec } from '@shantlr/shipyard-common-types';
+import { createEntity, createGroup } from '@shantlr/workflow';
+
 import { Service, Stack } from '../data';
-import { SideEffects } from '../events/sideEffects';
-import {
-  createWorkflowEntity,
-  createWorkflowEntityGroup,
-} from '@shantlr/workflow';
-import { servicesWorkflow } from './service';
 import { baseLogger } from '../config';
+
+import { SideEffects } from './sideEffects';
+import { servicesWorkflow } from './service';
 
 const createStackWorkflow = (name: string) => {
   const logger = baseLogger.extend(`stack:${name}`);
-  return createWorkflowEntity(null, {
+  return createEntity(null, {
     actions: {
       async save({ spec, configKey }: { spec: StackSpec; configKey: string }) {
         const existingStack = await Stack.getOne(name);
@@ -83,15 +82,13 @@ const createStackWorkflow = (name: string) => {
           logger.info(`'${name}' not found`);
         }
       },
-      async removeIfAllServiceRemoved(a: void) {
+      async serviceHasBeenRemoved({ serviceName }: { serviceName: string }) {
         const stack = await Stack.getOne(name);
         if (!stack) {
           logger.error(`stack '${name}' not found`);
           return;
         }
-
         if (!stack.to_remove) {
-          logger.info(`'${name}' is not expected to be removed (ignored)`);
           return;
         }
         const services = await Service.find({
@@ -125,7 +122,7 @@ const createStackWorkflow = (name: string) => {
 };
 
 const logger = baseLogger.extend('stacks');
-export const stacksWorkflow = createWorkflowEntityGroup({
+export const stacksWorkflow = createGroup({
   name: 'stacks',
   initEntity: createStackWorkflow,
 });

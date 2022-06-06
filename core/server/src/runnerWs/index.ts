@@ -2,10 +2,10 @@ import { Server } from 'socket.io';
 import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
 import { baseLogger, config } from '../config';
-import { State } from '../data/state';
-import { RunnerType } from './class';
 import { Task, TaskLog } from '../data';
-import { runnersWorkflow } from '../workflow';
+import { runnersWorkflow, servicesWorkflow } from '../workflow';
+
+import { RunnerType } from './class';
 
 export const startRunnerWs = async ({
   logger = baseLogger.extend('ws:runner'),
@@ -14,35 +14,45 @@ export const startRunnerWs = async ({
 
   io.on('connection', (socket) => {
     let runnerId = null;
-    socket.on('runner-ready', (event: { id: string; type: RunnerType }) => {
-      runnerId = event.id;
+    socket.on(
+      'runner-ready',
+      (event: {
+        id: string;
+        type: RunnerType;
+        tasks: {
+          id: string;
+          serviceName: string;
+          state: string;
+          exited_at?: Date;
+          exit_code?: number;
+        }[];
+      }) => {
+        runnerId = event.id;
 
-      const existing = State.runner.get(runnerId);
-      if (existing && existing.state === 'ready') {
-        logger.warn(`runner '${runnerId}' already connected`);
-        socket.emit('force-runner-exit', {
-          reason: 'already-connected',
+        console.log('tasks', event.tasks);
+
+        runnersWorkflow.get(runnerId).actions.ready({
+          type: event.type,
+          socket,
         });
-        return;
       }
-      State.runner.ready({
-        id: event.id,
-        type: event.type,
-        socket,
-      });
-
-      runnersWorkflow.get(runnerId).actions.joined();
-    });
+    );
 
     socket.on('disconnect', () => {
       logger.info(`'${runnerId}' disconnected`);
-      if (runnerId) {
-        State.runner.disconnected(runnerId);
+      if (runnerId && runnersWorkflow.has(runnerId)) {
+        void runnersWorkflow.leave(runnerId).catch((err) => {
+          logger.warn(`failed to leave runner: %o`, err);
+        });
       }
     });
     socket.on('runner-leave', ({ reason }: { reason: string }, ack) => {
       logger.info(`runner '${runnerId}' is leaving: ${reason}`);
-      State.runner.leave(runnerId);
+      if (runnerId && runnersWorkflow.has(runnerId)) {
+        void runnersWorkflow.leave(runnerId).catch((err) => {
+          logger.warn(`failed to leave runner: %o`, err);
+        });
+      }
       ack(true);
     });
 
@@ -62,7 +72,7 @@ export const startRunnerWs = async ({
         spec?: ServiceSpec;
         exitCode?: number;
       }) => {
-        const service = State.service.get(serviceName);
+        const service = servicesWorkflow.get(serviceName);
         if (!service) {
           logger.info(
             `task-state not updated: service '${serviceName}' not found`
@@ -70,15 +80,15 @@ export const startRunnerWs = async ({
           return;
         }
 
-        if (service.assignedRunnerId !== runnerId) {
+        if (service.state.assigned_runner_id !== runnerId) {
           logger.error(
-            `WARNING: task started by runner '${runnerId}' but is assigned to '${service.assignedRunnerId}'`
+            `WARNING: task started by runner '${runnerId}' but is assigned to '${service.state.assigned_runner_id}'`
           );
         }
 
         switch (state) {
           case 'creating': {
-            State.service.toTaskCreating(taskId, serviceName);
+            servicesWorkflow.get(serviceName).actions.taskCreating({ taskId });
             await Task.create({
               id: taskId,
               serviceName,
@@ -88,22 +98,22 @@ export const startRunnerWs = async ({
             break;
           }
           case 'running': {
-            State.service.toTaskRunning(taskId, serviceName);
+            servicesWorkflow.get(serviceName).actions.taskRunning({ taskId });
             await Task.update.runningAt(taskId);
             break;
           }
           case 'stopping': {
-            State.service.toTaskStopping(taskId, serviceName);
+            servicesWorkflow.get(serviceName).actions.taskStopping({ taskId });
             await Task.update.stoppingAt(taskId);
             break;
           }
           case 'stopped': {
-            State.service.toTaskStopped(taskId, serviceName);
+            servicesWorkflow.get(serviceName).actions.taskStopped({ taskId });
             await Task.update.stoppedAt(taskId);
             break;
           }
           case 'exited': {
-            State.service.toTaskExited(taskId, serviceName);
+            servicesWorkflow.get(serviceName).actions.taskExited({ taskId });
             await Task.update.exited(taskId, exitCode);
             break;
           }
@@ -152,18 +162,20 @@ export const startRunnerWs = async ({
      * Runner signal server that a service is unknown (happen when server ask runner to stop service)
      */
     socket.on('unknown-service', async ({ name }: { name: string }) => {
-      const serviceState = State.service.get(name);
-      if (serviceState) {
-        if (serviceState.assignedRunnerId === runnerId) {
-          await Task.update.stopRelicas(name, logger);
-        } else {
-          logger.warn(
-            `runner '${runnerId}' is signaling to not know service '${name}' but service is not assigned to this runner`
-          );
-        }
-      } else {
+      if (!servicesWorkflow.has(name)) {
         logger.warn(
           `runner '${runnerId}' is signaling to not know service '${name}' but service does not exists in state`
+        );
+        return;
+      }
+
+      const service = servicesWorkflow.get(name);
+      if (service.state.assigned_runner_id === runnerId) {
+        // Runner restarted and all assigned taks were lost ?
+        await Task.update.stopRelicas(name, logger);
+      } else {
+        logger.warn(
+          `runner '${runnerId}' is signaling to not know service '${name}' but service is not assigned to this runner`
         );
       }
     });

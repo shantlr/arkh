@@ -26,11 +26,37 @@ export function createEntity<State, Actions extends EntityActionHandlerMap>(
 ): Entity<State, Actions> {
   const queue = createCancellableQueue();
 
+  const createEntityActionApi = (cancellableApi: CancellableApi) => {
+    const ongoingPromise: Promise<any> = null;
+    const api: EntityActionApi = {
+      ...cancellableApi,
+      do: async (actionCreator, arg) => {
+        if (ongoingPromise) {
+          throw new Error('Another action already ongoing');
+        }
+
+        if (!actionCreatorMapping.has(actionCreator)) {
+          throw new Error(`api.do: unknown action creator`);
+        }
+
+        const handler = actionCreatorMapping.get(actionCreator);
+        return handler.handler(arg, api);
+      },
+    };
+
+    return {
+      api,
+      ensureActionDone: () => {
+        return ongoingPromise;
+      },
+    };
+  };
+
   const createActionCreator = (
     actionName: keyof Actions,
     handler: EntityActionAdvHandler<unknown>
   ): EntityActionCreator<unknown> => {
-    return (arg: unknown, { promise }: { promise?: boolean }) => {
+    return (arg: unknown, { promise }: { promise?: boolean } = {}) => {
       if (promise) {
         return new Promise<void>((resolve, reject) => {
           queue.transaction(async (trx) => {
@@ -38,7 +64,13 @@ export function createEntity<State, Actions extends EntityActionHandlerMap>(
               await handler.beforeEmitAction(arg, trx);
             }
             trx.addAction({
-              data: (api) => handler.handler(arg, api),
+              data: async (api) => {
+                const { api: wrappedApi, ensureActionDone } =
+                  createEntityActionApi(api);
+                const res = await handler.handler(arg, wrappedApi);
+                await ensureActionDone();
+                return res;
+              },
               onDone(err, res) {
                 if (err) {
                   reject(err);
@@ -55,8 +87,14 @@ export function createEntity<State, Actions extends EntityActionHandlerMap>(
           await handler.beforeEmitAction(arg, trx);
         }
         trx.addAction({
-          data: (api) => {
-            handler.handler(arg, api);
+          data: async (api) => {
+            const res = await handler.handler(arg, {
+              ...api,
+              async do() {
+                //
+              },
+            });
+            return res;
           },
         });
       });
@@ -70,6 +108,10 @@ export function createEntity<State, Actions extends EntityActionHandlerMap>(
       });
     }
     return createActionCreator(actionName, act);
+  });
+  const actionCreatorMapping = new Map();
+  Object.keys(actionCreators).forEach((k) => {
+    actionCreatorMapping.set(actionCreators[k], actions[k]);
   });
 
   return {
@@ -87,7 +129,12 @@ export function createEntity<State, Actions extends EntityActionHandlerMap>(
   };
 }
 
-type EntityActionApi = CancellableApi;
+type EntityActionApi = CancellableApi & {
+  /**
+   * Run another action of entity
+   */
+  do<T>(actionCreator: EntityActionCreator<T>, arg: T): Promise<void>;
+};
 type BeforeEmiActionApi = TransactionApi;
 
 /** INPUT TYPES */

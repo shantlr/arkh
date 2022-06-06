@@ -10,3 +10,6 @@ dist/
 yarn-error.log
 
 /core/webapp-bkp
+
+.metadata_never_index
+.DS_Store

@@ -1,14 +1,17 @@
-import { createWorkflowEntity } from '@shantlr/workflow';
-import { ShipyardFileSpec } from '@shantlr/shipyard-common-types';
 import { readdir, readFile } from 'fs/promises';
-import { forEach, isEqual, keyBy } from 'lodash';
 import path from 'path';
+
+import { createEntity } from '@shantlr/workflow';
+import { ShipyardFileSpec } from '@shantlr/shipyard-common-types';
+import { forEach, isEqual, keyBy } from 'lodash';
 import YAML from 'yaml';
 import { YAMLError } from 'yaml/util';
+
 import { Config, Stack } from '../../data';
-import { InvalidConfig, parseConfig } from './parseConfig';
 import { stacksWorkflow } from '../stack';
 import { baseLogger } from '../../config';
+
+import { InvalidConfig, parseConfig } from './parseConfig';
 
 const listAllFiles = async (dirPath: string) => {
   const res: string[] = [];
@@ -30,7 +33,7 @@ const listAllFiles = async (dirPath: string) => {
 };
 
 const logger = baseLogger.extend('config');
-export const configsWorkflow = createWorkflowEntity(null, {
+export const configsWorkflow = createEntity(null, {
   actions: {
     async syncDir(dirPath: string, api) {
       try {

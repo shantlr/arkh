@@ -1,9 +1,9 @@
+import { ServiceState } from '@shantlr/shipyard-common-types';
 import { Router } from 'express';
 import { mapValues } from 'lodash';
+
 import { Service, Stack, StackTab } from '../../../data';
-import { State } from '../../../data/state';
-import { stacksWorkflow } from '../../../workflow';
-// import { EventManager, EVENTS } from '../../../events';
+import { servicesWorkflow, stacksWorkflow } from '../../../workflow';
 
 export const stackRouter = () => {
   const router = Router();
@@ -34,9 +34,19 @@ export const stackRouter = () => {
     try {
       const stack = await Stack.getOne(req.params.name);
       if (stack) {
-        const serviceStates = mapValues(stack.spec.services, (service, key) => {
-          return State.service.get(`${stack.name}.${key}`);
-        });
+        const serviceStates: Record<string, ServiceState> = mapValues(
+          stack.spec.services,
+          (service, key): ServiceState => {
+            const serviceName = Service.formatName(stack.name, key);
+            if (servicesWorkflow.has(serviceName)) {
+              return servicesWorkflow.get(serviceName).state;
+            }
+            return {
+              name: serviceName,
+              state: 'off',
+            };
+          }
+        );
         return res.status(200).send(serviceStates);
       } else {
         return res.status(404).send();

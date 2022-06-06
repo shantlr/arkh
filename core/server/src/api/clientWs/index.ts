@@ -1,14 +1,17 @@
+import { Server as HttpServer } from 'http';
+
 import {
   SocketIOClientToServerEvents,
   SocketIOServerToClientEvents,
 } from '@shantlr/shipyard-common-types';
 import { Logger } from '@shantlr/shipyard-logger';
-import { Server as HttpServer } from 'http';
 import { forEach } from 'lodash';
 import { Server } from 'socket.io';
+
 import { Service, Task } from '../../data';
-import { State } from '../../data/state';
-import { SideEffects } from '../../events/sideEffects';
+import { SideEffects } from '../../workflow/sideEffects';
+import { servicesWorkflow } from '../../workflow';
+
 import {
   ROOMS,
   SUBCRIBE_PREFIX,
@@ -100,17 +103,18 @@ export const startClientWs = ({
   });
 
   SideEffects.on('updateServiceState', ({ serviceName }) => {
-    const { stackName, serviceKey } = Service.splitFullName(serviceName);
-    const state = State.service.get(serviceName);
-    io.in(ROOMS.subscription.serviceStates(stackName)).emit(
-      `update-service-state:${stackName}`,
-      {
-        serviceName,
-        stackName,
-        serviceKey,
-        state,
-      }
-    );
+    if (servicesWorkflow.has(serviceName)) {
+      const { stackName, serviceKey } = Service.splitFullName(serviceName);
+      io.in(ROOMS.subscription.serviceStates(stackName)).emit(
+        `update-service-state:${stackName}`,
+        {
+          serviceName,
+          stackName,
+          serviceKey,
+          state: servicesWorkflow.get(serviceName).state,
+        }
+      );
+    }
   });
 
   SideEffects.on('addTask', async ({ id, serviceName }) => {

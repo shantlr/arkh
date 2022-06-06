@@ -41,7 +41,7 @@ export type ServiceStateEnum =
 export type ServiceState = {
   name: string;
   state: ServiceStateEnum;
-  assignedRunnerId?: string;
+  assigned_runner_id?: string;
 
   current_task_id?: string;
   current_task_state?:

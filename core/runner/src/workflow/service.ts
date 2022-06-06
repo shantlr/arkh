@@ -1,5 +1,4 @@
-import { createEntity, createGroup } from '@shantlr/workflow';
-import { WorkflowCancel } from '@shantlr/workflow/dist/workflowQueue';
+import { createEntity, createGroup, Cancel } from '@shantlr/workflow';
 import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import { isEqual } from 'lodash';
 
@@ -40,7 +39,7 @@ export const createService = (serviceName: string) => {
           await task.exec();
           logger.info(`started`);
         } catch (err) {
-          if (err === WorkflowCancel) {
+          if (err === Cancel) {
             throw err;
           }
           logger.error(`run failed`, err);

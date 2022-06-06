@@ -24,17 +24,25 @@ export const createGroup = <
   Ent extends IEntity,
   Key extends string | number | symbol = string
 >({
+  name,
   initEntity,
   leaveEntity,
 }: {
-  initEntity: () => Ent;
+  name?: string;
+  initEntity: (key: Key) => Ent;
   leaveEntity?: (entity: Ent, key: Key) => void | Promise<void>;
 }): Group<Ent, Key> => {
   const members: { [key in Key]?: GroupMember<Ent, Key> } = {};
 
   return {
     get(key) {
-      return createGroupMemberProxy({ initEntity, leaveEntity, key, members });
+      return createGroupMemberProxy({
+        name,
+        initEntity,
+        leaveEntity,
+        key,
+        members,
+      });
     },
     has(key) {
       return key in members;
@@ -67,10 +75,12 @@ function createEntityMember<
   Ent extends IEntity,
   Key extends string | number | symbol
 >({
+  name,
   memberKey,
   initEntity,
   leaveEntity,
 }: {
+  name: string;
   memberKey: Key;
   initEntity: (key: Key) => Ent;
   leaveEntity?: (entity: Ent, key: Key) => void | Promise<void>;
@@ -90,7 +100,11 @@ function createEntityMember<
       forwardAction({ actionName, arg }) {
         const entity = getEntity();
         if (!(actionName in entity.actions)) {
-          throw new Error(`action '${String(actionName)}' does not exists`);
+          throw new Error(
+            `action '${String(
+              actionName
+            )}' does not exist in entity of group '${name}'`
+          );
         }
 
         return entity.actions[actionName](arg, { promise: true });
@@ -117,11 +131,13 @@ function createGroupMemberProxy<
   Ent extends IEntity,
   Key extends string | number | symbol
 >({
+  name,
   initEntity,
   leaveEntity,
   key: memberKey,
   members,
 }: {
+  name: string;
   initEntity: (key: Key) => Ent;
   leaveEntity?: (entity: Ent, key: Key) => void | Promise<void>;
   key: Key;
@@ -130,6 +146,7 @@ function createGroupMemberProxy<
   const getMember = (): GroupMember<Ent, Key> => {
     if (!members[memberKey]) {
       members[memberKey] = createEntityMember({
+        name,
         memberKey,
         initEntity,
         leaveEntity,

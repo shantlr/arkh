@@ -3,6 +3,7 @@ import { ServiceSpec } from '@shantlr/shipyard-common-types';
 
 export type RunnerType = 'run-process';
 export type RunnerState =
+  | 'not-inited'
   | 'ready'
   | 'leaving'
   | 'gracefully-disconnected'

@@ -1,7 +1,6 @@
-import { Logger } from '@shantlr/shipyard-logger';
 import { Router } from 'express';
+
 import { Service, Task } from '../../../data';
-import { State } from '../../../data/state';
 import { servicesWorkflow } from '../../../workflow';
 
 export const serviceRouter = () => {
@@ -20,6 +19,10 @@ export const serviceRouter = () => {
     const { name } = req.params;
     try {
       const service = await Service.getOne(name);
+      if (servicesWorkflow.has(name)) {
+        // @ts-ignore
+        service.state = servicesWorkflow.get(name).state;
+      }
       return res.status(200).send(service);
     } catch (err) {
       req.logger.error(err);
@@ -42,23 +45,17 @@ export const serviceRouter = () => {
   router.post('/:name/stop', async (req, res) => {
     try {
       const { name } = req.params;
-      const state = State.service.get(name);
-      if (!state) {
+      if (!servicesWorkflow.has(name)) {
         await Task.update.stopRelicas(name, req.logger);
         return res.status(200).send({ success: false, message: 'not-running' });
       }
 
-      if (state.assignedRunnerId && state.state === 'running') {
-        const result = await State.service.stopTask(name, 'api-endpoint');
-        return res.status(200).send(result);
+      const service = servicesWorkflow.get(name);
+      if (!service.state.isRunning) {
+        await Task.update.stopRelicas(name, req.logger);
       }
-
-      if ((await Task.update.stopRelicas(name, req.logger)).length) {
-        return res.status(200).send({ success: true, message: 'stopped' });
-      }
-      return res
-        .status(200)
-        .send({ success: false, message: 'service-not-running' });
+      void service.actions.stop(null);
+      return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);
       return res.status(500).send(err.message);

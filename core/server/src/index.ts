@@ -1,5 +1,6 @@
-import { toLower } from 'lodash';
 import path from 'path';
+
+import { toLower } from 'lodash';
 import sane from 'sane';
 
 import { startApi } from './api';
@@ -44,8 +45,14 @@ const main = async (): Promise<void> => {
   const shutRunnerWs = await startRunnerWs();
   const shutApi = await startApi(config.get('api.port'));
 
+  let isStopping = false;
   const gracefulShutdown = async (signal: string) => {
     console.log('signal', signal);
+    if (isStopping) {
+      return;
+    }
+    isStopping = true;
+
     console.log('shutting down...');
     try {
       await shutRunnerWs();

@@ -1,13 +1,4 @@
 import {
-  addStaticMethods,
-  createEntityAccessorBase,
-  createNamedEntityAccessor,
-  deserializer,
-  serializer,
-  StringifyNonScalar,
-} from '../lib/db';
-import { knex } from './knex';
-import {
   ShipyardFileSpec,
   StackSpec,
   ServiceSpec,
@@ -16,10 +7,21 @@ import {
   StackTabConfig,
   StackTab as StackTabType,
 } from '@shantlr/shipyard-common-types';
-import { SideEffects } from '../events/sideEffects';
 import { sortBy } from 'lodash';
 import { Logger } from '@shantlr/shipyard-logger';
-import { State } from './state';
+
+import { SideEffects } from '../workflow/sideEffects';
+import {
+  addStaticMethods,
+  createEntityAccessorBase,
+  createNamedEntityAccessor,
+  deserializer,
+  serializer,
+  StringifyNonScalar,
+} from '../lib/db';
+import { servicesWorkflow } from '../workflow';
+
+import { knex } from './knex';
 
 export { doMigrations } from './knex';
 
@@ -248,9 +250,11 @@ export const Task = {
             }
             await Task.update.syncStopped(t.id);
             stoppedTaskIds.push(t.id);
-            const serviceState = State.service.get(serviceName);
-            if (serviceState && serviceState.current_task_id === t.id) {
-              State.service.toTaskStopped(t.id, serviceName);
+            if (servicesWorkflow.has(serviceName)) {
+              const service = servicesWorkflow.get(serviceName);
+              if (service.state.current_task_id === t.id) {
+                await service.actions.stop(null, { promise: true });
+              }
             }
           }
         })
