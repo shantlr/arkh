@@ -1,33 +1,27 @@
-import { createWorkflowEntity, createWorkflowEntityGroup } from '../src';
+import { createEntity, createGroup } from '../src';
 
 const sleep = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay));
 
 describe('workflow group', () => {
-  it('should add entity', async () => {
+  it('should add entity on action', async () => {
     const initEntity = jest.fn(() =>
-      createWorkflowEntity(null, {
+      createEntity(null, {
         actions: {
           test: () => {
             //
           },
         },
-        //
       })
     );
-    const group = createWorkflowEntityGroup({
-      name: 'group-test',
-      initEntity,
-    });
 
+    const group = createGroup({ initEntity });
     const key = 'k';
     expect(group.has(key)).toBe(false);
     const member = group.get(key);
     expect(group.has(key)).toBe(false);
-
     const p = member.actions.test(null, { promise: true });
     expect(group.has(key)).toBe(true);
-
     await p;
     expect(initEntity).toHaveBeenCalledTimes(1);
   });
@@ -37,15 +31,14 @@ describe('workflow group', () => {
       //
     });
     const initEntity = jest.fn(() =>
-      createWorkflowEntity(null, {
+      createEntity(null, {
         actions: {
           test,
         },
       })
     );
 
-    const group = createWorkflowEntityGroup({
-      name: 'group-test',
+    const group = createGroup({
       initEntity,
     });
     const member = group.get('k');
@@ -58,15 +51,14 @@ describe('workflow group', () => {
       //
     });
     const initEntity = jest.fn(() =>
-      createWorkflowEntity(null, {
+      createEntity(null, {
         actions: {
           test,
         },
       })
     );
 
-    const group = createWorkflowEntityGroup({
-      name: 'group-test',
+    const group = createGroup({
       initEntity,
     });
     const key = 'k';
@@ -82,15 +74,14 @@ describe('workflow group', () => {
       //
     });
     const initEntity = jest.fn(() =>
-      createWorkflowEntity(null, {
+      createEntity(null, {
         actions: {
           test,
         },
       })
     );
 
-    const group = createWorkflowEntityGroup({
-      name: 'group-test',
+    const group = createGroup({
       initEntity,
     });
     await group.get('k').actions.test(null, { promise: true });
@@ -101,15 +92,14 @@ describe('workflow group', () => {
       //
     });
     const initEntity = jest.fn(() =>
-      createWorkflowEntity(null, {
+      createEntity(null, {
         actions: {
           test,
         },
       })
     );
 
-    const group = createWorkflowEntityGroup({
-      name: 'group-test',
+    const group = createGroup({
       initEntity,
     });
     const key = 'k';
