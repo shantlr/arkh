@@ -67,7 +67,7 @@ export const configsWorkflow = createEntity(null, {
         await Config.removeOne(name);
         const stacks = await Stack.ofConfig(name);
         stacks.forEach((stack) => {
-          stacksWorkflow.get(stack.name).actions.remove();
+          stacksWorkflow.bring(stack.name).actions.remove();
         });
         logger.info(`'${name}' deleted`);
       } else {
@@ -109,7 +109,7 @@ export const configsWorkflow = createEntity(null, {
 
         const config = parseConfig(configRaw);
         forEach(config.stacks, (stack, name) => {
-          stacksWorkflow.get(name).actions.save({
+          stacksWorkflow.bring(name).actions.save({
             spec: stack,
             configKey: key,
           });
@@ -120,7 +120,7 @@ export const configsWorkflow = createEntity(null, {
           // Remove missing stack
           forEach(prevConfig.stacks, (prevStack, prevStackName) => {
             if (!config.stacks[prevStackName]) {
-              stacksWorkflow.get(prevStackName).actions.remove();
+              stacksWorkflow.bring(prevStackName).actions.remove();
             }
           });
 

@@ -251,7 +251,7 @@ export const Task = {
             await Task.update.syncStopped(t.id);
             stoppedTaskIds.push(t.id);
             if (servicesWorkflow.has(serviceName)) {
-              const service = servicesWorkflow.get(serviceName);
+              const service = servicesWorkflow.bring(serviceName);
               if (service.state.current_task_id === t.id) {
                 await service.actions.stop(null, { promise: true });
               }

@@ -111,7 +111,7 @@ export const startClientWs = ({
           serviceName,
           stackName,
           serviceKey,
-          state: servicesWorkflow.get(serviceName).state,
+          state: servicesWorkflow.get(serviceName)?.state,
         }
       );
     }

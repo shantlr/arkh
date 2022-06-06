@@ -76,11 +76,9 @@ const createServiceWorkflow = (serviceName: string) => {
 
         const stackName = Service.getStackNameFromName(serviceName);
 
-        if (stacksWorkflow.has(stackName)) {
-          stacksWorkflow.get(stackName).actions.serviceHasBeenRemoved({
-            serviceName,
-          });
-        }
+        stacksWorkflow.get(stackName)?.actions.serviceHasBeenRemoved({
+          serviceName,
+        });
         void SideEffects.emit('removeService', { serviceName });
       },
       async stop(a: void) {
@@ -115,7 +113,7 @@ const createServiceWorkflow = (serviceName: string) => {
           void SideEffects.emit('updateServiceState', {
             serviceName,
           });
-          servicesWorkflow.get(serviceName).actions.assignRunner({
+          servicesWorkflow.bring(serviceName).actions.assignRunner({
             spec: service.spec,
           });
 

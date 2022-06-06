@@ -55,14 +55,14 @@ const createStackWorkflow = (name: string) => {
 
         forEach(spec.services, (service, serviceKey) => {
           const serviceName = Service.formatName(name, serviceKey);
-          servicesWorkflow.get(serviceName).actions.save({
+          servicesWorkflow.bring(serviceName).actions.save({
             spec: service,
           });
         });
         if (existingServices) {
           existingServices.forEach((service) => {
             if (!spec.services[service.key]) {
-              servicesWorkflow.get(service.name).actions.remove();
+              servicesWorkflow.bring(service.name).actions.remove();
             }
           });
         }
@@ -76,7 +76,7 @@ const createStackWorkflow = (name: string) => {
           logger.info(`start removing stack '${name}' services`);
           forEach(spec.services, (service, serviceKey) => {
             const serviceName = Service.formatName(name, serviceKey);
-            servicesWorkflow.get(serviceName).actions.remove();
+            servicesWorkflow.get(serviceName)?.actions.remove();
           });
         } else {
           logger.info(`'${name}' not found`);
@@ -113,7 +113,7 @@ const createStackWorkflow = (name: string) => {
 
         forEach(stack.spec.services, (service, serviceKey) => {
           const serviceName = Service.formatName(name, serviceKey);
-          servicesWorkflow.get(serviceName).actions.run();
+          servicesWorkflow.bring(serviceName).actions.run();
         });
         logger.info('started');
       },

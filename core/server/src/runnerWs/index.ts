@@ -31,7 +31,7 @@ export const startRunnerWs = async ({
 
         console.log('tasks', event.tasks);
 
-        runnersWorkflow.get(runnerId).actions.ready({
+        runnersWorkflow.bring(runnerId).actions.ready({
           type: event.type,
           socket,
         });
@@ -88,7 +88,7 @@ export const startRunnerWs = async ({
 
         switch (state) {
           case 'creating': {
-            servicesWorkflow.get(serviceName).actions.taskCreating({ taskId });
+            servicesWorkflow.get(serviceName)?.actions.taskCreating({ taskId });
             await Task.create({
               id: taskId,
               serviceName,
@@ -98,22 +98,22 @@ export const startRunnerWs = async ({
             break;
           }
           case 'running': {
-            servicesWorkflow.get(serviceName).actions.taskRunning({ taskId });
+            servicesWorkflow.get(serviceName)?.actions.taskRunning({ taskId });
             await Task.update.runningAt(taskId);
             break;
           }
           case 'stopping': {
-            servicesWorkflow.get(serviceName).actions.taskStopping({ taskId });
+            servicesWorkflow.get(serviceName)?.actions.taskStopping({ taskId });
             await Task.update.stoppingAt(taskId);
             break;
           }
           case 'stopped': {
-            servicesWorkflow.get(serviceName).actions.taskStopped({ taskId });
+            servicesWorkflow.get(serviceName)?.actions.taskStopped({ taskId });
             await Task.update.stoppedAt(taskId);
             break;
           }
           case 'exited': {
-            servicesWorkflow.get(serviceName).actions.taskExited({ taskId });
+            servicesWorkflow.get(serviceName)?.actions.taskExited({ taskId });
             await Task.update.exited(taskId, exitCode);
             break;
           }

@@ -21,7 +21,7 @@ export const serviceRouter = () => {
       const service = await Service.getOne(name);
       if (servicesWorkflow.has(name)) {
         // @ts-ignore
-        service.state = servicesWorkflow.get(name).state;
+        service.state = servicesWorkflow.get(name)?.state;
       }
       return res.status(200).send(service);
     } catch (err) {
@@ -35,7 +35,7 @@ export const serviceRouter = () => {
       if (!service) {
         return res.status(404).send();
       }
-      servicesWorkflow.get(service.name).actions.run();
+      servicesWorkflow.get(service.name)?.actions.run();
       return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);

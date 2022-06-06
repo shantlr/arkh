@@ -67,8 +67,9 @@ const createRunnerWorkflow = (runnerId: string) => {
         spec: ServiceSpec;
       }) {
         const reassignService = async () => {
-          const service = servicesWorkflow.get(serviceName);
-          service.actions.retryAssign({ spec });
+          const service = servicesWorkflow
+            .get(serviceName)
+            ?.actions.retryAssign({ spec });
         };
 
         if (state.runner.state !== 'ready') {

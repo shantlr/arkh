@@ -1,7 +1,14 @@
 import { createEntity, Entity } from './entity';
 
 export type Group<Ent extends IEntity, Key extends string | number | symbol> = {
-  get(key: Key): GroupMemberProxy<Ent>;
+  /**
+   * always return a member proxy
+   */
+  bring(key: Key): GroupMemberProxy<Ent>;
+  /**
+   * return a member proxy only if member already exists
+   */
+  get(key: Key): GroupMemberProxy<Ent> | undefined;
   has(key: Key): boolean;
   keys(): Key[];
   isLeaving(key: Key): boolean;
@@ -34,8 +41,8 @@ export const createGroup = <
 }): Group<Ent, Key> => {
   const members: { [key in Key]?: GroupMember<Ent, Key> } = {};
 
-  return {
-    get(key) {
+  const group: Group<Ent, Key> = {
+    bring(key) {
       return createGroupMemberProxy({
         name,
         initEntity,
@@ -43,6 +50,12 @@ export const createGroup = <
         key,
         members,
       });
+    },
+    get(key) {
+      if (key in members) {
+        return group.bring(key);
+      }
+      return undefined;
     },
     has(key) {
       return key in members;
@@ -69,6 +82,7 @@ export const createGroup = <
       }
     },
   };
+  return group;
 };
 
 function createEntityMember<

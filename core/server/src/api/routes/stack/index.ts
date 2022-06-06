@@ -39,7 +39,7 @@ export const stackRouter = () => {
           (service, key): ServiceState => {
             const serviceName = Service.formatName(stack.name, key);
             if (servicesWorkflow.has(serviceName)) {
-              return servicesWorkflow.get(serviceName).state;
+              return servicesWorkflow.get(serviceName)?.state;
             }
             return {
               name: serviceName,
@@ -63,7 +63,7 @@ export const stackRouter = () => {
       if (!stack) {
         return res.status(404).send();
       }
-      stacksWorkflow.get(stack.name).actions.run();
+      stacksWorkflow.bring(stack.name).actions.run();
       return res.status(200).send({ success: true });
     } catch (err) {
       req.logger.error(err);
