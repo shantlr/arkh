@@ -1,18 +1,18 @@
 import { io } from 'socket.io-client';
 import { ServiceSpec } from '@shantlr/shipyard-common-types';
+import { map } from 'lodash';
 
 import { baseLogger, config } from './config';
-import { runnerMainWorkflow } from './workflow';
+import { mainWorkflow } from './workflow';
 import { loadConfig } from './data/loadConfig';
 import { State } from './data';
 import { SideEffects } from './workflow/sideEffects';
-import { map } from 'lodash';
+import { servicesWorkflow } from './workflow/service';
 
 const logger = baseLogger.extend('runner');
 
 const main = async () => {
   loadConfig();
-  // EventManager.startConsumeEvent();
 
   logger.info(`Connecting to metro server at ${config.get('server.url')}`);
   const socket = io(`${config.get('server.url')}`);
@@ -20,9 +20,26 @@ const main = async () => {
   socket.on('connect', () => {
     logger.info('connected');
 
+    const tasks = [];
+    // Sync current tasks to server
+    servicesWorkflow.keys().forEach((k) => {
+      const service = servicesWorkflow.get(k);
+      const { name, task } = service.state;
+      if (service.state.task) {
+        tasks.push({
+          id: task.id,
+          serviceName: name,
+          state: task.state,
+          exited_at: task.endDetail?.at,
+          exit_code: task.endDetail?.code,
+        });
+      }
+    });
+
     socket.emit('runner-ready', {
       id: State.runner.getId(),
       type: 'run-process',
+      tasks,
     });
   });
 
@@ -45,6 +62,9 @@ const main = async () => {
 
   socket.on('force-runner-exit', ({ reason }: { reason: string }) => {
     logger.error(`server is forcing runner to exit: ${reason}`);
+    if (reason === 'already-connected') {
+      logger.error('Did you start same runner twice ?');
+    }
     socket.disconnect();
     process.exit(1);
   });
@@ -53,7 +73,7 @@ const main = async () => {
     'run-service',
     ({ name, spec }: { name: string; spec: ServiceSpec }, callback) => {
       logger.info(`assigned '${name}'`);
-      runnerMainWorkflow.actions.runService({
+      mainWorkflow.actions.runService({
         name,
         spec,
       });
@@ -63,12 +83,12 @@ const main = async () => {
   socket.on(
     'stop-service',
     ({ name, reason }: { name: string; reason?: string }, callback) => {
-      runnerMainWorkflow.actions.stopService({ name, reason });
+      mainWorkflow.actions.stopService({ name, reason });
       callback({ success: true });
     }
   );
   socket.on('remove-service', ({ name }: { name: string }) => {
-    runnerMainWorkflow.actions.removeService({ name });
+    mainWorkflow.actions.removeService({ name });
   });
 
   // Side effects

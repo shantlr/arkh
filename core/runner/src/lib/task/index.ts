@@ -27,6 +27,11 @@ export class Task {
 
   process: ChildProcessWithoutNullStreams = null;
 
+  endDetail: {
+    code: number;
+    at: Date;
+  } = null;
+
   constructor({
     serviceName,
     spec,
@@ -49,6 +54,7 @@ export class Task {
     try {
       this.id = nanoid();
       this.state = 'creating';
+      this.endDetail = null;
       logger.info(`creating '${this.serviceName}'`);
       this.sendState();
 
@@ -90,6 +96,10 @@ export class Task {
         logger.info(`'${this.serviceName}' exited (${code})`);
         this.process = null;
         this.state = 'exited';
+        this.endDetail = {
+          at: new Date(),
+          code,
+        };
         void SideEffects.emit('taskStateUpdate', {
           id: this.id,
           serviceName: this.serviceName,

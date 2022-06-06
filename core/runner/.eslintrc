@@ -13,6 +13,12 @@
   ],
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-floating-promises": ["error"]
+    "@typescript-eslint/no-floating-promises": ["error"],
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always"
+      }
+    ]
   }
 }
