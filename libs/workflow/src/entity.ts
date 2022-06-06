@@ -4,12 +4,11 @@ import {
   createCancellableQueue,
   TransactionApi,
 } from './cancellableQueue';
-import { QueueAction } from './queue';
 import { mapObject } from './utils';
 
 type EntityAction = CancellableAction;
 
-type Entity<State, Actions extends EntityActionHandlerMap> = {
+export type Entity<State, Actions extends EntityActionHandlerMap> = {
   state: State;
   actions: EntityActionCreatorMap<Actions>;
   get isActionOngoing(): boolean;

@@ -1,16 +1,3 @@
-// const createDefer = () => {
-//   const defer = {
-//     promise: null,
-//     resolve: null,
-//     reject: null,
-//   };
-//   defer.promise = new Promise((resolve, reject) => {
-//     defer.resolve = resolve;
-//     defer.reject = reject;
-//   });
-//   return defer;
-// };
-
 import { isPromise } from './utils';
 
 export class ErrorQueueDraining extends Error {}
