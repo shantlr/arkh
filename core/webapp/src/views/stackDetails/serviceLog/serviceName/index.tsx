@@ -1,17 +1,19 @@
-import { ServiceInfo } from '@shantlr/shipyard-common-types';
-import { Select } from 'components/select';
-import { ServiceTask } from 'configs/types';
-import { map } from 'lodash';
-import { useMemo } from 'react';
-import styled, { css } from 'styled-components';
-import { DateFromNow } from 'components/dateFromNow';
-import { Text } from 'components/text';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faStopCircle } from '@fortawesome/free-solid-svg-icons';
-import { styles } from 'styles/css';
-import { useMutation } from 'react-query';
-import { API } from 'configs';
 import React from 'react';
+import { useMemo } from 'react';
+
+import { faPlay, faStopCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ServiceInfo, ServiceState } from '@shantlr/shipyard-common-types';
+import { map } from 'lodash';
+import { useMutation } from 'react-query';
+import styled, { css } from 'styled-components';
+
+import { DateFromNow } from 'components/dateFromNow';
+import { Select } from 'components/select';
+import { Text } from 'components/text';
+import { API } from 'configs';
+import { ServiceTask } from 'configs/types';
+import { styles } from 'styles/css';
 
 const StyledSelect = styled(Select)`
   z-index: 1;
@@ -32,8 +34,6 @@ const Container = styled.div`
 
   display: flex;
   align-items: center;
-
-  cursor: pointer;
 `;
 const Name = styled(Text)`
   ${styles.mr.md};
@@ -56,6 +56,9 @@ const statusCss = {
   stopped: css`
     background-color: ${(p) => p.theme.color.secondaryMainBg};
   `,
+  'pending-assignment': css`
+    ${styles.bg.warning}
+  `,
   exited: css`
     background-color: ${(p) => p.theme.color.secondaryMainBg};
   `,
@@ -70,8 +73,8 @@ const Status = styled.div<{
   state?: keyof typeof statusCss | null;
 }>`
   ${(props) => statusCss[props.state || 'default']};
-  min-width: 10px;
-  min-height: 10px;
+  min-width: 8px;
+  min-height: 8px;
   ${styles.rounded.round};
   ${styles.mr.sm};
   ${styles.transition.default};
@@ -81,7 +84,7 @@ export const ServiceName = React.forwardRef<
   HTMLDivElement,
   {
     name: string;
-    service: ServiceInfo;
+    service: ServiceInfo & { state: ServiceState };
     tasks: ServiceTask[] | undefined;
     selectedTaskId?: string | null;
     onSelectTask: (taskId: string) => void;
@@ -111,6 +114,9 @@ export const ServiceName = React.forwardRef<
   }, [selectedTaskId, tasks]);
 
   const currentTaskState = useMemo(() => {
+    if (service.state?.state === 'pending-assignment') {
+      return 'pending-assignment';
+    }
     if (!currentTask) {
       return null;
     }
@@ -121,7 +127,7 @@ export const ServiceName = React.forwardRef<
       return 'stopped';
     }
     return 'running';
-  }, [currentTask]);
+  }, [currentTask, service.state?.state]);
 
   const isRunning = useMemo(() => {
     if (!tasks) {
@@ -135,6 +141,8 @@ export const ServiceName = React.forwardRef<
     }
     return false;
   }, [tasks]);
+
+  console.log(service, currentTask);
 
   return (
     <StyledSelect

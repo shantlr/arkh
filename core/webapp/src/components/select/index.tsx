@@ -1,9 +1,11 @@
 import { useEffect, useState, CSSProperties } from 'react';
+
 import ReactDOM from 'react-dom';
-import { usePopper } from 'react-popper';
-import styled, { css } from 'styled-components';
+
 import { Placement } from '@popperjs/core';
 import { motion, HTMLMotionProps } from 'framer-motion';
+import { usePopper } from 'react-popper';
+import styled, { css } from 'styled-components';
 
 import { createTimeout } from 'lib/createTimeout';
 import { styles } from 'styles/css';

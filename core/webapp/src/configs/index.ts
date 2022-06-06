@@ -1,7 +1,13 @@
-import { ServiceInfo, StackTab, Stack } from '@shantlr/shipyard-common-types';
+import {
+  ServiceInfo,
+  StackTab,
+  Stack,
+  ServiceState,
+} from '@shantlr/shipyard-common-types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
 import io from 'socket.io-client';
+
 import { ServiceTask, ServiceTaskLog } from './types';
 
 export const API_URL = process.env.REACT_APP_API_URL;
@@ -82,7 +88,11 @@ export const API = {
       const res = await base.get('service/list');
       return res.json();
     },
-    async get(name: string): Promise<ServiceInfo> {
+    async get(name: string): Promise<
+      ServiceInfo & {
+        state: ServiceState;
+      }
+    > {
       const res = await base.get(`service/${name}`);
 
       return res.json();

@@ -1,14 +1,17 @@
-import { Stack, StackTab } from '@shantlr/shipyard-common-types';
-import { Grid, useGridState } from 'components/grid';
-import { useUpdateStackTab } from 'hooks/query';
-import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
-import { map } from 'lodash';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
 import { useMemo } from 'react';
+
+import { Stack, StackTab } from '@shantlr/shipyard-common-types';
+import { map } from 'lodash';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { Grid, useGridState } from 'components/grid';
+import { useUpdateStackTab } from 'hooks/query';
+import { useDebouncedState, useUpdateEffect } from 'hooks/utils';
 import { styles } from 'styles/css';
+
 import { AvailableServiceList } from '../availableServices';
 import { ServiceLogs } from '../serviceLog';
 import { StackTabList } from './tabList';

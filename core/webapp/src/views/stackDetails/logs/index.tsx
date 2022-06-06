@@ -1,11 +1,14 @@
-import { Text } from 'components/text';
-import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { useReducer } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
+
+import dayjs from 'dayjs';
 import styled from 'styled-components';
+
+import { Text } from 'components/text';
 import { styles } from 'styles/css';
+
 import { formatJsonLog } from './formatJsonLog';
 import { logDefaultState, LogPage, logReducer } from './reducer';
 

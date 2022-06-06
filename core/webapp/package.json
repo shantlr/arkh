@@ -45,7 +45,61 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "import/order": [
+        "error",
+        {
+          "newlines-between": "always",
+          "groups": [
+            "builtin",
+            "external",
+            "internal"
+          ],
+          "pathGroups": [
+            {
+              "pattern": "react",
+              "group": "external",
+              "position": "before"
+            },
+            {
+              "pattern": "react-dom",
+              "group": "external",
+              "position": "before"
+            },
+            {
+              "pattern": "components/**",
+              "group": "internal"
+            },
+            {
+              "pattern": "configs",
+              "group": "internal"
+            },
+            {
+              "pattern": "configs/**",
+              "group": "internal"
+            },
+            {
+              "pattern": "lib/**",
+              "group": "internal"
+            },
+            {
+              "pattern": "styles/**",
+              "group": "internal"
+            },
+            {
+              "pattern": "hooks/**",
+              "group": "internal"
+            }
+          ],
+          "pathGroupsExcludedImportTypes": [],
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
+        }
+      ]
+    }
   },
   "browserslist": {
     "production": [
@@ -61,6 +115,8 @@
   },
   "devDependencies": {
     "@shantlr/shipyard-common-types": "0.1.0",
-    "@types/styled-components": "^5.1.15"
+    "@types/styled-components": "^5.1.15",
+    "eslint-plugin-import": "^2.26.0",
+    "react-scripts": "^5.0.1"
   }
 }

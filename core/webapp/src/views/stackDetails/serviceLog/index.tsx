@@ -1,8 +1,14 @@
 import { CSSProperties, useEffect, useState } from 'react';
+import { useMemo } from 'react';
+
+import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 
+import { ActionDropdown } from 'components/actionDropdown';
+import { Duration } from 'components/duration';
 import { ServiceTaskLog } from 'configs/types';
 import {
   useScubscribeServiceTaskLogs,
@@ -11,15 +17,11 @@ import {
   useServiceTasks,
   useSubscribeServiceTasks,
 } from 'hooks/query';
+import { useHover } from 'hooks/utils';
+import { styles } from 'styles/css';
+
 import { Logs } from '../logs';
 import { ServiceName } from './serviceName';
-import { useMemo } from 'react';
-import { Duration } from 'components/duration';
-import { styles } from 'styles/css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
-import { ActionDropdown } from 'components/actionDropdown';
-import { useHover } from 'hooks/utils';
 
 const ContainerOuter = styled.div`
   height: 100%;

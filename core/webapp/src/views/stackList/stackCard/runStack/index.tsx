@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation } from 'react-query';
 import styled from 'styled-components';
 
-import { API } from 'configs';
 import { Button } from 'components/button';
+import { API } from 'configs';
 
 const Container = styled.div`
   display: flex;

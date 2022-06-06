@@ -1,7 +1,8 @@
-import { Text } from 'components/text';
-import { createTimeout } from 'lib/createTimeout';
 import { useEffect } from 'react';
 import { useState } from 'react';
+
+import { Text } from 'components/text';
+import { createTimeout } from 'lib/createTimeout';
 
 const MS_IN_ONE_SEC = 1000;
 const MS_IN_ONE_MIN = 60 * MS_IN_ONE_SEC;

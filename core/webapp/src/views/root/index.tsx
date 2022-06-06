@@ -1,7 +1,6 @@
-import { createSocket, queryClient } from 'configs';
-import { SocketProvider } from 'lib/context/socket';
 import { useEffect } from 'react';
 import { useState } from 'react';
+
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClientProvider } from 'react-query';
@@ -12,6 +11,10 @@ import { theme } from 'styles';
 import { SideBar } from 'views/sideBar';
 import { StackDetails } from 'views/stackDetails';
 import { StackListView } from 'views/stackList';
+
+import { createSocket, queryClient } from 'configs';
+import { SocketProvider } from 'lib/context/socket';
+
 import { CustomDragLayer } from './customDragLayer';
 
 const Container = styled.div`

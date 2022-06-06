@@ -1,16 +1,18 @@
+import { memo } from 'react';
+
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Outlet, useParams } from 'react-router';
 import styled from 'styled-components';
-import { memo } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-import { Text } from 'components/text';
 import { Button } from 'components/button';
 import { BaseCard } from 'components/card';
 import { NoStyleLink } from 'components/noStyleLink';
+import { Text } from 'components/text';
 import { useStack, useStackTabs } from 'hooks/query';
-import { StackTabs } from './tabs';
 import { styles } from 'styles/css';
+
+import { StackTabs } from './tabs';
 
 const Container = styled.div`
   background-color: white;

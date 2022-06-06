@@ -1,5 +1,6 @@
-import { forEach } from 'lodash';
 import { useMemo } from 'react';
+
+import { forEach } from 'lodash';
 import styled, { css } from 'styled-components';
 
 const Container = styled.div`
@@ -47,6 +48,7 @@ export const StackStatusIndicator = ({
     };
     forEach(serviceStates, (s) => {
       switch (s.state) {
+        case 'pending-assignment':
         case 'running': {
           r.hasRunning = true;
           break;

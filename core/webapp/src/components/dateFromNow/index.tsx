@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
+
 import dayjs from 'dayjs';
 import relative from 'dayjs/plugin/relativeTime';
+
 import { createTimeout } from 'lib/createTimeout';
-import { useEffect, useState } from 'react';
 
 dayjs.extend(relative);
 

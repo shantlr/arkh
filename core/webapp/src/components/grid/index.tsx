@@ -1,19 +1,21 @@
 import React, { CSSProperties, Dispatch, useEffect, useReducer } from 'react';
-import styled from 'styled-components';
+import { useMemo } from 'react';
+import { useState } from 'react';
+
+import { StackTab } from '@shantlr/shipyard-common-types';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import styled from 'styled-components';
 
 import { useEqualMemo } from 'lib/hooks';
-import { Action, defaultState, reducer, State } from './reducer';
+
+import { GridCell } from './components/cell';
 import {
   GridHorizResizeDragHandle,
   GridVertResizeDragHandle,
 } from './components/dragHandle';
-import { GridCell } from './components/cell';
-import { GridRow, GridRowContent } from './components/row';
-import { useMemo } from 'react';
-import { StackTab } from '@shantlr/shipyard-common-types';
-import { useState } from 'react';
 import { GridEmptyDroppable } from './components/emptyDroppable';
+import { GridRow, GridRowContent } from './components/row';
+import { Action, defaultState, reducer, State } from './reducer';
 
 const Container = styled.div`
   width: 100%;

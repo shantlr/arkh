@@ -1,13 +1,16 @@
+import { useState } from 'react';
+
 import { Stack, StackTab } from '@shantlr/shipyard-common-types';
+import styled from 'styled-components';
+
 import { NoStyleLink } from 'components/noStyleLink';
 import {
   useCreateStackTab,
   useDeleteStackTab,
   useRenameStackTab,
 } from 'hooks/query';
-import { useState } from 'react';
-import styled from 'styled-components';
 import { styles } from 'styles/css';
+
 import { Tab } from './tab';
 
 const AddTabPlaceholder = styled.div`

@@ -1,8 +1,9 @@
 import { faCog, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { NoStyleLink } from 'components/noStyleLink';
 import { useMatch } from 'react-router';
 import styled from 'styled-components';
+
+import { NoStyleLink } from 'components/noStyleLink';
 import { styles } from 'styles/css';
 
 const WIDTH = '28px';

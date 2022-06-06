@@ -1,5 +1,6 @@
-import { mapStylePropsToCss, StyleProps } from 'components/box';
 import styled, { css } from 'styled-components';
+
+import { mapStylePropsToCss, StyleProps } from 'components/box';
 import { styles } from 'styles/css';
 
 const sizeCss = {

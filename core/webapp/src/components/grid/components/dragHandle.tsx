@@ -1,6 +1,8 @@
-import { createWindowMouseEventListener } from 'lib/createWindowMouseEventListener';
 import { useEffect, useRef, useState } from 'react';
+
 import styled from 'styled-components';
+
+import { createWindowMouseEventListener } from 'lib/createWindowMouseEventListener';
 
 const VertContainer = styled.div<{ active?: boolean }>`
   height: 100%;

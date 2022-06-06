@@ -1,12 +1,15 @@
-import { createTimeout } from 'lib/createTimeout';
-import { map } from 'lodash';
 import { useEffect } from 'react';
 import { useState } from 'react';
+
+import { Stack } from '@shantlr/shipyard-common-types';
+import { motion } from 'framer-motion';
+import { map } from 'lodash';
 import { usePopper } from 'react-popper';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+
+import { createTimeout } from 'lib/createTimeout';
 import { styles } from 'styles/css';
-import { Stack } from '@shantlr/shipyard-common-types';
+
 
 const Container = styled(motion.div)`
   ${styles.pl.md};

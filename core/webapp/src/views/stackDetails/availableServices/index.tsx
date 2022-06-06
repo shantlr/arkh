@@ -1,9 +1,11 @@
+import { useEffect, useMemo } from 'react';
+
 import { Stack, StackTab } from '@shantlr/shipyard-common-types';
 import { reduce } from 'lodash';
-import { useEffect, useMemo } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
+
 import { styles } from 'styles/css';
 
 const Container = styled.div`

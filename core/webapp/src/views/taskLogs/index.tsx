@@ -1,11 +1,13 @@
-import { API } from 'configs';
 import { useMemo, useState } from 'react';
+
+import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import dayjs from 'dayjs';
 import { useQuery } from 'react-query';
 import styled, { css } from 'styled-components';
-import dayjs from 'dayjs';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
+
 import { BaseCard } from 'components/card';
+import { API } from 'configs';
 
 const Container = styled.div`
   padding: ${(props) => props.theme.space.lg};

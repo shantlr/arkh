@@ -1,9 +1,9 @@
+import { useEffect, useState } from 'react';
+
 import ReactDOM from 'react-dom';
+
 import { Placement } from '@popperjs/core';
 import { motion } from 'framer-motion';
-import { createTimeout } from 'lib/createTimeout';
-import { Children } from 'lib/types';
-import { useEffect, useState } from 'react';
 import { usePopper } from 'react-popper';
 import styled, {
   css,
@@ -11,6 +11,9 @@ import styled, {
   FlattenInterpolation,
   ThemeProps,
 } from 'styled-components';
+
+import { createTimeout } from 'lib/createTimeout';
+import { Children } from 'lib/types';
 import { styles } from 'styles/css';
 
 const sizes = {

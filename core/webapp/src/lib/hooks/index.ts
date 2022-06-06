@@ -1,5 +1,6 @@
-import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
+
+import { isEqual } from 'lodash';
 
 export function useEqualMemo<T = any>(value: T): T {
   const [prev, setPrev] = useState(() => value);

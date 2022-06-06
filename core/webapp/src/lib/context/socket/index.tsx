@@ -1,10 +1,12 @@
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+
 import {
   SocketIOClientToServerEvents,
   SocketIOServerToClientEvents,
 } from '@shantlr/shipyard-common-types';
-import { useEqualMemo } from 'lib/hooks';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
+
+import { useEqualMemo } from 'lib/hooks';
 
 type TypedSocket = Socket<
   SocketIOServerToClientEvents,

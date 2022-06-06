@@ -1,5 +1,6 @@
-import { createTimeout } from 'lib/createTimeout';
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { createTimeout } from 'lib/createTimeout';
 
 export const useDebouncedState = <T>(state: T, delay: number = 300) => {
   const [debounced, setDebounced] = useState(state);

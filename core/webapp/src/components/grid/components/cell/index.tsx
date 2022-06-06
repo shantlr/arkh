@@ -1,6 +1,8 @@
 import { CSSProperties } from 'react';
+
 import { useDrop } from 'react-dnd';
 import styled from 'styled-components';
+
 import { GridCellHorizDroppable } from './droppable';
 
 const GridCellContainer = styled.div`

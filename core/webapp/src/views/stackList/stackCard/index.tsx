@@ -1,17 +1,19 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
+import { CSSProperties } from 'react';
+
+import { Stack } from '@shantlr/shipyard-common-types';
 import { usePopper } from 'react-popper';
 import styled, { css } from 'styled-components';
 
 import { BaseCard } from 'components/card';
 import { useStackServiceStates, useSubscribeServiceStates } from 'hooks/query';
+import { createTimeout } from 'lib/createTimeout';
+import { styles } from 'styles/css';
+
+import { ServiceDropdownList } from '../serviceDropdownList';
 import { StackStatusIndicator } from './indicator';
 import { RunStack } from './runStack';
-import { styles } from 'styles/css';
-import { useEffect } from 'react';
-import { CSSProperties } from 'react';
-import { ServiceDropdownList } from '../serviceDropdownList';
-import { createTimeout } from 'lib/createTimeout';
-import { Stack } from '@shantlr/shipyard-common-types';
 
 const StackHeader = styled.div`
   width: 100%;
@@ -129,6 +131,8 @@ export const StackCard = ({
 }) => {
   const { data: serviceStates } = useStackServiceStates(stack.name);
   useSubscribeServiceStates(stack.name);
+
+  console.log(serviceStates);
 
   const [showPopper, setShowPopper] = useState(false);
   const [hasEnteredPopper, setHasEnteredPopper] = useState(false);
