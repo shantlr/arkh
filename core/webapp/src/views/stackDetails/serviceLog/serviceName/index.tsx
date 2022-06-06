@@ -139,8 +139,11 @@ export const ServiceName = React.forwardRef<
         return true;
       }
     }
+    if (currentTaskState === 'pending-assignment') {
+      return true;
+    }
     return false;
-  }, [tasks]);
+  }, [currentTaskState, tasks]);
 
   return (
     <StyledSelect
@@ -150,7 +153,10 @@ export const ServiceName = React.forwardRef<
       onSelect={(task) => onSelectTask(task.value)}
     >
       <Container ref={ref}>
-        <Status state={currentTaskState} />
+        <Status
+          title={currentTaskState || undefined}
+          state={currentTaskState}
+        />
         <Name size="sm">{service.key}</Name>
         <ActionContainer>
           {isRunning === false && (

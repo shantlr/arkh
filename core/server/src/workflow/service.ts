@@ -82,6 +82,11 @@ const createServiceWorkflow = (serviceName: string) => {
         void SideEffects.emit('removeService', { serviceName });
       },
       async stop(a: void) {
+        if (state.state === 'off') {
+          logger.info(`service is already stopped`);
+          return;
+        }
+
         if (state.state === 'assigned' || state.state === 'running') {
           if (runnersWorkflow.has(state.assigned_runner_id)) {
             const runner = runnersWorkflow.get(state.assigned_runner_id);
@@ -94,6 +99,10 @@ const createServiceWorkflow = (serviceName: string) => {
         state.state = 'off';
         state.current_task_id = null;
         state.current_task_state = null;
+        logger.info('service stopped');
+        void SideEffects.emit('updateServiceState', {
+          serviceName,
+        });
       },
       async run(a: void, api) {
         try {
