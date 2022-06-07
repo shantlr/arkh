@@ -85,7 +85,7 @@ export const StackTabList = ({
             setShowAdd(true);
           }}
         >
-          new tab
+          new view
         </AddTabPlaceholder>
       )}
       {showAdd && (

@@ -21,6 +21,8 @@ export type Group<Ent extends IEntity, Key extends string | number | symbol> = {
     key: Key,
     handler?: (entity: Ent, key: Key) => void | Promise<void>
   ): Promise<void>;
+
+  [Symbol.iterator]: () => Generator<GroupMemberProxy<Ent>, void, void>;
 };
 export type GroupMemberProxy<Entity extends IEntity> = {
   state: Entity['state'];
@@ -79,6 +81,11 @@ export const createGroup = <
       if (!member.isActionOngoing && !member.actionQueueSize) {
         // Remove member from group if no more action
         delete members[key];
+      }
+    },
+    [Symbol.iterator]: function* () {
+      for (const [key] of Object.entries(members)) {
+        yield group.bring(key as Key);
       }
     },
   };

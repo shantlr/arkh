@@ -22,8 +22,7 @@ const main = async () => {
 
     const tasks = [];
     // Sync current tasks to server
-    servicesWorkflow.keys().forEach((k) => {
-      const service = servicesWorkflow.get(k);
+    for (const service of servicesWorkflow) {
       const { name, task } = service.state;
       if (service.state.task) {
         tasks.push({
@@ -34,7 +33,7 @@ const main = async () => {
           exit_code: task.endDetail?.code,
         });
       }
-    });
+    }
 
     socket.emit('runner-ready', {
       id: State.runner.getId(),
