@@ -90,6 +90,7 @@ const createServiceWorkflow = (serviceName: string) => {
         if (state.state === 'assigned' || state.state === 'running') {
           if (runnersWorkflow.has(state.assigned_runner_id)) {
             const runner = runnersWorkflow.get(state.assigned_runner_id);
+            logger.info('asking runner to stop service');
             await runner.actions.stopService(
               { serviceName },
               { promise: true }

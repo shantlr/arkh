@@ -52,6 +52,7 @@ export const createService = (serviceName: string) => {
         }
         try {
           await task.stop(reason);
+          logger.info('task stopped');
         } catch (err) {
           logger.error(`failed to stop`, err);
         }

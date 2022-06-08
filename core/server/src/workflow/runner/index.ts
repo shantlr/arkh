@@ -96,7 +96,7 @@ const createRunnerWorkflow = (runnerId: string) => {
         serviceName: string;
         reason?: string;
       }) {
-        if (state.runner.state !== 'ready') {
+        if (state.runner.state === 'ready') {
           await state.runner.stopService({ name: serviceName, reason });
         } else {
           logger.warn(

@@ -1,10 +1,12 @@
-import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import {
   spawn,
   SpawnOptionsWithoutStdio,
   ChildProcessWithoutNullStreams,
 } from 'child_process';
+
+import { ServiceSpec } from '@shantlr/shipyard-common-types';
 import { nanoid } from 'nanoid';
+
 import { baseLogger } from '../../config';
 import { SideEffects } from '../../workflow/sideEffects';
 
@@ -126,6 +128,7 @@ export class Task {
     try {
       // kill process with timeout
       this.state = 'stopping';
+      logger.info('stopping...');
       let timeout = null;
       await Promise.race([
         new Promise<void>((resolve) => {

@@ -11,7 +11,7 @@ const logger = baseLogger.extend('main-wk');
 export const mainWorkflow = createEntity(null, {
   actions: {
     runService({ name, spec }: { name: string; spec: ServiceSpec }) {
-      const service = servicesWorkflow.get(name);
+      const service = servicesWorkflow.bring(name);
       void service.actions.run(spec, { promise: true });
     },
     stopService({ name, reason }: { name: string; reason?: string }) {
