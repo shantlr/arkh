@@ -1,9 +1,9 @@
 import React from 'react';
 import { useMemo } from 'react';
 
+import { ServiceInfo, ServiceState } from '@arkh/types';
 import { faPlay, faStopCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ServiceInfo, ServiceState } from '@arkh/types';
 import { map } from 'lodash';
 import { useMutation } from 'react-query';
 import styled, { css } from 'styled-components';
