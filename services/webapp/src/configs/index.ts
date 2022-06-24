@@ -1,7 +1,7 @@
 import { ServiceInfo, StackTab, Stack, ServiceState } from '@arkh/types';
 import ky from 'ky';
 import { QueryClient } from 'react-query';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 
 import { ServiceTask, ServiceTaskLog } from './types';
 

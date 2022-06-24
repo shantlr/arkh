@@ -414,6 +414,10 @@
     {
       "packageName": "@arkh/webapp",
       "projectFolder": "services/webapp"
+    },
+    {
+      "packageName": "@arkh/cli",
+      "projectFolder": "services/cli"
     }
 
     // {

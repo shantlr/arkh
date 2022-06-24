@@ -1,0 +1,25 @@
+{
+  "name": "@arkh/cli",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "ts-node --esm ./src/scripts/build.mts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "@arkh/webapp": "workspace:*",
+    "express": "4.18.1",
+    "commander": "9.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/express": "4.17.13",
+    "typescript": "4.7.4",
+    "ts-node": "10.8.1",
+    "esbuild": "0.14.47"
+  }
+}

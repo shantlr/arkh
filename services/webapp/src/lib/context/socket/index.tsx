@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   SocketIOClientToServerEvents,
@@ -23,7 +30,7 @@ const SubscriptionContext = createContext<{
   delete(key: string): void;
 } | null>(null);
 
-const SubscriptionProvider = ({ children }: { children: JSX.Element }) => {
+const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   const ref = useRef<
     Record<
       string,
@@ -81,7 +88,7 @@ export const SocketProvider = ({
   children,
 }: {
   socket: Socket;
-  children: JSX.Element;
+  children: ReactNode;
 }) => {
   return (
     <Context.Provider value={socket}>

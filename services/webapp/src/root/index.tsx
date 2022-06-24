@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useState } from 'react';
 
 import { DndProvider } from 'react-dnd';
@@ -17,19 +17,7 @@ import { SocketProvider } from 'lib/context/socket';
 
 import { CustomDragLayer } from './customDragLayer';
 
-const Container = styled.div`
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  position: relative;
-
-  display: flex;
-  flex-direction: row;
-
-  background-color: white;
-`;
-
-export const RootApp = () => {
+export const ArkhProvider = ({ children }: { children: ReactNode }) => {
   const [socket] = useState(() => createSocket());
 
   useEffect(() => {
@@ -53,24 +41,42 @@ export const RootApp = () => {
       <QueryClientProvider client={queryClient}>
         <DndProvider backend={HTML5Backend}>
           <ThemeProvider theme={theme}>
-            <SocketProvider socket={socket}>
-              <Container>
-                <SideBar />
-                <Routes>
-                  <Route path="stack" element={<StackListView />}>
-                    <Route path=":name" element={<StackDetails />}>
-                      <Route path="t/:tabKey" element={null} />
-                    </Route>
-                  </Route>
-
-                  <Route path="/" element={<Navigate to="/stack" />}></Route>
-                </Routes>
-                <CustomDragLayer />
-              </Container>
-            </SocketProvider>
+            <SocketProvider socket={socket}>{children}</SocketProvider>
           </ThemeProvider>
         </DndProvider>
       </QueryClientProvider>
     </BrowserRouter>
+  );
+};
+
+const Container = styled.div`
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+
+  background-color: white;
+`;
+
+export const Arkh = () => {
+  return (
+    <ArkhProvider>
+      <Container>
+        <SideBar />
+        <Routes>
+          <Route path="stack" element={<StackListView />}>
+            <Route path=":name" element={<StackDetails />}>
+              <Route path="t/:tabKey" element={null} />
+            </Route>
+          </Route>
+
+          <Route path="/" element={<Navigate to="/stack" />}></Route>
+        </Routes>
+        <CustomDragLayer />
+      </Container>
+    </ArkhProvider>
   );
 };

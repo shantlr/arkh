@@ -3,13 +3,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './index.css';
-import { RootApp } from 'views/root';
+import { Arkh } from 'root';
 
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <RootApp />
+    <Arkh />
   </React.StrictMode>,
   document.getElementById('root')
 );
